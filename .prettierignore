@@ -1,0 +1,8 @@
+node_modules
+client/node_modules
+client/dist
+data
+envs
+backups
+package-lock.json
+client/package-lock.json
