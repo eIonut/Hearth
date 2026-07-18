@@ -1,3 +1,4 @@
+/* --- Base & design tokens --- */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -23,6 +24,7 @@ body {
   font-size: 14px;
 }
 
+/* --- Layout: app shell + sidebar --- */
 .app {
   display: flex;
   height: 100vh;
@@ -110,6 +112,7 @@ body {
   font-size: 11px;
 }
 
+/* --- Layout: content + page --- */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -119,6 +122,7 @@ body {
   max-width: 1100px;
 }
 
+/* --- Typography --- */
 h2 {
   margin-bottom: 12px;
 }
@@ -127,6 +131,7 @@ h3 {
   font-size: 15px;
 }
 
+/* --- Row / flex utilities --- */
 .row {
   display: flex;
   gap: 8px;
@@ -141,6 +146,7 @@ h3 {
   flex: 1;
 }
 
+/* --- Cards + grid --- */
 .card {
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -163,6 +169,7 @@ h3 {
   gap: 10px;
 }
 
+/* --- Buttons --- */
 .btn {
   background: var(--bg-3);
   border: 1px solid var(--border);
@@ -192,6 +199,7 @@ h3 {
   font-size: 12px;
 }
 
+/* --- Forms --- */
 label {
   display: block;
   margin: 8px 0;
@@ -234,6 +242,7 @@ select:focus {
   margin: 8px 0;
 }
 
+/* --- Text utilities + status text --- */
 .mono {
   font-family: Menlo, Monaco, monospace;
 }
@@ -252,6 +261,7 @@ select:focus {
   margin: 6px 0;
 }
 
+/* --- Status dots + service rows --- */
 .dot {
   width: 9px;
   height: 9px;
@@ -282,6 +292,7 @@ select:focus {
   font-weight: 600;
 }
 
+/* --- Logs + code blocks --- */
 .logs,
 .snippet-body {
   background: var(--bg);
@@ -304,6 +315,7 @@ select:focus {
   bottom: 8px;
 }
 
+/* --- Chips, badges, tags --- */
 .chip {
   border-radius: 10px;
   padding: 2px 10px;
@@ -362,6 +374,7 @@ select:focus {
   color: var(--muted);
 }
 
+/* --- Learning board --- */
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -408,6 +421,7 @@ select:focus {
   font-size: 12px;
 }
 
+/* --- Workspace tabs --- */
 .tab-bar {
   display: flex;
   gap: 4px;
@@ -441,6 +455,7 @@ select:focus {
   opacity: 0.7;
 }
 
+/* --- Links --- */
 a {
   color: var(--accent);
   text-decoration: none;
@@ -574,7 +589,7 @@ a.btn {
   padding: 12px;
 }
 
-/* Confirmation modal */
+/* --- Confirmation modal --- */
 .modal-overlay {
   position: fixed;
   inset: 0;
