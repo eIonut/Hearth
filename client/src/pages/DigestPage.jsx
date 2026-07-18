@@ -66,10 +66,10 @@ export default function DigestPage() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="my-2.5 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2.5">
         {stats.map((s) => (
           <div className="card stat" key={s.label}>
-            <div className="stat-value">{s.value}</div>
+            <div className="text-[28px] font-bold text-accent">{s.value}</div>
             <div className="text-muted text-[12px]">{s.label}</div>
           </div>
         ))}
@@ -85,7 +85,8 @@ export default function DigestPage() {
               {copied ? 'Copied!' : 'Copy'}
             </button>
           </div>
-          <pre className="summary-text">{summary}</pre>
+          {/* prettier-ignore */}
+          <pre className="whitespace-pre-wrap rounded-md border border-border bg-bg p-3 font-sans text-[13px] leading-[1.5]">{summary}</pre>
         </div>
       )}
 

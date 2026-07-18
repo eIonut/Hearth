@@ -309,7 +309,7 @@ export default function Workflows() {
             <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={i}>
               <span
                 className={'dot ' + (r.ok ? 'green' : 'gray')}
-                style={!r.ok ? { background: 'var(--red)' } : {}}
+                style={!r.ok ? { background: 'var(--color-red)' } : {}}
               />
               <span className="text-[12px]">{r.label}</span>
               {r.error && <span className="text-red my-1.5 text-[12px]">{r.error}</span>}

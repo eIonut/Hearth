@@ -59,23 +59,26 @@ function ConfirmModal({ options, onClose }) {
   }, [onClose]);
 
   return (
-    <div className="modal-overlay" onClick={() => onClose(false)}>
+    <div
+      className="animate-modal-fade fixed inset-0 z-[1000] flex items-center justify-center bg-[rgba(1,4,9,0.7)] p-5"
+      onClick={() => onClose(false)}
+    >
       <div
-        className="modal"
+        className="animate-modal-pop w-full max-w-[420px] rounded-[10px] border border-border bg-bg-2 p-5 shadow-[0_12px_40px_rgba(1,4,9,0.6)]"
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="modal-title">{title}</h3>
-        {message && <p className="modal-message">{message}</p>}
-        <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between modal-actions">
-          <button className="btn" onClick={() => onClose(false)}>
+        <h3 className="mt-0 mb-2 text-[16px]">{title}</h3>
+        {message && <p className="mb-4 text-[13px] leading-[1.5] text-muted">{message}</p>}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button className="btn ml-0" onClick={() => onClose(false)}>
             {cancelText}
           </button>
           <button
             ref={confirmRef}
-            className={'btn ' + (danger ? 'danger-solid' : 'primary')}
+            className={'btn ml-0 ' + (danger ? 'danger-solid' : 'primary')}
             onClick={() => onClose(true)}
           >
             {confirmText}
