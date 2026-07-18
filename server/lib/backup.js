@@ -11,7 +11,9 @@ function backup(projectId, absFile, relPath) {
     const dir = path.join(BACKUPS_DIR, projectId);
     fs.mkdirSync(dir, { recursive: true });
     fs.copyFileSync(absFile, path.join(dir, safe));
-  } catch {}
+  } catch {
+    /* backup is best-effort */
+  }
 }
 
 module.exports = { backup, BACKUPS_DIR };

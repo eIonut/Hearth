@@ -95,7 +95,9 @@ function stop(projectId, serviceName) {
   } catch {
     try {
       entry.child.kill('SIGTERM');
-    } catch {}
+    } catch {
+      /* process already gone */
+    }
   }
   return { ok: true, wasRunning: true };
 }

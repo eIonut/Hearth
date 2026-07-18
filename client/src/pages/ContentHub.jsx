@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import SubTabs from '../components/SubTabs.jsx';
 import Learning from './Learning.jsx';
 import ContentPage from './ContentPage.jsx';

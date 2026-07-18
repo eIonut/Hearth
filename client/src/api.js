@@ -8,7 +8,9 @@ export async function api(path, opts = {}) {
     let msg = res.statusText;
     try {
       msg = (await res.json()).error || msg;
-    } catch {}
+    } catch {
+      /* response body not JSON — keep statusText */
+    }
     throw new Error(msg);
   }
   return res.json();

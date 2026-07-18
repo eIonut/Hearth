@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
@@ -49,7 +49,9 @@ function TermView({ cwd, visible }) {
       window.removeEventListener('resize', onResize);
       try {
         ws.close();
-      } catch {}
+      } catch {
+        /* socket may already be closed */
+      }
       term.dispose();
     };
   }, [cwd]);

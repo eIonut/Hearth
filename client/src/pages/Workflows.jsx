@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
@@ -241,7 +241,9 @@ export default function Workflows() {
     try {
       const r = await api(`/env/${projectId}`);
       setEnvCache((c) => ({ ...c, [projectId]: r.targets }));
-    } catch {}
+    } catch {
+      /* env prefetch — best-effort */
+    }
   }
 
   async function run(wf) {

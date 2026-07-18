@@ -1,5 +1,3 @@
-import React from 'react';
-
 // Pill-style tab switcher used by hub pages (Content, Library, Projects) and project cards.
 export default function SubTabs({ tabs, active, onChange, small }) {
   return (

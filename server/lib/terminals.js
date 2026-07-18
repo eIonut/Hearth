@@ -41,14 +41,20 @@ try {
     for (const helper of findSpawnHelpers(ptyDir)) {
       try {
         fs.chmodSync(helper, 0o755);
-      } catch {}
+      } catch {
+        /* chmod best-effort */
+      }
       if (process.platform === 'darwin') {
         try {
           execFileSync('xattr', ['-d', 'com.apple.quarantine', helper], { stdio: 'ignore' });
-        } catch {}
+        } catch {
+          /* quarantine attr may be absent */
+        }
         try {
           execFileSync('codesign', ['--force', '--sign', '-', helper], { stdio: 'ignore' });
-        } catch {}
+        } catch {
+          /* codesign best-effort */
+        }
       }
       const mode = fs.statSync(helper).mode;
       helperInfo.push({ path: helper, executable: !!(mode & 0o100) });
@@ -58,7 +64,9 @@ try {
         '[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source',
       );
     }
-  } catch {}
+  } catch {
+    /* spawn-helper diagnostics best-effort */
+  }
 } catch {
   console.warn('[dev-hub] node-pty not installed — embedded terminals disabled.');
 }
@@ -81,7 +89,9 @@ function pickShell() {
   for (const c of candidates) {
     try {
       if (fs.existsSync(c)) return c;
-    } catch {}
+    } catch {
+      /* stat may fail — try next candidate */
+    }
   }
   return null;
 }
@@ -108,7 +118,9 @@ function spawnTest(cmd, args, cwd) {
           done = true;
           try {
             t.kill();
-          } catch {}
+          } catch {
+            /* probe cleanup */
+          }
           resolve({ ok: true, note: 'spawned ok' });
         }
       }, 1500);
@@ -241,12 +253,16 @@ function attach(server) {
     term.onData((d) => {
       try {
         ws.send(d);
-      } catch {}
+      } catch {
+        /* client socket gone */
+      }
     });
     term.onExit(() => {
       try {
         ws.close();
-      } catch {}
+      } catch {
+        /* socket may already be closed */
+      }
     });
 
     ws.on('message', (msg) => {
@@ -256,7 +272,9 @@ function attach(server) {
         if (cols > 0 && rows > 0) {
           try {
             term.resize(cols, rows);
-          } catch {}
+          } catch {
+            /* resize best-effort */
+          }
         }
         return;
       }
@@ -266,7 +284,9 @@ function attach(server) {
     ws.on('close', () => {
       try {
         term.kill();
-      } catch {}
+      } catch {
+        /* terminal may have already exited */
+      }
     });
   });
 }

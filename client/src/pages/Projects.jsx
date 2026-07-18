@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnsiUp } from 'ansi_up';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
@@ -227,7 +227,9 @@ function LogPanel({ target, onClose }) {
           `/services/logs?projectId=${target.projectId}&service=${encodeURIComponent(target.service)}`,
         );
         if (alive) setLogs(data);
-      } catch {}
+      } catch {
+        /* log poll — ignore transient errors */
+      }
     }
     poll();
     const t = setInterval(poll, 1500);
@@ -315,7 +317,9 @@ export default function Projects() {
       try {
         const s = await api('/services/status');
         if (alive) setStatuses(s);
-      } catch {}
+      } catch {
+        /* status poll — ignore transient errors */
+      }
     }
     poll();
     const t = setInterval(poll, 2000);

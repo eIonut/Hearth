@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 const ConfirmContext = createContext(null);
 
@@ -86,6 +86,7 @@ function ConfirmModal({ options, onClose }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- provider + hook colocated; splitting is Phase 4 work
 export function useConfirm() {
   const confirm = useContext(ConfirmContext);
   if (!confirm) throw new Error('useConfirm must be used within a ConfirmProvider');

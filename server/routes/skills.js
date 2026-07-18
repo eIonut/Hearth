@@ -48,7 +48,9 @@ router.get('/', (req, res) => {
             : content
                 .split('\n')
                 .find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---')) || '';
-        } catch {}
+        } catch {
+          /* unreadable SKILL.md — skip description */
+        }
         skills.push({ name: entry.name, type: 'dir', description: description.slice(0, 160) });
       }
     } else if (entry.name.endsWith('.md') && entry.name !== 'README.md') {

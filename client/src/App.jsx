@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Projects from './pages/Projects.jsx';
 import Workspace from './pages/Workspace.jsx';
 import ContentHub from './pages/ContentHub.jsx';
@@ -58,7 +58,7 @@ export default function App() {
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onPreview = () => setPage('workspace');
     window.addEventListener('hub:open-preview', onPreview);
     return () => window.removeEventListener('hub:open-preview', onPreview);
@@ -66,13 +66,15 @@ export default function App() {
 
   // crash badge: poll service statuses on every page
   const [crashedCount, setCrashedCount] = useState(0);
-  React.useEffect(() => {
+  useEffect(() => {
     let alive = true;
     async function poll() {
       try {
         const s = await api('/services/status');
         if (alive) setCrashedCount(Object.values(s).filter((x) => x.crashed).length);
-      } catch {}
+      } catch {
+        /* crash-count poll — ignore transient errors */
+      }
     }
     poll();
     const t = setInterval(poll, 5000);

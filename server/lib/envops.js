@@ -55,7 +55,9 @@ function computeTargets(project) {
             current = name;
             break;
           }
-        } catch {}
+        } catch {
+          /* skip unreadable preset */
+        }
       }
     }
     return { name: t.name, file: t.file, exists, presets, current };
