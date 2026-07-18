@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useConfirm } from './ConfirmDialog.jsx';
 
 function TargetCard({ projectId, target, onChanged }) {
   const [newName, setNewName] = useState('');
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+  const confirm = useConfirm();
 
   async function apply(preset) {
     setMsg(''); setError('');
@@ -26,15 +28,15 @@ function TargetCard({ projectId, target, onChanged }) {
   }
 
   async function removePreset(preset) {
-    if (!confirm(`Delete preset "${preset}" for ${target.name}?`)) return;
+    if (!(await confirm(`Delete preset "${preset}" for ${target.name}?`))) return;
     await api(`/env/${projectId}/${target.name}/${preset}`, { method: 'DELETE' });
     onChanged();
   }
 
   return (
-    <div className="card">
+    <div className="card compact op-editor">
       <div className="row space-between">
-        <h3>{target.name}</h3>
+        <strong>{target.name}</strong>
         <span className="muted mono small-text">{target.file}{!target.exists && ' (missing)'}</span>
       </div>
 
@@ -63,49 +65,24 @@ function TargetCard({ projectId, target, onChanged }) {
   );
 }
 
-export default function EnvPage() {
-  const [projects, setProjects] = useState([]);
-  const [projectId, setProjectId] = useState('');
+// Env presets for one project, shown inside its card on the Projects page.
+export default function EnvPanel({ projectId }) {
   const [targets, setTargets] = useState([]);
 
-  useEffect(() => {
-    api('/projects').then((ps) => {
-      setProjects(ps);
-      if (ps.length) setProjectId((cur) => cur || ps[0].id);
-    });
-  }, []);
-
-  async function load(id = projectId) {
-    if (!id) return;
-    const r = await api(`/env/${id}`);
-    setTargets(r.targets || []);
+  async function load() {
+    try {
+      const r = await api(`/env/${projectId}`);
+      setTargets(r.targets || []);
+    } catch { setTargets([]); }
   }
 
   useEffect(() => { load(); }, [projectId]);
 
-  return (
-    <div className="page">
-      <h2>Env Presets</h2>
-      <p className="muted">
-        One-click env swaps per service. Define env targets on the project (Dashboard → Edit) — one per service if needed.
-        The current file is always backed up before a swap.
-      </p>
+  if (targets.length === 0) {
+    return <div className="muted small-text" style={{ padding: '8px 0' }}>No env targets — add env files to this project via Edit. The current file is always backed up before a swap.</div>;
+  }
 
-      {projects.length === 0 ? (
-        <div className="card empty">Add a project on the Dashboard first.</div>
-      ) : (
-        <>
-          <label className="inline-label">Project
-            <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </label>
-
-          {targets.map((t) => (
-            <TargetCard key={t.name} projectId={projectId} target={t} onChanged={load} />
-          ))}
-        </>
-      )}
-    </div>
-  );
+  return targets.map((t) => (
+    <TargetCard key={t.name} projectId={projectId} target={t} onChanged={load} />
+  ));
 }

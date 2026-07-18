@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useConfirm } from './ConfirmDialog.jsx';
 
 const EMPTY_ENV_OP = { type: 'env-set', file: '.env', key: '', value: '', revert: '' };
 const EMPTY_REPLACE_OP = { type: 'replace', file: '', find: '', replace: '' };
@@ -111,27 +112,19 @@ function opSummary(op) {
   return `${op.file} · "${short(op.find)}" → "${short(op.replace)}"`;
 }
 
-export default function Patches() {
-  const [projects, setProjects] = useState([]);
-  const [projectId, setProjectId] = useState('');
+// Patches for one project, shown inside its card on the Projects page.
+export default function PatchPanel({ projectId }) {
   const [patches, setPatches] = useState([]);
   const [editing, setEditing] = useState(null); // null | {} | patch
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+  const confirm = useConfirm();
 
-  useEffect(() => {
-    api('/projects').then((ps) => {
-      setProjects(ps);
-      if (ps.length) setProjectId((cur) => cur || ps[0].id);
-    });
-  }, []);
-
-  async function load(id = projectId) {
-    if (!id) return;
-    setPatches(await api(`/patches?projectId=${id}`));
+  async function load() {
+    try { setPatches(await api(`/patches?projectId=${projectId}`)); } catch { setPatches([]); }
   }
 
-  useEffect(() => { setMsg(''); setError(''); load(); }, [projectId]);
+  useEffect(() => { setMsg(''); setError(''); setEditing(null); load(); }, [projectId]);
 
   async function run(patch, action) {
     setMsg(''); setError('');
@@ -143,72 +136,57 @@ export default function Patches() {
   }
 
   async function remove(patch) {
-    if (!confirm(`Delete patch "${patch.name}"? (Files are not touched.)`)) return;
+    if (!(await confirm(`Delete patch "${patch.name}"? (Files are not touched.)`))) return;
     await api(`/patches/${patch.id}`, { method: 'DELETE' });
     load();
   }
 
   return (
-    <div className="page">
-      <div className="row space-between">
-        <h2>Patches</h2>
-        <button className="btn primary" onClick={() => setEditing({})}>+ New patch</button>
-      </div>
-      <p className="muted">
-        Named file tweaks you apply and revert on demand — change one env value without touching the rest,
-        comment a line in and out. Replaces risky git stashes for config switching.
-      </p>
-
-      {projects.length === 0 ? (
-        <div className="card empty">Add a project on the Dashboard first.</div>
+    <div>
+      {editing ? (
+        <PatchForm
+          projectId={projectId}
+          initial={editing.id ? editing : null}
+          onSaved={() => { setEditing(null); load(); }}
+          onCancel={() => setEditing(null)}
+        />
       ) : (
-        <>
-          <label className="inline-label">Project
-            <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </label>
+        <div className="row">
+          <span className="muted small-text">Named file tweaks you apply and revert on demand.</span>
+          <span className="spacer" />
+          <button className="btn small primary" onClick={() => setEditing({})}>+ New patch</button>
+        </div>
+      )}
 
-          {editing && (
-            <PatchForm
-              projectId={projectId}
-              initial={editing.id ? editing : null}
-              onSaved={() => { setEditing(null); load(); }}
-              onCancel={() => setEditing(null)}
-            />
-          )}
+      {msg && <div className="success">{msg}</div>}
+      {error && <div className="error">{error}</div>}
 
-          {msg && <div className="success">{msg}</div>}
-          {error && <div className="error">{error}</div>}
+      {patches.length === 0 && !editing && (
+        <div className="muted small-text" style={{ padding: '8px 0' }}>No patches for this project yet.</div>
+      )}
 
-          {patches.length === 0 && !editing && (
-            <div className="card empty">No patches for this project yet.</div>
-          )}
-
-          {patches.map((p) => (
-            <div className="card" key={p.id}>
-              <div className="row space-between">
-                <div className="row">
-                  <h3 style={{ margin: 0 }}>{p.name}</h3>
-                  {statusChip(p.status)}
-                </div>
-                <div>
-                  {p.status !== 'applied' && <button className="btn small primary" onClick={() => run(p, 'apply')}>Apply</button>}
-                  {p.status !== 'not-applied' && <button className="btn small" onClick={() => run(p, 'revert')}>Revert</button>}
-                  <button className="btn small" onClick={() => setEditing(p)}>Edit</button>
-                  <button className="btn small danger" onClick={() => remove(p)}>✕</button>
-                </div>
-              </div>
-              {p.ops.map((op, i) => (
-                <div className="service-row" key={i}>
-                  <span className={'dot ' + (p.opStatuses[i] === 'applied' ? 'green' : p.opStatuses[i] === 'not-applied' ? 'gray' : 'orange')} />
-                  <span className="mono small-text">{opSummary(op)}</span>
-                </div>
-              ))}
+      {patches.map((p) => (
+        <div className="card compact op-editor" key={p.id}>
+          <div className="row space-between">
+            <div className="row">
+              <strong>{p.name}</strong>
+              {statusChip(p.status)}
+            </div>
+            <div>
+              {p.status !== 'applied' && <button className="btn small primary" onClick={() => run(p, 'apply')}>Apply</button>}
+              {p.status !== 'not-applied' && <button className="btn small" onClick={() => run(p, 'revert')}>Revert</button>}
+              <button className="btn small" onClick={() => setEditing(p)}>Edit</button>
+              <button className="btn small danger" onClick={() => remove(p)}>✕</button>
+            </div>
+          </div>
+          {p.ops.map((op, i) => (
+            <div className="service-row" key={i}>
+              <span className={'dot ' + (p.opStatuses[i] === 'applied' ? 'green' : p.opStatuses[i] === 'not-applied' ? 'gray' : 'orange')} />
+              <span className="mono small-text">{opSummary(op)}</span>
             </div>
           ))}
-        </>
-      )}
+        </div>
+      ))}
     </div>
   );
 }

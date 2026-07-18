@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 const COLUMNS = [
   { id: 'queued', label: 'Queued' },
@@ -50,6 +51,7 @@ export default function Learning() {
   const [items, setItems] = useState([]);
   const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState('');
+  const confirm = useConfirm();
 
   async function load() { setItems(await api('/learning')); }
   useEffect(() => { load(); }, []);
@@ -60,7 +62,7 @@ export default function Learning() {
   }
 
   async function remove(item) {
-    if (!confirm(`Delete "${item.title}"?`)) return;
+    if (!(await confirm(`Delete "${item.title}"?`))) return;
     await api(`/learning/${item.id}`, { method: 'DELETE' });
     load();
   }
@@ -71,12 +73,11 @@ export default function Learning() {
   );
 
   return (
-    <div className="page">
+    <div>
       <div className="row space-between">
-        <h2>Learning Queue</h2>
+        <p className="muted">Everything you want to learn next, so nothing gets lost. Finished items are raw material for your content.</p>
         <button className="btn primary" onClick={() => setAdding(true)}>+ Add</button>
       </div>
-      <p className="muted">Everything you want to learn next, so nothing gets lost. Finished items are raw material for your content.</p>
 
       <input className="search" value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by title or tag…" />
 

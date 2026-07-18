@@ -51,8 +51,7 @@ export default function SkillsPage() {
   }
 
   return (
-    <div className="page">
-      <h2>AI Skills</h2>
+    <div>
       <p className="muted">Your reusable skills repo, installable into any project's <span className="mono">.claude/skills</span> with one click.</p>
 
       <div className="card">
@@ -72,7 +71,7 @@ export default function SkillsPage() {
             {projects.length > 0 && (
               <div className="row">
                 <span className="muted">Install into:</span>
-                <select value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+                <select value={projectId} onChange={(e) => setProjectId(e.target.value)} style={{ width: 'auto', marginTop: 0 }}>
                   {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
                 <button className="btn primary" onClick={install} disabled={!Object.values(selected).some(Boolean)}>

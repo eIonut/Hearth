@@ -5,3 +5,6 @@ data/
 envs/
 backups/
 .DS_Store
+
+# Local Claude Code settings (per-user)
+.claude/settings.local.json

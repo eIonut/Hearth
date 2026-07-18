@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 const STEP_LABELS = {
   'start': 'Start service',
@@ -149,6 +150,7 @@ export default function Workflows() {
   const [editing, setEditing] = useState(null);
   const [running, setRunning] = useState({});
   const [results, setResults] = useState(null); // { name, results }
+  const confirm = useConfirm();
 
   async function load() {
     setWorkflows(await api('/workflows'));
@@ -181,7 +183,7 @@ export default function Workflows() {
   }
 
   async function remove(wf) {
-    if (!confirm(`Delete workflow "${wf.name}"?`)) return;
+    if (!(await confirm(`Delete workflow "${wf.name}"?`))) return;
     await api(`/workflows/${wf.id}`, { method: 'DELETE' });
     load();
   }
@@ -189,18 +191,17 @@ export default function Workflows() {
   const previewUrls = projects.flatMap((p) => (p.previews || []).map((pr) => pr.url));
 
   return (
-    <div className="page">
+    <div>
       <datalist id="preview-urls">
         {previewUrls.map((u) => <option key={u} value={u} />)}
       </datalist>
 
       <div className="row space-between">
-        <h2>Workflows</h2>
+        <p className="muted">
+          Your setup rituals as one click: start services, swap env presets, apply patches, open previews — in order.
+        </p>
         <button className="btn primary" onClick={() => setEditing({})}>+ New workflow</button>
       </div>
-      <p className="muted">
-        Your setup rituals as one click: start services, swap env presets, apply patches, open previews — in order.
-      </p>
 
       {editing && (
         <WorkflowForm

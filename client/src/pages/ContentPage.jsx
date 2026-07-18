@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 const COLUMNS = [
   { id: 'idea', label: 'Ideas' },
@@ -57,6 +58,7 @@ export default function ContentPage() {
   const [generating, setGenerating] = useState({});
   const [viewing, setViewing] = useState(null);
   const [error, setError] = useState('');
+  const confirm = useConfirm();
 
   async function load() {
     setTils(await api('/tils'));
@@ -92,20 +94,19 @@ export default function ContentPage() {
   }
 
   async function removeItem(item) {
-    if (!confirm(`Delete "${item.title}"?`)) return;
+    if (!(await confirm(`Delete "${item.title}"?`))) return;
     await api(`/content/${item.id}`, { method: 'DELETE' });
     load();
   }
 
   async function removeTil(til) {
-    if (!confirm('Delete this TIL?')) return;
+    if (!(await confirm('Delete this TIL?'))) return;
     await api(`/tils/${til.id}`, { method: 'DELETE' });
     load();
   }
 
   return (
-    <div className="page">
-      <h2>Content Pipeline</h2>
+    <div>
       <p className="muted">Turn what you learn into TikTok scripts, X threads, and LinkedIn posts. Log TILs with the bar at the top of the app.</p>
       {error && <div className="error">{error}</div>}
 

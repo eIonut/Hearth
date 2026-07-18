@@ -2,8 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnsiUp } from 'ansi_up';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
+import SubTabs from '../components/SubTabs.jsx';
+import EnvPanel from '../components/EnvPanel.jsx';
+import PatchPanel from '../components/PatchPanel.jsx';
+import Workflows from './Workflows.jsx';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 const ansi = new AnsiUp();
+
+const PAGE_TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'workflows', label: 'Workflows' },
+];
+
+const CARD_TABS = [
+  { id: 'services', label: 'Services' },
+  { id: 'env', label: 'Env presets' },
+  { id: 'patches', label: 'Patches' },
+];
 
 function parseServices(text) {
   // one per line: "web: yarn dev" — add * after the name for auto-restart on crash: "web*: yarn dev"
@@ -186,7 +202,8 @@ function LogPanel({ target, onClose }) {
   );
 }
 
-export default function Dashboard() {
+export default function Projects() {
+  const [pageTab, setPageTab] = useState('overview');
   const [projects, setProjects] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [workflows, setWorkflows] = useState([]);
@@ -194,6 +211,8 @@ export default function Dashboard() {
   const [wfMsg, setWfMsg] = useState('');
   const [editing, setEditing] = useState(null); // null | {} | project
   const [logTarget, setLogTarget] = useState(null);
+  const [cardTab, setCardTab] = useState({}); // projectId -> 'services' | 'env' | 'patches'
+  const confirm = useConfirm();
 
   async function load() {
     setProjects(await api('/projects'));
@@ -244,7 +263,7 @@ export default function Dashboard() {
   }
 
   async function remove(project) {
-    if (!confirm(`Remove project "${project.name}" from the hub? (Files are not touched.)`)) return;
+    if (!(await confirm(`Remove project "${project.name}" from the hub? (Files are not touched.)`))) return;
     await api(`/projects/${project.id}`, { method: 'DELETE' });
     load();
   }
@@ -252,79 +271,96 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="row space-between">
-        <h2>Dashboard</h2>
-        <button className="btn primary" onClick={() => setEditing({})}>+ Add project</button>
+        <h2>Projects</h2>
+        <SubTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
       </div>
 
-      {workflows.length > 0 && (
-        <div className="row">
-          {workflows.map((wf) => (
-            <button key={wf.id} className="btn small" disabled={wfRunning[wf.id]} onClick={() => runWorkflow(wf)} title={wf.stepLabels.join(' → ')}>
-              {wfRunning[wf.id] ? '…' : '▶'} {wf.name}
-            </button>
-          ))}
-        </div>
-      )}
-      {wfMsg && <div className={wfMsg.includes('failed') ? 'error' : 'success'}>{wfMsg}</div>}
-
-      {editing && (
-        <ProjectForm
-          initial={editing.id ? editing : null}
-          onSaved={() => { setEditing(null); load(); }}
-          onCancel={() => setEditing(null)}
-        />
-      )}
-
-      {projects.length === 0 && !editing && (
-        <div className="card empty">No projects yet. Add your first one — name, path, and its yarn commands.</div>
-      )}
-
-      <div className="grid">
-        {projects.map((p) => (
-          <div className="card" key={p.id}>
-            <div className="row space-between">
-              <h3>{p.name}</h3>
-              <div>
-                <button className="btn small" onClick={() => setEditing(p)}>Edit</button>
-                <button className="btn small danger" onClick={() => remove(p)}>✕</button>
-              </div>
-            </div>
-            <div className="muted mono">{p.path}</div>
-            {(p.links || []).length > 0 && (
-              <div className="row" style={{ marginTop: 6 }}>
-                {p.links.map((l) => <LinkButton key={l.name + l.url} project={p} link={l} />)}
-              </div>
-            )}
-            <div className="services">
-              {(p.services || []).map((s) => {
-                const st = statuses[`${p.id}::${s.name}`];
-                const running = st?.running;
-                const crashed = st?.crashed;
-                const preview = (p.previews || []).find((pr) => pr.name === s.name);
-                return (
-                  <div className="service-row" key={s.name}>
-                    <span className={'dot ' + (running ? 'green' : crashed ? 'red' : 'gray')} />
-                    <span className="service-name">{s.name}{s.autoRestart ? ' ↻' : ''}</span>
-                    <span className="muted mono small-text">{s.cmd}</span>
-                    {crashed && <span className="chip red">crashed ({st.exitCode})</span>}
-                    <span className="spacer" />
-                    {preview && (
-                      <button className="btn small" onClick={() => openPreview(`${p.name}/${s.name}`, preview.url)}>Preview</button>
-                    )}
-                    <button className="btn small" onClick={() => setLogTarget({ projectId: p.id, projectName: p.name, service: s.name })}>Logs</button>
-                    <button className={'btn small ' + (running ? 'danger' : 'primary')} onClick={() => toggle(p, s)}>
-                      {running ? 'Stop' : 'Start'}
-                    </button>
-                  </div>
-                );
-              })}
-              {(p.services || []).length === 0 && <div className="muted">No services defined.</div>}
-            </div>
+      {pageTab === 'workflows' ? <Workflows /> : (
+        <>
+          <div className="row">
+            {workflows.map((wf) => (
+              <button key={wf.id} className="btn small" disabled={wfRunning[wf.id]} onClick={() => runWorkflow(wf)} title={wf.stepLabels.join(' → ')}>
+                {wfRunning[wf.id] ? '…' : '▶'} {wf.name}
+              </button>
+            ))}
+            <span className="spacer" />
+            <button className="btn primary" onClick={() => setEditing({})}>+ Add project</button>
           </div>
-        ))}
-      </div>
+          {wfMsg && <div className={wfMsg.includes('failed') ? 'error' : 'success'}>{wfMsg}</div>}
 
-      {logTarget && <LogPanel target={logTarget} onClose={() => setLogTarget(null)} />}
+          {editing && (
+            <ProjectForm
+              initial={editing.id ? editing : null}
+              onSaved={() => { setEditing(null); load(); }}
+              onCancel={() => setEditing(null)}
+            />
+          )}
+
+          {projects.length === 0 && !editing && (
+            <div className="card empty">No projects yet. Add your first one — name, path, and its yarn commands.</div>
+          )}
+
+          <div className="grid">
+            {projects.map((p) => {
+              const section = cardTab[p.id] || 'services';
+              return (
+                <div className="card" key={p.id}>
+                  <div className="row space-between">
+                    <h3>{p.name}</h3>
+                    <div>
+                      <button className="btn small" onClick={() => setEditing(p)}>Edit</button>
+                      <button className="btn small danger" onClick={() => remove(p)}>✕</button>
+                    </div>
+                  </div>
+                  <div className="muted mono">{p.path}</div>
+                  {(p.links || []).length > 0 && (
+                    <div className="row" style={{ marginTop: 6 }}>
+                      {p.links.map((l) => <LinkButton key={l.name + l.url} project={p} link={l} />)}
+                    </div>
+                  )}
+
+                  <div className="row" style={{ marginTop: 8 }}>
+                    <SubTabs small tabs={CARD_TABS} active={section} onChange={(id) => setCardTab((c) => ({ ...c, [p.id]: id }))} />
+                  </div>
+
+                  {section === 'services' && (
+                    <div className="services">
+                      {(p.services || []).map((s) => {
+                        const st = statuses[`${p.id}::${s.name}`];
+                        const running = st?.running;
+                        const crashed = st?.crashed;
+                        const preview = (p.previews || []).find((pr) => pr.name === s.name);
+                        return (
+                          <div className="service-row" key={s.name}>
+                            <span className={'dot ' + (running ? 'green' : crashed ? 'red' : 'gray')} />
+                            <span className="service-name">{s.name}{s.autoRestart ? ' ↻' : ''}</span>
+                            <span className="muted mono small-text">{s.cmd}</span>
+                            {crashed && <span className="chip red">crashed ({st.exitCode})</span>}
+                            <span className="spacer" />
+                            {preview && (
+                              <button className="btn small" onClick={() => openPreview(`${p.name}/${s.name}`, preview.url)}>Preview</button>
+                            )}
+                            <button className="btn small" onClick={() => setLogTarget({ projectId: p.id, projectName: p.name, service: s.name })}>Logs</button>
+                            <button className={'btn small ' + (running ? 'danger' : 'primary')} onClick={() => toggle(p, s)}>
+                              {running ? 'Stop' : 'Start'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                      {(p.services || []).length === 0 && <div className="muted">No services defined.</div>}
+                    </div>
+                  )}
+
+                  {section === 'env' && <EnvPanel projectId={p.id} />}
+                  {section === 'patches' && <PatchPanel projectId={p.id} />}
+                </div>
+              );
+            })}
+          </div>
+
+          {logTarget && <LogPanel target={logTarget} onClose={() => setLogTarget(null)} />}
+        </>
+      )}
     </div>
   );
 }

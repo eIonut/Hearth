@@ -38,11 +38,11 @@ export default function DigestPage() {
   ] : [];
 
   return (
-    <div className="page">
+    <div>
       <div className="row space-between">
-        <h2>Digest</h2>
+        <p className="muted">Your last stretch at a glance — and a Claude-written review when you want one.</p>
         <div className="row">
-          <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
+          <select value={days} onChange={(e) => setDays(Number(e.target.value))} style={{ width: 'auto', marginTop: 0 }}>
             <option value={7}>Last 7 days</option>
             <option value={14}>Last 14 days</option>
             <option value={30}>Last 30 days</option>

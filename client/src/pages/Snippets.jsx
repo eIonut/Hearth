@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 function SnippetForm({ initial, onSaved, onCancel }) {
   const [title, setTitle] = useState(initial?.title || '');
@@ -48,12 +49,13 @@ export default function Snippets() {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
+  const confirm = useConfirm();
 
   async function load() { setItems(await api('/snippets')); }
   useEffect(() => { load(); }, []);
 
   async function remove(item) {
-    if (!confirm(`Delete snippet "${item.title}"?`)) return;
+    if (!(await confirm(`Delete snippet "${item.title}"?`))) return;
     await api(`/snippets/${item.id}`, { method: 'DELETE' });
     load();
   }
@@ -74,13 +76,11 @@ export default function Snippets() {
   );
 
   return (
-    <div className="page">
+    <div>
       <div className="row space-between">
-        <h2>Snippets</h2>
+        <input className="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by title, tag, language, or content…" style={{ flex: 1 }} />
         <button className="btn primary" onClick={() => setEditing({})}>+ New snippet</button>
       </div>
-
-      <input className="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by title, tag, language, or content…" />
 
       {editing && (
         <SnippetForm

@@ -1,29 +1,15 @@
 import React, { useState } from 'react';
-import Dashboard from './pages/Dashboard.jsx';
-import EnvPage from './pages/EnvPage.jsx';
-import Patches from './pages/Patches.jsx';
-import Terminals from './pages/Terminals.jsx';
-import Snippets from './pages/Snippets.jsx';
-import Learning from './pages/Learning.jsx';
-import Preview from './pages/Preview.jsx';
-import Workflows from './pages/Workflows.jsx';
-import ContentPage from './pages/ContentPage.jsx';
-import DigestPage from './pages/DigestPage.jsx';
-import SkillsPage from './pages/SkillsPage.jsx';
+import Projects from './pages/Projects.jsx';
+import Workspace from './pages/Workspace.jsx';
+import ContentHub from './pages/ContentHub.jsx';
+import Library from './pages/Library.jsx';
 import { api } from './api.js';
 
 const PAGES = [
-  { id: 'dashboard', label: 'Dashboard', component: Dashboard },
-  { id: 'workflows', label: 'Workflows', component: Workflows },
-  { id: 'env', label: 'Env Presets', component: EnvPage },
-  { id: 'patches', label: 'Patches', component: Patches },
-  { id: 'terminals', label: 'Terminals', component: Terminals },
-  { id: 'preview', label: 'Preview', component: Preview },
-  { id: 'snippets', label: 'Snippets', component: Snippets },
-  { id: 'learning', label: 'Learning Queue', component: Learning },
-  { id: 'content', label: 'Content', component: ContentPage },
-  { id: 'digest', label: 'Digest', component: DigestPage },
-  { id: 'skills', label: 'AI Skills', component: SkillsPage },
+  { id: 'projects', label: 'Projects', component: Projects },
+  { id: 'workspace', label: 'Workspace', component: Workspace },
+  { id: 'content', label: 'Content', component: ContentHub },
+  { id: 'library', label: 'Library', component: Library },
 ];
 
 function TilBar() {
@@ -54,10 +40,10 @@ function TilBar() {
   );
 }
 
-const KEEP_MOUNTED = ['terminals', 'preview']; // shells and iframes survive page switches
+const KEEP_MOUNTED = ['workspace']; // shells and iframes survive page switches
 
 export default function App() {
-  const [page, setPage] = useState('dashboard');
+  const [page, setPage] = useState('projects');
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('hub-sidebar-collapsed') === '1');
   const Active = PAGES.find((p) => p.id === page).component;
 
@@ -69,7 +55,7 @@ export default function App() {
   }
 
   React.useEffect(() => {
-    const onPreview = () => setPage('preview');
+    const onPreview = () => setPage('workspace');
     window.addEventListener('hub:open-preview', onPreview);
     return () => window.removeEventListener('hub:open-preview', onPreview);
   }, []);
@@ -107,7 +93,7 @@ export default function App() {
               title={p.label}
             >
               {collapsed ? p.label[0] : p.label}
-              {p.id === 'dashboard' && crashedCount > 0 && (
+              {p.id === 'projects' && crashedCount > 0 && (
                 <span className="crash-badge" title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}>
                   {collapsed ? '' : crashedCount}
                 </span>
@@ -120,11 +106,8 @@ export default function App() {
       <main className="content">
         <TilBar />
         <div className="page-area">
-          <div style={{ display: page === 'terminals' ? 'block' : 'none', height: '100%' }}>
-            <Terminals />
-          </div>
-          <div style={{ display: page === 'preview' ? 'block' : 'none', height: '100%' }}>
-            <Preview />
+          <div style={{ display: page === 'workspace' ? 'block' : 'none', height: '100%' }}>
+            <Workspace />
           </div>
           {!KEEP_MOUNTED.includes(page) && <Active />}
         </div>
