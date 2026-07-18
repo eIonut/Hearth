@@ -140,12 +140,6 @@
     @apply text-center text-muted;
     padding: 28px;
   }
-  .card.stat {
-    @apply text-center;
-    padding: 16px 10px;
-    margin: 0;
-  }
-
   /* Status dots */
   .dot {
     @apply inline-block shrink-0 rounded-full;

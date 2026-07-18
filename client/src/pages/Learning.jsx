@@ -108,11 +108,12 @@ export default function Learning() {
   );
 
   return (
-    <div>
+    <div className="max-w-[1100px] p-6">
+      <h2>Learning queue</h2>
       <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted">
-          Everything you want to learn next, so nothing gets lost. Finished items are raw material
-          for your content.
+          Everything you want to learn next, so nothing gets lost. Finished items stay as a record
+          of what you have learned.
         </p>
         <button className="btn primary" onClick={() => setAdding(true)}>
           + Add

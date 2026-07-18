@@ -10,9 +10,6 @@ import templates from './routes/templates.js';
 import snippets from './routes/snippets.js';
 import learning from './routes/learning.js';
 import skills from './routes/skills.js';
-import tils from './routes/tils.js';
-import content from './routes/content.js';
-import digest from './routes/digest.js';
 
 // The Express app is built here and exported without binding a port, so tests
 // can drive it with supertest. Port binding, the WebSocket terminal server, and
@@ -30,9 +27,6 @@ app.use('/api/templates', templates);
 app.use('/api/snippets', snippets);
 app.use('/api/learning', learning);
 app.use('/api/skills', skills);
-app.use('/api/tils', tils);
-app.use('/api/content', content);
-app.use('/api/digest', digest);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, terminals: terminals.available() });

@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router';
 import Projects from './pages/Projects.jsx';
 import Workspace from './pages/Workspace.jsx';
-import ContentHub from './pages/ContentHub.jsx';
+import Learning from './pages/Learning.jsx';
 import Library from './pages/Library.jsx';
 import { api } from './api.js';
 import { usePoll } from './hooks/usePoll.js';
 import Sidebar from './components/layout/Sidebar.jsx';
-import TilBar from './components/layout/TilBar.jsx';
 
 const PAGES = [
   { path: '/projects', label: 'Projects', badge: true },
   { path: '/workspace', label: 'Workspace' },
-  { path: '/content', label: 'Content' },
+  { path: '/learning', label: 'Learning' },
   { path: '/library', label: 'Library' },
 ];
 
@@ -57,7 +56,6 @@ export default function App() {
         onToggle={toggleSidebar}
       />
       <main className="flex flex-1 flex-col overflow-y-auto">
-        <TilBar />
         <div className="min-h-0 flex-1 overflow-y-auto">
           {/* Workspace stays mounted across navigation so its terminals and preview
               iframes survive route changes (they'd otherwise be torn down and
@@ -76,8 +74,8 @@ export default function App() {
             <Route path="/projects/workflows" element={<Projects />} />
             <Route path="/projects/templates" element={<Projects />} />
             <Route path="/workspace" element={null} />
-            <Route path="/content" element={<Navigate to="/content/learning" replace />} />
-            <Route path="/content/:tab" element={<ContentHub />} />
+            <Route path="/learning" element={<Learning />} />
+            <Route path="/content/*" element={<Navigate to="/learning" replace />} />
             <Route path="/library" element={<Navigate to="/library/snippets" replace />} />
             <Route path="/library/:tab" element={<Library />} />
             <Route path="*" element={<Navigate to="/projects" replace />} />

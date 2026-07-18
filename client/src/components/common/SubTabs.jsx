@@ -1,4 +1,4 @@
-// Pill-style tab switcher used by hub pages (Content, Library, Projects) and project cards.
+// Pill-style tab switcher used by hub pages (Library, Projects) and project cards.
 export default function SubTabs({ tabs, active, onChange, small }) {
   return (
     <div className={'subnav' + (small ? ' small' : '')}>

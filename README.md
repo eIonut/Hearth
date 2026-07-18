@@ -1,12 +1,12 @@
 # ⚡ Dev Hub
 
-Your personal local mission control: start/stop project services, swap env presets, run terminals (and Claude Code) in the browser, save snippets, and track what to learn next.
+Your personal local mission control: start/stop project services, swap env presets, run terminals in the browser, save snippets, and track what to learn next.
 
 Everything runs on **localhost only** and stores data as JSON files inside this folder. Nothing leaves your machine.
 
 ## Why this exists
 
-I got tired of re-running the same setup rituals every morning — start three services, swap the right `.env`, comment out that one auth line, open the right tabs. So I built the tool I wanted, then kept adding the rest of my workflow: what I'm learning, what I'll turn into content, snippets I keep googling.
+I got tired of re-running the same setup rituals every morning — start three services, swap the right `.env`, comment out that one auth line, open the right tabs. So I built the tool I wanted, then kept adding the rest of my workflow: what I'm learning and snippets I keep googling.
 
 It's free and MIT-licensed. Clone it, gut it for parts, make it yours.
 
@@ -24,15 +24,13 @@ Open **http://localhost:5173**.
 
 > **Terminals:** they need `node-pty`, which compiles natively. On macOS you need Xcode Command Line Tools (`xcode-select --install`). If it fails to install, everything else still works — the Workspace will tell you.
 
-> **Claude-powered features** (content drafts, digest reviews) need `@anthropic-ai/claude-agent-sdk` (installed automatically with `npm install`). It authenticates via your existing Claude Code login or `ANTHROPIC_API_KEY`. If it's missing, those features tell you and everything else still works. For chatting with Claude Code, use a terminal (embedded or your own) or the Claude desktop app.
-
 ## Using it
 
-The sidebar has four pages, grouped by what you're doing — managing projects, working in them, producing content, or reaching for reference material.
+The sidebar has four pages, grouped by what you're doing — managing projects, working in them, learning, or reaching for reference material.
 
 ### Projects
 
-**Projects** — add each project: name, absolute path, and services one per line (`web: yarn dev`). Then start/stop with one click and watch live logs. Green dot = running. Each project card has three tabs — **Services**, **Env presets**, **Patches** — so a whole setup ritual happens in one place.
+**Projects** — add each project: name, absolute path, and services one per line (`web: yarn dev`). Then start/stop with one click and watch live logs. Green dot = running. Each project card also shows its Git branch, commits to push or pull, and changed files. Non-Git folders work normally too. The card has three tabs — **Services**, **Env presets**, **Patches** — so a whole setup ritual happens in one place.
 
 **Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
 
@@ -50,21 +48,13 @@ The sidebar has four pages, grouped by what you're doing — managing projects, 
 
 One surface for shells and running apps, with a mixed tab strip — terminal tabs and preview tabs side by side. All tabs survive switching pages.
 
-**Terminals** — real shells opened in your home folder or any project. Run `claude` in one to use Claude Code inside the hub.
+**Terminals** — real shells opened in your home folder or any project.
 
 **Previews** — run your apps inside the hub. Set preview URLs per service (Projects → Edit, e.g. `web: localhost:4000`), then hit Preview on a running service or open any URL from the Workspace toolbar. HMR keeps working, and your browser DevTools inspect the embedded app normally — pick its frame in the Console's context dropdown. Apps that send `X-Frame-Options`/`frame-ancestors` are detected and flagged with an "open in new tab" fallback.
 
-### Content
+### Learning
 
-The learn → post pipeline as three sub-tabs: **Learning queue**, **Ideas & drafts**, **Digest**.
-
-**TIL bar** — the input at the top of every page. Log what you learn in 3 seconds; it feeds the drafts and the digest.
-
-**Learning queue** — queued → learning → done board so nothing you want to learn gets lost. Done items are your future content ideas.
-
-**Ideas & drafts** — select TILs (or just type a title), create an idea, and Claude generates a TikTok script, X thread, and LinkedIn post. Edit drafts inline, copy per platform, move ideas idea → drafted → posted.
-
-**Digest** — your last 7/14/30 days at a glance (TILs, learning finished, content shipped) plus a Claude-written weekly review with content ideas for next week.
+**Learning queue** — queued → learning → done board so nothing you want to learn gets lost, with finished items retained as a record of your progress.
 
 ### Library
 
@@ -82,7 +72,7 @@ Two independent halves, connected only over HTTP/WebSocket on localhost:
 server/routes/*   parse & validate requests, shape JSON responses (thin)
       ↓
 server/lib/*      all fs / process / data access (projects, envops, patchops,
-                  procman, terminals, workflows, store, backup, claude)
+                  procman, terminals, workflows, store, backup)
       ↓
 data/*.json       persisted state       envs/  env presets
 ```
@@ -125,7 +115,6 @@ Both are gitignored (env presets contain secrets — keep them out of any remote
 
 1. **Git dashboard** — branch/stash/dirty state across all repos at a glance.
 2. **Money tracker** — income streams and goals with a scoreboard.
-3. **Learning → TIL flow** — mark a learning item done and turn it into a TIL in one step.
 
 ## License
 

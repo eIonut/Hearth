@@ -4,27 +4,26 @@ This document is an execution plan for an agent. Goal: bring the codebase to a s
 
 ## Context (current state, verified 2026-07-18)
 
-- **App**: personal local dev hub. Express server (`server/`, CommonJS, port 5001, localhost-only) + React SPA (`client/`, Vite, ESM). WebSocket terminals via `node-pty` + `@xterm/xterm`. Data persisted as JSON files via `server/lib/store.js`. Optional Claude features via `@anthropic-ai/claude-agent-sdk`.
+- **App**: personal local dev hub. Express server (`server/`, CommonJS, port 5001, localhost-only) + React SPA (`client/`, Vite, ESM). WebSocket terminals via `node-pty` + `@xterm/xterm`. Data persisted as JSON files via `server/lib/store.js`.
 - **No tests, no linting, no formatting config, no CI.**
 - **The working tree has uncommitted changes** (a nav restructure: pages deleted/added). Nothing here may be discarded.
 - Largest files: `client/src/pages/Projects.jsx` (366 lines, 5 components), `client/src/styles.css` (329), `client/src/pages/Workflows.jsx` (252), `client/src/pages/Workspace.jsx` (234, 3 components), `server/lib/terminals.js` (232).
 
 ### Dependency versions: current → target (latest on npm as of 2026-07-18)
 
-| Package                        | Current | Target   | Jump                       |
-| ------------------------------ | ------- | -------- | -------------------------- |
-| express                        | ^4.19.2 | ^5.2.1   | **major**                  |
-| ws                             | ^8.17.0 | ^8.21.1  | minor                      |
-| concurrently                   | ^9.0.0  | ^10.0.3  | major (Node 20+)           |
-| node-pty                       | ^1.1.0  | ^1.1.0   | current                    |
-| @anthropic-ai/claude-agent-sdk | ^0.1.0  | ^0.3.214 | **major (0.x)**            |
-| react / react-dom              | ^18.3.1 | ^19.2.7  | **major**                  |
-| vite                           | ^5.4.0  | ^8.1.5   | **3 majors**               |
-| @vitejs/plugin-react           | ^4.3.1  | ^6.0.3   | major                      |
-| @xterm/xterm                   | ^5.5.0  | ^6.0.0   | **major**                  |
-| @xterm/addon-fit               | ^0.10.0 | ^0.11.0  | minor (pairs with xterm 6) |
-| ansi_up                        | ^6.0.2  | ^6.0.6   | patch                      |
-| react-router                   | — (new) | ^8.2.0   | new dependency (Phase 5)   |
+| Package              | Current | Target  | Jump                       |
+| -------------------- | ------- | ------- | -------------------------- |
+| express              | ^4.19.2 | ^5.2.1  | **major**                  |
+| ws                   | ^8.17.0 | ^8.21.1 | minor                      |
+| concurrently         | ^9.0.0  | ^10.0.3 | major (Node 20+)           |
+| node-pty             | ^1.1.0  | ^1.1.0  | current                    |
+| react / react-dom    | ^18.3.1 | ^19.2.7 | **major**                  |
+| vite                 | ^5.4.0  | ^8.1.5  | **3 majors**               |
+| @vitejs/plugin-react | ^4.3.1  | ^6.0.3  | major                      |
+| @xterm/xterm         | ^5.5.0  | ^6.0.0  | **major**                  |
+| @xterm/addon-fit     | ^0.10.0 | ^0.11.0 | minor (pairs with xterm 6) |
+| ansi_up              | ^6.0.2  | ^6.0.6  | patch                      |
+| react-router         | — (new) | ^8.2.0  | new dependency (Phase 5)   |
 
 Re-run `npm view <pkg> version` at execution time; use whatever is latest then.
 
@@ -74,25 +73,20 @@ Order rationale: server and client are independent; within the client, Vite befo
   - **Win**: Express 5 auto-forwards rejected promises from async handlers to error middleware. Add a terminal error-handling middleware in `server/index.js` (`(err, req, res, next) => res.status(500).json({ error: err.message })`) plus a JSON 404 handler — this also fixes today's failure mode where an async throw hangs the request.
 - Verify: every route in the smoke checklist.
 
-### 2c. claude-agent-sdk 0.1 → 0.3
-
-- `server/lib/claude.js` (~50 lines) is the only consumer. The 0.x SDK has had breaking API changes between minors — read the SDK changelog/migration notes and adapt the call sites.
-- This dependency is **optional** at runtime; preserve the graceful "SDK not installed" degradation. Verify: content draft generation and digest review either work (if authenticated) or fail with the existing friendly message.
-
-### 2d. Vite 5 → 8 + @vitejs/plugin-react 6
+### 2c. Vite 5 → 8 + @vitejs/plugin-react 6
 
 - Node floor becomes **20.19+ / 22.12+**. Set `engines` accordingly in both `package.json` files and update README ("Node 18+" → the new floor).
 - `client/vite.config.js` is tiny; expect it to work unchanged (check the dev proxy for `/api` and the `/term` WebSocket proxy still function — proxy `ws: true` behavior must be re-verified).
 - Read the Vite 6/7/8 migration pages for anything that applies; this project uses near-default config, so expect little.
 - Verify: `npm run dev` (HMR works), `npm --prefix client run build` succeeds.
 
-### 2e. React 18 → 19
+### 2d. React 18 → 19
 
 - Check `client/src/main.jsx` uses `createRoot` from `react-dom/client` (it should; fix if not).
 - This codebase uses no legacy APIs (no propTypes, no defaultProps on functions, no string refs, no `forwardRef`-heavy patterns) — expect a near-drop-in upgrade. Run the official React 19 codemod set if anything surfaces.
 - Verify: full client smoke pass; watch the console for new warnings.
 
-### 2f. @xterm/xterm 5 → 6 + addon-fit 0.11
+### 2e. @xterm/xterm 5 → 6 + addon-fit 0.11
 
 - Consumers: `client/src/pages/Workspace.jsx` (`TermView`) only — `new Terminal(opts)`, `loadAddon`, `open`, `onData`, `write`, `dispose`, and the CSS import `@xterm/xterm/css/xterm.css`. Check the 6.0 changelog for renames in these APIs and the CSS path.
 - Verify: open terminals (home + project cwd), type commands, resize the window (fit + server-side resize message `\x00resize:` must keep working), close tab.
@@ -102,7 +96,7 @@ Order rationale: server and client are independent; within the client, Vite befo
 Current shape is already routes + lib, but routes mix HTTP handling, validation, and persistence. Target: **routes parse/validate and shape responses; `lib/` owns all fs/process/data access.**
 
 1. **ESM migration** (`"type": "module"` in root `package.json`, `require` → `import`): do this first, in its own commit. It touches every server file mechanically and aligns server with client. `__dirname` in `lib/store.js` becomes `import.meta.dirname` (Node 20.11+).
-2. **Extract domain logic from routes into lib modules.** E.g. `routes/projects.js` currently does validation + `read`/`write` mutation inline — move to `lib/projects.js` exposing `list/create/update/remove`, keeping the route file ~30 lines. Apply the same pattern to the other routes that inline logic (`workflows.js` at 142 lines is the main offender; `content.js`, `skills.js`, `patches.js` next). Routes that are already thin wrappers can stay.
+2. **Extract domain logic from routes into lib modules.** E.g. `routes/projects.js` currently does validation + `read`/`write` mutation inline — move to `lib/projects.js` exposing `list/create/update/remove`, keeping the route file ~30 lines. Apply the same pattern to the other routes that inline logic (`workflows.js` at 142 lines is the main offender; `skills.js`, `patches.js` next). Routes that are already thin wrappers can stay.
 3. **Shared helpers**: one `lib/validate.js` for the repeated patterns (required-field checks, path existence + `~` expansion — `expandHome` currently lives in `routes/projects.js` and belongs in a lib).
 4. **Consistent error contract**: all errors as `{ error: string }` with correct status codes, thrown from lib as typed errors (e.g. `NotFoundError`) and mapped once in the Phase-2b error middleware — delete per-route boilerplate.
 5. `server/index.js` stays the composition root; keep the localhost-only bind and its comment.
@@ -121,7 +115,7 @@ client/src/
     bus.js                   # existing
     parsers.js               # NEW — shared "name: value" line parsing
   components/
-    layout/  Sidebar.jsx, TilBar.jsx
+    layout/  Sidebar.jsx
     common/  ConfirmDialog.jsx, SubTabs.jsx
     projects/ ProjectForm.jsx, ProjectCard.jsx, ServiceRow.jsx,
               LinkButton.jsx, LogPanel.jsx, EnvPanel.jsx, PatchPanel.jsx
@@ -135,24 +129,21 @@ Specific extractions:
 2. **`lib/parsers.js`.** `Projects.jsx` contains four near-identical "split lines, split on first `:`" parsers (services, env targets, previews, links). Extract one `parseNamedLines(text, { defaultName })` plus the two thin domain wrappers (`parseServices` handles the `*` auto-restart suffix). Serialize counterparts too (form prefill currently rebuilds these strings inline).
 3. **Split `Projects.jsx` (366 lines → ~120-line page + components).** It currently defines `ProjectForm`, `LinkButton`, `LogPanel`, the card markup, and workflow quick-run inline. Extract `ProjectCard` (card + tabs + service rows) and move each named component to `components/projects/`. The workflow quick-run row can become `components/projects/WorkflowQuickRun.jsx`.
 4. **Split `Workspace.jsx` (234 lines).** `TermView` and `FrameTab` (rename `PreviewFrame`) move to `components/workspace/`. Known pre-existing wart to preserve-or-fix (own commit if fixed): the `hub:open-preview` effect depends on `[tabs]`, re-subscribing every tabs change — a `useRef`-based handler removes the churn.
-5. **Slim `App.jsx`**: extract `TilBar` and the sidebar into `components/layout/`; keep the `KEEP_MOUNTED` workspace-stays-alive mechanism exactly as is (it's intentional — terminals/iframes must survive page switches; add a one-line comment saying so).
-6. **`styles.css` (329 lines)**: acceptable for this size — just reorganize into commented sections matching the component tree (layout / cards / forms / terminal / preview / content). Do **not** introduce CSS modules or Tailwind.
+5. **Slim `App.jsx`**: extract the sidebar into `components/layout/`; keep the `KEEP_MOUNTED` workspace-stays-alive mechanism exactly as is (it's intentional — terminals/iframes must survive page switches; add a one-line comment saying so).
+6. **`styles.css` (329 lines)**: acceptable for this size — just reorganize into commented sections matching the component tree (layout / cards / forms / terminal / preview / learning). Do **not** introduce CSS modules or Tailwind.
 
 ## Phase 5 — React Router (URL-driven navigation)
 
 Add **`react-router` v8** (the single package — do NOT install `react-router-dom`, which is the legacy v7-era wrapper). Use plain **library/declarative mode** (`BrowserRouter` + `Routes`); do not adopt framework mode, loaders, or SSR — this is a small SPA and data fetching stays in the pages as-is. v8 is recent: read its release notes/changelog before starting and adapt if APIs moved since this plan was written.
 
-Today navigation is `useState` in three places (`App.jsx` page switching, `ContentHub.jsx` and `Library.jsx` sub-tabs, plus the Projects overview/workflows tab) — none of it survives a browser refresh or can be linked to. Target route map:
+Today navigation is `useState` in three places (`App.jsx` page switching, `Library.jsx` sub-tabs, plus the Projects overview/workflows tab) — none of it survives a browser refresh or can be linked to. Target route map:
 
 ```
 /                    → redirect to /projects
 /projects            → Projects (overview tab)
 /projects/workflows  → Projects (workflows tab)
 /workspace           → Workspace (see keep-mounted note below)
-/content             → redirect to /content/learning
-/content/learning    → Learning queue
-/content/pipeline    → Ideas & drafts
-/content/digest      → Digest
+/learning             → Learning queue
 /library             → redirect to /library/snippets
 /library/snippets    → Snippets
 /library/skills      → AI skills
@@ -161,13 +152,13 @@ Today navigation is `useState` in three places (`App.jsx` page switching, `Conte
 
 Steps:
 
-1. Wrap the app in `BrowserRouter` in `main.jsx`; convert `App.jsx`'s `PAGES` array + `useState` into `<Routes>` inside the existing layout (sidebar + TIL bar stay outside `<Routes>` as a layout shell).
+1. Wrap the app in `BrowserRouter` in `main.jsx`; convert `App.jsx`'s `PAGES` array + `useState` into `<Routes>` inside the existing layout (the sidebar stays outside `<Routes>` as a layout shell).
 2. Sidebar buttons → `NavLink` (active styling comes free via the `isActive` class callback; keep the existing `.nav-item.active` CSS class).
 3. **Critical — keep Workspace alive across navigation.** Terminals and preview iframes must NOT unmount when the user navigates away (this is what the current `KEEP_MOUNTED` hack preserves). Do not put `<Workspace />` inside a `<Route>` — a route change would unmount it and kill every terminal session. Instead, render `<Workspace />` unconditionally in the layout shell, shown/hidden via `useLocation()` (`display: pathname === '/workspace' ? 'block' : 'none'`), and give `/workspace` a route that renders `null`. Preserve the explanatory comment. **Verify by opening a terminal, running `top`, navigating to Projects and back — the terminal must still be live.**
-4. Sub-tabs → routes: `ContentHub` and `Library` become layout routes with nested `<Route>`s (or just read the tab from the path); `SubTabs` gets a variant that navigates (`useNavigate` or render `NavLink`s) instead of calling `setState`. Same for the Projects overview/workflows page tab. Delete the now-dead `useState` tab plumbing.
+4. Sub-tabs → routes: `Library` becomes a layout route with nested `<Route>`s (or just read the tab from the path); `SubTabs` gets a variant that navigates (`useNavigate` or render `NavLink`s) instead of calling `setState`. Same for the Projects overview/workflows page tab. Delete the now-dead `useState` tab plumbing.
 5. Replace the `hub:open-preview` → `setPage('workspace')` wiring in `App.jsx` with `useNavigate()` to `/workspace`. Keep `lib/bus.js` itself — it also carries the pending-preview payload that Workspace consumes on the other side; only the page-switching half moves to the router.
 6. The per-project card tab state (`cardTab` in Projects — services/env/patches per card) stays as component state; it's per-card UI state, not navigation. Don't force it into the URL.
-7. No server changes needed: Vite's dev server serves `index.html` for unknown paths by default (SPA fallback), and the Express server doesn't serve the built client. Verify a hard refresh on `http://localhost:5173/content/digest` loads correctly.
+7. No server changes needed: Vite's dev server serves `index.html` for unknown paths by default (SPA fallback), and the Express server doesn't serve the built client. Verify a hard refresh on `http://localhost:5173/learning` loads correctly.
 
 Verify: full smoke pass + browser back/forward moves between pages, refresh on every deep link works, sidebar active state follows the URL.
 
@@ -200,8 +191,7 @@ Keep it proportionate — this is a personal tool, not a library:
 - [ ] Workflows: create one, run it from Projects quick-run, per-step results reported
 - [ ] Workspace: open terminal (home + a project), run a command, resize window, close tab
 - [ ] Workspace: open preview of a running localhost URL; iframe-blocked site shows the ↗ fallback
-- [ ] TIL bar logs an entry; Content page shows it; Learning queue drag/status changes persist
-- [ ] Digest renders counts; Claude features either work or degrade with the friendly message
+- [ ] Learning queue status changes persist
 - [ ] Snippets: add, search, copy; Skills: repo scan works (point at any folder with a `SKILL.md`)
-- [ ] (After Phase 5) Deep links: hard-refresh on `/content/digest` and `/library/skills` works; back/forward navigates pages; open a terminal, navigate away and back — terminal session still alive
+- [ ] (After Phase 5) Deep links: hard-refresh on `/learning` and `/library/skills` works; back/forward navigates pages; open a terminal, navigate away and back — terminal session still alive
 - [ ] `npm --prefix client run build` succeeds; no new console errors/warnings in the browser

@@ -1,6 +1,7 @@
 import { read, write, id } from './store.js';
 import { expandHome, requirePathExists } from './validate.js';
 import { ValidationError, NotFoundError } from './errors.js';
+import { status as gitStatus } from './git.js';
 
 const NAME = 'projects';
 
@@ -12,6 +13,10 @@ export function getById(projectId) {
 
 export function list() {
   return read(NAME);
+}
+
+export function gitStatuses() {
+  return Object.fromEntries(list().map((project) => [project.id, gitStatus(project.path)]));
 }
 
 export function create(body) {

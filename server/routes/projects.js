@@ -7,6 +7,10 @@ router.get('/', (req, res) => {
   res.json(projects.list());
 });
 
+router.get('/git-status', (req, res) => {
+  res.json(projects.gitStatuses());
+});
+
 router.post('/', (req, res) => {
   res.json(projects.create(req.body));
 });

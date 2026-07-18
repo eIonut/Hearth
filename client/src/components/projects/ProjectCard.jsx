@@ -4,6 +4,7 @@ import LinkButton from './LinkButton.jsx';
 import ServiceRow from './ServiceRow.jsx';
 import EnvPanel from './EnvPanel.jsx';
 import PatchPanel from './PatchPanel.jsx';
+import GitStatus from './GitStatus.jsx';
 
 const CARD_TABS = [
   { id: 'services', label: 'Services' },
@@ -11,7 +12,15 @@ const CARD_TABS = [
   { id: 'patches', label: 'Patches' },
 ];
 
-export default function ProjectCard({ project, statuses, onEdit, onRemove, onToggle, onLogs }) {
+export default function ProjectCard({
+  project,
+  statuses,
+  gitStatus,
+  onEdit,
+  onRemove,
+  onToggle,
+  onLogs,
+}) {
   // per-card UI state (which section tab is open); not navigation, stays local.
   const [section, setSection] = useState('services');
 
@@ -29,6 +38,7 @@ export default function ProjectCard({ project, statuses, onEdit, onRemove, onTog
         </div>
       </div>
       <div className="font-mono text-muted">{project.path}</div>
+      <GitStatus status={gitStatus} />
       {(project.links || []).length > 0 && (
         <div className="my-1.5 flex flex-wrap items-center gap-2" style={{ marginTop: 6 }}>
           {project.links.map((l) => (

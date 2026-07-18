@@ -11,9 +11,8 @@ Execution plan for an agent. Goal: replace `client/src/styles.css` (~650 lines) 
   1. **Design tokens**: `:root` CSS variables (`--bg`, `--bg-2`, `--bg-3`, `--border`, `--text`, `--muted`, `--accent`, `--green`, `--red`, plus orange `#d29922` used raw).
   2. **Element-level base styles** (no class): `body`, `h2`, `h3`, `label`, `input`, `textarea`, `select`, `a`.
   3. **Reused primitives with dynamic variants**: `.btn` (+ `primary/danger/danger-solid/small`), `.chip` (+ `green/gray/orange/red`), `.dot` (+ `green/gray/orange/red`), `.card` (+ `compact/empty/stat`), `.subnav`/`.subnav-item`, `.nav-item`, `.tab`. Variants are composed at runtime: `'btn small ' + (running ? 'danger' : 'primary')`.
-  4. **One-off layout/page styles**: app shell, workspace, TIL bar, content pipeline grid, learning board, digest stats, modal (with two keyframe animations), logs.
+  4. **One-off layout/page styles**: app shell, workspace, learning board, modal (with two keyframe animations), logs.
 - Other CSS in play: `@xterm/xterm/css/xterm.css` (imported by `TermView.jsx` — untouched by this plan), `ansi_up` inline styles in logs (unaffected).
-- One media query: `.content-layout` collapses at `max-width: 900px`.
 - Prettier 3 with `.prettierrc`; ESLint 9 flat config; CI runs lint + client build + vitest.
 
 ### Target versions (latest on npm as of 2026-07-18 — re-check at execution time)
@@ -31,7 +30,7 @@ Execution plan for an agent. Goal: replace `client/src/styles.css` (~650 lines) 
    - Tokens → `@theme` variables (`--color-bg`, `--color-accent`, …). Tailwind emits them as CSS variables, so the few places that need raw `var()` (e.g. box-shadow glows) keep working.
    - Element base styles (`body`, headings, forms, links) → a small `@layer base` block. These are _intentionally_ global (every `<input>` in the app is styled identically); adding 10 utility classes to every input would be strictly worse.
    - Reused primitives (`.btn`, `.chip`, `.dot`, `.card`, `.subnav*`, `.nav-item`, `.tab`) → keep as classes, redefined with `@apply` in `@layer components`. **Rationale:** call sites compose variants dynamically (`'chip ' + color`, `'btn small ' + (running ? 'danger' : 'primary')`); converting these to inline utilities would require touching every call site's logic and inventing a `cn()`/variant helper — a bigger diff for zero behavior gain. This is the pragmatic subset of Tailwind for a small app.
-   - Everything else (one-off layout: `.app`, `.sidebar`, `.workspace-page`, `.til-bar`, `.content-layout`, `.board`, `.stats-grid`, `.modal*`, `.logs`, etc.) → **inline utilities in JSX**, deleting the CSS rules as you go.
+   - Everything else (one-off layout: `.app`, `.sidebar`, `.workspace-page`, `.board`, `.modal*`, `.logs`, etc.) → **inline utilities in JSX**, deleting the CSS rules as you go.
 3. **Full literal class names only.** Tailwind's scanner can't see interpolated fragments. `'dot ' + (running ? 'green' : 'red')` is fine while `dot`/`green` are `@layer components` classes, but any _utility_ chosen at runtime must be a complete literal in source (`running ? 'bg-green' : 'bg-red'`, never `` `bg-${color}` ``).
 4. **Keyframes** (`modal-fade`, `modal-pop`) → `@theme` `--animate-*` definitions, applied via `animate-modal-fade` / `animate-modal-pop` utilities.
 5. **Breakpoint**: use `max-[900px]:grid-cols-1` for the one media query — not worth a named breakpoint.
@@ -109,10 +108,10 @@ No visual change expected. Verify + commit (can be 2–3 commits: primitives / t
 One commit per area; delete the corresponding `styles.css` section in the same commit:
 
 1. **App shell**: `.app`, `.sidebar` (+ `.collapsed` — conditional utilities in `Sidebar.jsx`), `.logo*`, `.collapse-btn`, `.sidebar-footer`, `.content`, `.page-area`, `.page`.
-2. **TIL bar + content pipeline**: `.til-bar`, `.til-label`, `.content-layout` (with `max-[900px]:grid-cols-1`), `.til-column`, `.board`, `.column h3` (becomes a class on the h3).
+2. **Learning board**: `.board`, `.column h3` (becomes a class on the h3).
 3. **Projects**: `.grid`, `.service-row` (`first-of-type` border → `first:border-t-0`), `.service-name`, `.logs`, `.log-panel`, `.snippet-body`, `.crash-badge`, `.op-editor`, `.tag`, `.search`.
 4. **Workspace**: `.workspace-page`, `.workspace-toolbar` (its child `select`/`input` overrides become classes on those elements), `.tab-bar`, `.work-area`, `.term-container`, `.preview-frame-wrap`, `.preview-iframe`, `.preview-notice`, `.btn a`/`a.btn` link-color override.
-5. **Digest + modal**: `.stats-grid`, `.stat-value`, `.summary-text`, `.modal-overlay`/`.modal`/`.modal-title`/`.modal-message`/`.modal-actions` (use `animate-modal-fade`/`animate-modal-pop` from Phase 1).
+5. **Modal**: `.modal-overlay`/`.modal`/`.modal-title`/`.modal-message`/`.modal-actions` (use `animate-modal-fade`/`animate-modal-pop` from Phase 1).
 
 After this phase `styles.css` is empty → delete the file and inline the `@import` removal.
 
@@ -133,7 +132,7 @@ After this phase `styles.css` is empty → delete the file and inline the `@impo
 - [ ] Projects: cards, green/red/gray dots **with glow**, chips (all 4 colors), service rows, logs panel styling, form inputs + focus ring
 - [ ] Sidebar: active nav highlight, collapse/expand, crash badge
 - [ ] Workspace: tab bar active state, terminal container fills height, preview iframe, toolbar select/input sizing
-- [ ] Content: TIL bar, pipeline two-column layout (and single-column below 900px), learning board, digest stat cards
+- [ ] Learning: queue board
 - [ ] Library: snippets mono body, tags, search width
 - [ ] Confirm dialog: overlay + pop animation, danger-solid button
 - [ ] Diff-check: side-by-side screenshot comparison against `main` for at least Projects + Workspace

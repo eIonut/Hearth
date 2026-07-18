@@ -28,6 +28,7 @@ export default function Projects() {
   const pageTab = pageTabFromPath(useLocation().pathname);
   const [projects, setProjects] = useState([]);
   const [statuses, setStatuses] = useState({});
+  const [gitStatuses, setGitStatuses] = useState({});
   const [workflows, setWorkflows] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [wfRunning, setWfRunning] = useState({});
@@ -37,7 +38,12 @@ export default function Projects() {
   const confirm = useConfirm();
 
   async function load() {
-    setProjects(await api('/projects'));
+    const [projectList, gitStatusList] = await Promise.all([
+      api('/projects'),
+      api('/projects/git-status'),
+    ]);
+    setProjects(projectList);
+    setGitStatuses(gitStatusList);
     api('/workflows')
       .then(setWorkflows)
       .catch(() => {});
@@ -72,6 +78,7 @@ export default function Projects() {
   }
 
   usePoll(() => api('/services/status'), setStatuses, 2000);
+  usePoll(() => api('/projects/git-status'), setGitStatuses, 10000);
 
   async function toggle(project, service) {
     const running = statuses[`${project.id}::${service.name}`]?.running;
@@ -148,6 +155,7 @@ export default function Projects() {
                 key={p.id}
                 project={p}
                 statuses={statuses}
+                gitStatus={gitStatuses[p.id]}
                 onEdit={() => setEditing(p)}
                 onRemove={() => remove(p)}
                 onToggle={(service) => toggle(p, service)}
