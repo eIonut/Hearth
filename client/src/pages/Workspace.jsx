@@ -54,16 +54,22 @@ export default function Workspace() {
     setActiveTab(id);
   }
 
-  // Preview requests coming from other pages (Projects "Preview" buttons, links, workflows)
+  // Preview requests coming from other pages (Projects "Preview" buttons, links, workflows).
+  // Keep the handler in a ref so the event subscription mounts once instead of
+  // re-subscribing on every tabs change (openPreviewTab closes over `tabs` for dedup).
+  const openPreviewRef = useRef(openPreviewTab);
+  useEffect(() => {
+    openPreviewRef.current = openPreviewTab;
+  });
   useEffect(() => {
     function onOpen() {
       const p = consumePendingPreview();
-      if (p) openPreviewTab(p.label, p.url);
+      if (p) openPreviewRef.current(p.label, p.url);
     }
     onOpen(); // consume anything queued before mount
     window.addEventListener('hub:open-preview', onOpen);
     return () => window.removeEventListener('hub:open-preview', onOpen);
-  }, [tabs]);
+  }, []);
 
   function closeTab(id) {
     setTabs((t) => t.filter((tab) => tab.id !== id));
