@@ -41,7 +41,7 @@ function DraftViewer({ item, onClose, onSaved }) {
           </button>
         </div>
       </div>
-      <div className="tab-bar">
+      <div className="my-2 flex flex-wrap gap-1">
         {PLATFORMS.map((p) => (
           <div key={p} className={'tab' + (tab === p ? ' active' : '')} onClick={() => setTab(p)}>
             {p}
