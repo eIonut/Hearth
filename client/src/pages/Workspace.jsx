@@ -88,9 +88,10 @@ export default function Workspace() {
   const active = tabs.find((t) => t.id === activeTab);
 
   return (
-    <div className="workspace-page">
-      <div className="flex gap-2 items-center flex-wrap my-1.5 workspace-toolbar">
+    <div className="flex h-full max-w-none flex-col px-2 pt-1.5 pb-2">
+      <div className="mb-1 flex flex-wrap items-center gap-1.5">
         <select
+          className="mt-0 w-auto"
           value=""
           onChange={(e) => {
             if (e.target.value === '::home') openTerm('home', '');
@@ -114,6 +115,7 @@ export default function Workspace() {
 
         {quickLinks.length > 0 && (
           <select
+            className="mt-0 w-auto"
             value=""
             onChange={(e) => {
               const q = quickLinks.find((x) => x.label === e.target.value);
@@ -173,7 +175,7 @@ export default function Workspace() {
       </div>
 
       {tabs.length > 0 && (
-        <div className="tab-bar">
+        <div className="my-2 flex flex-wrap gap-1">
           {tabs.map((t) => (
             <div
               key={t.id}
@@ -216,7 +218,7 @@ export default function Workspace() {
         </div>
       )}
 
-      <div className="work-area">
+      <div className="flex min-h-0 flex-1 flex-col">
         {tabs.map((t) =>
           t.kind === 'term' ? (
             <TermView key={'t' + t.id} cwd={t.cwd} visible={activeTab === t.id} />

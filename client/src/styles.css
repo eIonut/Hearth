@@ -35,68 +35,13 @@
 
 /* --- Sub-tabs: .subnav family → index.css @layer components --- */
 
-/* --- Workspace tabs (.tab family → @layer components) --- */
-.tab-bar {
-  display: flex;
-  gap: 4px;
-  margin: 8px 0;
-  flex-wrap: wrap;
-}
-
-/* --- Workspace (terminals + previews) --- */
-.workspace-page {
-  max-width: none;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 6px 8px 8px; /* minimal chrome: give the work area everything */
-}
-.workspace-toolbar {
-  margin: 0 0 4px;
-  gap: 6px;
-}
-.workspace-toolbar select,
-.workspace-toolbar input {
-  margin-top: 0;
-  width: auto;
-}
-.preview-notice {
-  margin: 0 0 4px;
-}
-.work-area {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-.work-area .term-container {
-  flex: 1;
-  min-height: 400px;
-  background: #0d1117;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px;
-}
-.preview-frame-wrap {
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-}
-.preview-iframe {
-  flex: 1;
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #fff;
-}
-.btn a,
-a.btn {
-  color: var(--text);
-}
-
-/* TIL bar (.til-bar, .til-bar input, .til-label) and content pipeline
-   (.content-layout with max-[900px]:grid-cols-1, .til-column) → inline
-   utilities in TilBar.jsx / ContentPage.jsx */
+/* Workspace tabs + terminals/previews (.tab-bar, .workspace-page,
+   .workspace-toolbar + its select/input overrides, .work-area, .term-container,
+   .preview-frame-wrap, .preview-iframe, .preview-notice) → inline utilities in
+   Workspace.jsx / TermView.jsx / PreviewFrame.jsx. The redundant `.btn a, a.btn`
+   text-color override is dropped: the .btn component (@apply text-text) already
+   wins over the base `a` accent color via the cascade layers.
+   TIL bar + content pipeline already inlined. */
 
 /* --- Digest --- */
 .stats-grid {

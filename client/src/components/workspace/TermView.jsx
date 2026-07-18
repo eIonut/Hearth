@@ -56,7 +56,7 @@ export default function TermView({ cwd, visible }) {
   return (
     <div
       ref={containerRef}
-      className="term-container"
+      className="min-h-[400px] flex-1 rounded-md border border-border bg-bg p-1"
       style={{ display: visible ? 'block' : 'none' }}
     />
   );

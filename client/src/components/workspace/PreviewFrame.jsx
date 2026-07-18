@@ -14,9 +14,9 @@ export default function PreviewFrame({ tab, visible }) {
   const problem = check && (!check.reachable || check.blocked);
 
   return (
-    <div style={{ display: visible ? 'flex' : 'none' }} className="preview-frame-wrap">
+    <div style={{ display: visible ? 'flex' : 'none' }} className="min-h-0 flex-1 flex-col">
       {problem && (
-        <div className="flex gap-2 items-center flex-wrap my-1.5 preview-notice">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
           {!check.reachable && (
             <span className="chip red">not reachable — is the service running?</span>
           )}
@@ -34,7 +34,7 @@ export default function PreviewFrame({ tab, visible }) {
         <iframe
           key={tab.reloadKey}
           src={tab.url}
-          className="preview-iframe"
+          className="w-full flex-1 rounded-md border border-border bg-white"
           title={tab.label}
           allow="clipboard-read; clipboard-write; geolocation; microphone; camera"
         />
