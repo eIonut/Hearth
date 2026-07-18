@@ -3,6 +3,7 @@ import * as procman from './procman.js';
 import * as envops from './envops.js';
 import * as patchops from './patchops.js';
 import * as projects from './projects.js';
+import { openInBrowser } from './browser.js';
 import { ValidationError, NotFoundError } from './errors.js';
 
 const NAME = 'workflows';
@@ -13,8 +14,19 @@ const NAME = 'workflows';
 //   { type: 'env-apply', projectId, target, preset }
 //   { type: 'patch-apply' | 'patch-revert', patchId }
 //   { type: 'preview', label, url }   — executed client-side after run
+//   { type: 'open-url', label, url, target: 'browser' | 'workspace' }
+//   { type: 'terminal', projectId?, command } — opened client-side after run
 
-const STEP_TYPES = ['start', 'stop', 'env-apply', 'patch-apply', 'patch-revert', 'preview'];
+const STEP_TYPES = [
+  'start',
+  'stop',
+  'env-apply',
+  'patch-apply',
+  'patch-revert',
+  'preview',
+  'open-url',
+  'terminal',
+];
 
 function describeStep(step) {
   const project = step.projectId ? projects.getById(step.projectId) : null;
@@ -34,7 +46,11 @@ function describeStep(step) {
       return `revert patch "${patch?.name || '?'}"`;
     }
     case 'preview':
-      return `preview ${step.label || step.url}`;
+      return `open ${step.label || step.url} in Workspace`;
+    case 'open-url':
+      return `open ${step.label || step.url} in ${step.target === 'workspace' ? 'Workspace' : 'browser'}`;
+    case 'terminal':
+      return `run ${step.command}`;
     default:
       return step.type;
   }
@@ -49,6 +65,12 @@ function validateStep(step) {
   if (['patch-apply', 'patch-revert'].includes(step.type) && !step.patchId)
     return `${step.type} needs patchId`;
   if (step.type === 'preview' && !step.url) return 'preview needs url';
+  if (step.type === 'open-url') {
+    if (!step.url) return 'open-url needs url';
+    if (step.target !== undefined && !['browser', 'workspace'].includes(step.target))
+      return 'open-url target must be browser or workspace';
+  }
+  if (step.type === 'terminal' && !step.command?.trim()) return 'terminal needs command';
   return null;
 }
 
@@ -99,8 +121,8 @@ export function remove(wfId) {
   );
 }
 
-// Run all server-side steps in order; preview steps are returned for the client
-// to open. Per-step failures are captured in the results rather than aborting.
+// Run all server-side steps in order; URL and terminal steps are returned for
+// the client to open. Per-step failures are captured instead of aborting.
 export function run(wfId) {
   const wf = read(NAME).find((w) => w.id === wfId);
   if (!wf) throw new NotFoundError();
@@ -136,6 +158,35 @@ export function run(wfId) {
           label,
           ok: true,
           clientPreview: { label: step.label || step.url, url: step.url },
+        });
+        continue;
+      } else if (step.type === 'open-url') {
+        if ((step.target || 'browser') === 'browser') {
+          openInBrowser(step.url);
+          results.push({ label, ok: true });
+        } else {
+          results.push({
+            label,
+            ok: true,
+            clientUrl: {
+              label: step.label || step.url,
+              url: step.url,
+              target: 'workspace',
+            },
+          });
+        }
+        continue;
+      } else if (step.type === 'terminal') {
+        const project = step.projectId ? projects.getById(step.projectId) : null;
+        if (step.projectId && !project) throw new Error('project not found');
+        results.push({
+          label,
+          ok: true,
+          clientTerm: {
+            label: step.label || step.command,
+            cwd: project?.path || '',
+            cmd: step.command,
+          },
         });
         continue;
       }

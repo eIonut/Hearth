@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { api } from '../api.js';
-import { openPreview, openTerm } from '../lib/bus.js';
+import { openTerm } from '../lib/bus.js';
+import { handleWorkflowClientStep } from '../lib/workflowSteps.js';
 import { usePoll } from '../hooks/usePoll.js';
 import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import ProjectForm from '../components/projects/ProjectForm.jsx';
@@ -62,9 +63,7 @@ export default function Projects() {
     try {
       const r = await api(`/workflows/${wf.id}/run`, { method: 'POST', body: {} });
       const failed = r.results.filter((x) => !x.ok);
-      for (const step of r.results) {
-        if (step.clientPreview) openPreview(step.clientPreview.label, step.clientPreview.url);
-      }
+      r.results.forEach(handleWorkflowClientStep);
       setWfMsg(
         failed.length === 0
           ? `"${wf.name}" done — ${r.results.length} steps ✓`
