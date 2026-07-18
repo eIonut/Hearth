@@ -46,11 +46,11 @@ export default function DigestPage() {
 
   return (
     <div>
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <p className="text-muted">
           Your last stretch at a glance — and a Claude-written review when you want one.
         </p>
-        <div className="row">
+        <div className="flex gap-2 items-center flex-wrap my-1.5">
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
@@ -79,7 +79,7 @@ export default function DigestPage() {
 
       {summary && (
         <div className="card">
-          <div className="row space-between">
+          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
             <h3>Your review</h3>
             <button className="btn small primary" onClick={copySummary}>
               {copied ? 'Copied!' : 'Copy'}

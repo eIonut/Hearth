@@ -92,20 +92,8 @@
   max-width: 1100px;
 }
 
-/* --- Row / flex utilities --- */
-.row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin: 6px 0;
-}
-.space-between {
-  justify-content: space-between;
-}
-.spacer {
-  flex: 1;
-}
+/* Row / flex utilities (.row/.space-between/.spacer) → inline utilities at call
+   sites: flex gap-2 items-center flex-wrap my-1.5 / justify-between / flex-1 */
 
 /* --- Grid --- */
 /* .card family + .btn family → index.css @layer components */

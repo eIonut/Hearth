@@ -31,7 +31,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
 
   return (
     <div className="card compact op-editor">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <select value={step.type} onChange={(e) => setType(e.target.value)}>
           {Object.entries(STEP_LABELS).map(([k, v]) => (
             <option key={k} value={k}>
@@ -45,7 +45,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
       </div>
 
       {['start', 'stop', 'env-apply'].includes(step.type) && (
-        <div className="row">
+        <div className="flex gap-2 items-center flex-wrap my-1.5">
           <label>
             Project
             <select value={step.projectId || ''} onChange={(e) => set('projectId', e.target.value)}>
@@ -127,7 +127,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
       )}
 
       {step.type === 'preview' && (
-        <div className="row">
+        <div className="flex gap-2 items-center flex-wrap my-1.5">
           <label>
             Label
             <input
@@ -201,7 +201,7 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
       </button>
 
       {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button
           className="btn primary"
           onClick={save}
@@ -277,7 +277,7 @@ export default function Workflows() {
         ))}
       </datalist>
 
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <p className="text-muted">
           Your setup rituals as one click: start services, swap env presets, apply patches, open
           previews — in order.
@@ -327,7 +327,7 @@ export default function Workflows() {
 
       {workflows.map((wf) => (
         <div className="card" key={wf.id}>
-          <div className="row space-between">
+          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
             <h3 style={{ margin: 0 }}>{wf.name}</h3>
             <div>
               <button

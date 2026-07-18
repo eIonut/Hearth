@@ -27,7 +27,7 @@ function DraftViewer({ item, onClose, onSaved }) {
 
   return (
     <div className="card">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h3>{item.title} — drafts</h3>
         <div>
           <button className="btn small primary" onClick={copy}>
@@ -137,7 +137,7 @@ export default function ContentPage() {
           )}
           {tils.map((t) => (
             <div className="card compact" key={t.id}>
-              <div className="row" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>
+              <div className="flex gap-2 items-center flex-wrap my-1.5" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>
                 <input
                   type="checkbox"
                   style={{ width: 'auto', marginTop: 3 }}
@@ -161,7 +161,7 @@ export default function ContentPage() {
         <div className="ideas-column">
           <div className="card form-card">
             <h3>New content idea</h3>
-            <div className="row">
+            <div className="flex gap-2 items-center flex-wrap my-1.5">
               <input
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -183,7 +183,7 @@ export default function ContentPage() {
                   </h3>
                   {colItems.map((item) => (
                     <div className="card compact" key={item.id}>
-                      <div className="row space-between">
+                      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
                         <strong className="text-[12px]">{item.title}</strong>
                         <button className="btn small danger" onClick={() => removeItem(item)}>
                           ✕
@@ -194,7 +194,7 @@ export default function ContentPage() {
                           {item.sourceTilIds.length} TIL{item.sourceTilIds.length > 1 ? 's' : ''}
                         </div>
                       )}
-                      <div className="row">
+                      <div className="flex gap-2 items-center flex-wrap my-1.5">
                         <button
                           className="btn small primary"
                           disabled={generating[item.id]}

@@ -17,7 +17,7 @@ export default function ProjectCard({ project, statuses, onEdit, onRemove, onTog
 
   return (
     <div className="card">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h3>{project.name}</h3>
         <div>
           <button className="btn small" onClick={onEdit}>
@@ -30,14 +30,14 @@ export default function ProjectCard({ project, statuses, onEdit, onRemove, onTog
       </div>
       <div className="text-muted font-mono">{project.path}</div>
       {(project.links || []).length > 0 && (
-        <div className="row" style={{ marginTop: 6 }}>
+        <div className="flex gap-2 items-center flex-wrap my-1.5" style={{ marginTop: 6 }}>
           {project.links.map((l) => (
             <LinkButton key={l.name + l.url} project={project} link={l} />
           ))}
         </div>
       )}
 
-      <div className="row" style={{ marginTop: 8 }}>
+      <div className="flex gap-2 items-center flex-wrap my-1.5" style={{ marginTop: 8 }}>
         <SubTabs small tabs={CARD_TABS} active={section} onChange={setSection} />
       </div>
 

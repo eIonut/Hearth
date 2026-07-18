@@ -69,7 +69,7 @@ export default function SkillsPage() {
 
       <div className="card">
         <h3>Skills repo location</h3>
-        <div className="row">
+        <div className="flex gap-2 items-center flex-wrap my-1.5">
           <input
             value={repoPath}
             onChange={(e) => setRepoPath(e.target.value)}
@@ -87,10 +87,10 @@ export default function SkillsPage() {
 
       {skillsInfo.configured && (
         <div className="card">
-          <div className="row space-between">
+          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
             <h3>Skills ({skillsInfo.skills.length})</h3>
             {projects.length > 0 && (
-              <div className="row">
+              <div className="flex gap-2 items-center flex-wrap my-1.5">
                 <span className="text-muted">Install into:</span>
                 <select
                   value={projectId}

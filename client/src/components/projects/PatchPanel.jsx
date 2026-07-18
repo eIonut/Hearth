@@ -12,7 +12,7 @@ function OpEditor({ op, onChange, onRemove }) {
 
   return (
     <div className="card compact op-editor">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <select
           value={op.type}
           onChange={(e) =>
@@ -42,7 +42,7 @@ function OpEditor({ op, onChange, onRemove }) {
 
       {op.type === 'env-set' ? (
         <>
-          <div className="row">
+          <div className="flex gap-2 items-center flex-wrap my-1.5">
             <label>
               Key
               <input
@@ -134,7 +134,7 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
         />
       ))}
 
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_ENV_OP }])}>
           + Env value
         </button>
@@ -147,7 +147,7 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
       </div>
 
       {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button className="btn primary" onClick={save} disabled={!name.trim() || ops.length === 0}>
           Save
         </button>
@@ -234,11 +234,11 @@ export default function PatchPanel({ projectId }) {
           onCancel={() => setEditing(null)}
         />
       ) : (
-        <div className="row">
+        <div className="flex gap-2 items-center flex-wrap my-1.5">
           <span className="text-muted text-[12px]">
             Named file tweaks you apply and revert on demand.
           </span>
-          <span className="spacer" />
+          <span className="flex-1" />
           <button className="btn small primary" onClick={() => setEditing({})}>
             + New patch
           </button>
@@ -256,8 +256,8 @@ export default function PatchPanel({ projectId }) {
 
       {patches.map((p) => (
         <div className="card compact op-editor" key={p.id}>
-          <div className="row space-between">
-            <div className="row">
+          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+            <div className="flex gap-2 items-center flex-wrap my-1.5">
               <strong>{p.name}</strong>
               {statusChip(p.status)}
             </div>

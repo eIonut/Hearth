@@ -69,7 +69,7 @@ function ConfirmModal({ options, onClose }) {
       >
         <h3 className="modal-title">{title}</h3>
         {message && <p className="modal-message">{message}</p>}
-        <div className="row space-between modal-actions">
+        <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between modal-actions">
           <button className="btn" onClick={() => onClose(false)}>
             {cancelText}
           </button>

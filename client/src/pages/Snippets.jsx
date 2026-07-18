@@ -40,7 +40,7 @@ function SnippetForm({ initial, onSaved, onCancel }) {
           placeholder="Kill process on port"
         />
       </label>
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <label>
           Language
           <input value={language} onChange={(e) => setLanguage(e.target.value)} />
@@ -61,7 +61,7 @@ function SnippetForm({ initial, onSaved, onCancel }) {
         />
       </label>
       {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button className="btn primary" onClick={save}>
           Save
         </button>
@@ -111,7 +111,7 @@ export default function Snippets() {
 
   return (
     <div>
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <input
           className="search"
           value={query}
@@ -145,7 +145,7 @@ export default function Snippets() {
 
       {filtered.map((s) => (
         <div className="card" key={s.id}>
-          <div className="row space-between">
+          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
             <h3>{s.title}</h3>
             <div>
               <button className="btn small primary" onClick={() => copy(s)}>

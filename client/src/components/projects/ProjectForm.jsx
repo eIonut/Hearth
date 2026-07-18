@@ -99,7 +99,7 @@ export default function ProjectForm({ initial, onSaved, onCancel }) {
         />
       </label>
       {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button className="btn primary" onClick={save}>
           Save
         </button>

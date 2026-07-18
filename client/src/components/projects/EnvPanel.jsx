@@ -47,7 +47,7 @@ function TargetCard({ projectId, target, onChanged }) {
 
   return (
     <div className="card compact op-editor">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <strong>{target.name}</strong>
         <span className="text-muted font-mono text-[12px]">
           {target.file}
@@ -63,7 +63,7 @@ function TargetCard({ projectId, target, onChanged }) {
           <span className={'dot ' + (target.current === name ? 'green' : 'gray')} />
           <span className="service-name">{name}</span>
           {target.current === name && <span className="text-muted text-[12px]">active</span>}
-          <span className="spacer" />
+          <span className="flex-1" />
           <button
             className="btn small primary"
             onClick={() => apply(name)}
@@ -77,7 +77,7 @@ function TargetCard({ projectId, target, onChanged }) {
         </div>
       ))}
 
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}

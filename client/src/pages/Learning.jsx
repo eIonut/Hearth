@@ -65,7 +65,7 @@ function ItemForm({ onSaved, onCancel }) {
         />
       </label>
       {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="row">
+      <div className="flex gap-2 items-center flex-wrap my-1.5">
         <button className="btn primary" onClick={save}>
           Add
         </button>
@@ -109,7 +109,7 @@ export default function Learning() {
 
   return (
     <div>
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <p className="text-muted">
           Everything you want to learn next, so nothing gets lost. Finished items are raw material
           for your content.
@@ -146,7 +146,7 @@ export default function Learning() {
               </h3>
               {colItems.map((item) => (
                 <div className="card compact" key={item.id}>
-                  <div className="row space-between">
+                  <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
                     <strong>{item.title}</strong>
                     <button className="btn small danger" onClick={() => remove(item)}>
                       ✕
@@ -167,7 +167,7 @@ export default function Learning() {
                     </div>
                   )}
                   {item.notes && <div className="text-muted text-[12px]">{item.notes}</div>}
-                  <div className="row">
+                  <div className="flex gap-2 items-center flex-wrap my-1.5">
                     {col.id !== 'queued' && (
                       <button
                         className="btn small"

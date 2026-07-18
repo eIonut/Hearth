@@ -16,7 +16,7 @@ export default function PreviewFrame({ tab, visible }) {
   return (
     <div style={{ display: visible ? 'flex' : 'none' }} className="preview-frame-wrap">
       {problem && (
-        <div className="row preview-notice">
+        <div className="flex gap-2 items-center flex-wrap my-1.5 preview-notice">
           {!check.reachable && (
             <span className="chip red">not reachable — is the service running?</span>
           )}

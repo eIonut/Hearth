@@ -27,7 +27,7 @@ export default function LogPanel({ target, onClose }) {
 
   return (
     <div className="card log-panel">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h3>
           {target.projectName} / {target.service}{' '}
           {logs.running

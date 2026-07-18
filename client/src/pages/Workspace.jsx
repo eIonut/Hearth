@@ -89,7 +89,7 @@ export default function Workspace() {
 
   return (
     <div className="workspace-page">
-      <div className="row workspace-toolbar">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 workspace-toolbar">
         <select
           value=""
           onChange={(e) => {
@@ -153,7 +153,7 @@ export default function Workspace() {
           Open
         </button>
 
-        <span className="spacer" />
+        <span className="flex-1" />
         {active?.kind === 'preview' && (
           <>
             <button className="btn small" onClick={reloadActive} title="Reload">

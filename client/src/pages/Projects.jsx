@@ -79,7 +79,7 @@ export default function Projects() {
 
   return (
     <div className="page">
-      <div className="row space-between">
+      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h2>Projects</h2>
         <SubTabsNav tabs={PAGE_TABS} />
       </div>
@@ -88,9 +88,9 @@ export default function Projects() {
         <Workflows />
       ) : (
         <>
-          <div className="row">
+          <div className="flex gap-2 items-center flex-wrap my-1.5">
             <WorkflowQuickRun workflows={workflows} running={wfRunning} onRun={runWorkflow} />
-            <span className="spacer" />
+            <span className="flex-1" />
             <button className="btn primary" onClick={() => setEditing({})}>
               + Add project
             </button>
