@@ -20,12 +20,16 @@ Open http://localhost:5173.
 
 ```bash
 npm run lint          # ESLint over server + client
+npm test              # vitest: server API/store + client parsers
 npm run format        # Prettier — write
-npm run format:check  # Prettier — verify (what CI runs)
+npm run format:check  # Prettier — verify
 npm --prefix client run build   # client build must succeed
 ```
 
-CI runs lint + client build on every push and PR; keep both green.
+CI runs lint + tests + client build on every push and PR; keep them green.
+Tests live in `server/test/` (supertest against the exported app, with a temp
+`DEV_HUB_DATA_DIR`) and next to the code they cover on the client
+(`client/src/lib/parsers.test.js`).
 
 ## Guidelines
 
