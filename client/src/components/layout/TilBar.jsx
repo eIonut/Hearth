@@ -15,9 +15,10 @@ export default function TilBar() {
   }
 
   return (
-    <div className="til-bar">
-      <span className="til-label">TIL</span>
+    <div className="flex shrink-0 items-center gap-2.5 border-b border-border bg-bg-2 px-6 py-2">
+      <span className="text-[12px] font-bold text-accent">TIL</span>
       <input
+        className="mt-0 max-w-[520px]"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {

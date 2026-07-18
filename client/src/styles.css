@@ -19,13 +19,10 @@
    Sidebar.jsx and page roots. .nav-item family → index.css @layer components.
    Row/flex utilities (.row, .space-between, .spacer) → inline utilities. */
 
-/* --- Grid --- */
-/* .card family + .btn family → index.css @layer components */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-  gap: 10px;
-}
+/* .card family + .btn family → index.css @layer components.
+   .grid (projects overview) → inline grid-cols-[repeat(auto-fill,minmax(420px,1fr))]
+   gap-2.5 in Projects.jsx — pulled forward from the projects area so the legacy
+   .grid selector stops shadowing Tailwind's `grid`/`grid-cols-*` utilities. */
 
 /* --- Forms --- */
 .search {
@@ -103,17 +100,9 @@
   color: var(--muted);
 }
 
-/* --- Learning board --- */
-.board {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 8px;
-}
-.column h3 {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 6px;
-}
+/* Learning board (.board → grid grid-cols-3 gap-3 mt-2; .column h3 → border-b
+   border-border pb-1.5 on the header) → inline utilities in Learning.jsx /
+   ContentPage.jsx */
 
 /* --- Sub-tabs: .subnav family → index.css @layer components --- */
 
@@ -176,42 +165,9 @@ a.btn {
   color: var(--text);
 }
 
-/* --- TIL bar (.content/.page-area → App.jsx inline utilities) --- */
-.til-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 24px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.til-bar input {
-  margin-top: 0;
-  max-width: 520px;
-}
-.til-label {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 12px;
-}
-
-/* --- Content pipeline --- */
-.content-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 16px;
-  align-items: start;
-}
-.til-column {
-  max-height: 75vh;
-  overflow-y: auto;
-}
-@media (max-width: 900px) {
-  .content-layout {
-    grid-template-columns: 1fr;
-  }
-}
+/* TIL bar (.til-bar, .til-bar input, .til-label) and content pipeline
+   (.content-layout with max-[900px]:grid-cols-1, .til-column) → inline
+   utilities in TilBar.jsx / ContentPage.jsx */
 
 /* --- Digest --- */
 .stats-grid {

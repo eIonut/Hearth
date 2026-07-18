@@ -136,12 +136,12 @@ export default function Learning() {
         />
       )}
 
-      <div className="board">
+      <div className="mt-2 grid grid-cols-3 gap-3">
         {COLUMNS.map((col) => {
           const colItems = visible.filter((i) => i.status === col.id);
           return (
-            <div className="column" key={col.id}>
-              <h3>
+            <div key={col.id}>
+              <h3 className="border-b border-border pb-1.5">
                 {col.label} <span className="text-muted">({colItems.length})</span>
               </h3>
               {colItems.map((item) => (

@@ -127,8 +127,8 @@ export default function ContentPage() {
       </p>
       {error && <div className="text-red my-1.5">{error}</div>}
 
-      <div className="content-layout">
-        <div className="til-column">
+      <div className="grid grid-cols-[280px_1fr] items-start gap-4 max-[900px]:grid-cols-1">
+        <div className="max-h-[75vh] overflow-y-auto">
           <h3>TIL log ({tils.length})</h3>
           {tils.length === 0 && (
             <div className="text-muted text-[12px]">
@@ -173,12 +173,12 @@ export default function ContentPage() {
             </div>
           </div>
 
-          <div className="board">
+          <div className="mt-2 grid grid-cols-3 gap-3">
             {COLUMNS.map((col) => {
               const colItems = items.filter((i) => i.status === col.id);
               return (
-                <div className="column" key={col.id}>
-                  <h3>
+                <div key={col.id}>
+                  <h3 className="border-b border-border pb-1.5">
                     {col.label} <span className="text-muted">({colItems.length})</span>
                   </h3>
                   {colItems.map((item) => (
