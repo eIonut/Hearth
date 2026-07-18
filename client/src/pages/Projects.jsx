@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AnsiUp } from 'ansi_up';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
+import { usePoll } from '../hooks/usePoll.js';
 import SubTabs from '../components/SubTabs.jsx';
 import EnvPanel from '../components/EnvPanel.jsx';
 import PatchPanel from '../components/PatchPanel.jsx';
@@ -219,25 +220,15 @@ function LogPanel({ target, onClose }) {
   const [logs, setLogs] = useState({ lines: [], running: false, exitCode: null });
   const boxRef = useRef(null);
 
-  useEffect(() => {
-    let alive = true;
-    async function poll() {
-      try {
-        const data = await api(
-          `/services/logs?projectId=${target.projectId}&service=${encodeURIComponent(target.service)}`,
-        );
-        if (alive) setLogs(data);
-      } catch {
-        /* log poll — ignore transient errors */
-      }
-    }
-    poll();
-    const t = setInterval(poll, 1500);
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
-  }, [target]);
+  usePoll(
+    () =>
+      api(
+        `/services/logs?projectId=${target.projectId}&service=${encodeURIComponent(target.service)}`,
+      ),
+    setLogs,
+    1500,
+    [target],
+  );
 
   useEffect(() => {
     if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
@@ -311,23 +302,7 @@ export default function Projects() {
     setWfRunning((r) => ({ ...r, [wf.id]: false }));
   }
 
-  useEffect(() => {
-    let alive = true;
-    async function poll() {
-      try {
-        const s = await api('/services/status');
-        if (alive) setStatuses(s);
-      } catch {
-        /* status poll — ignore transient errors */
-      }
-    }
-    poll();
-    const t = setInterval(poll, 2000);
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
-  }, []);
+  usePoll(() => api('/services/status'), setStatuses, 2000);
 
   async function toggle(project, service) {
     const running = statuses[`${project.id}::${service.name}`]?.running;

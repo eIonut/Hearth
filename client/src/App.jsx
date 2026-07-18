@@ -4,6 +4,7 @@ import Workspace from './pages/Workspace.jsx';
 import ContentHub from './pages/ContentHub.jsx';
 import Library from './pages/Library.jsx';
 import { api } from './api.js';
+import { usePoll } from './hooks/usePoll.js';
 
 const PAGES = [
   { id: 'projects', label: 'Projects', component: Projects },
@@ -66,23 +67,11 @@ export default function App() {
 
   // crash badge: poll service statuses on every page
   const [crashedCount, setCrashedCount] = useState(0);
-  useEffect(() => {
-    let alive = true;
-    async function poll() {
-      try {
-        const s = await api('/services/status');
-        if (alive) setCrashedCount(Object.values(s).filter((x) => x.crashed).length);
-      } catch {
-        /* crash-count poll — ignore transient errors */
-      }
-    }
-    poll();
-    const t = setInterval(poll, 5000);
-    return () => {
-      alive = false;
-      clearInterval(t);
-    };
-  }, []);
+  usePoll(
+    () => api('/services/status'),
+    (s) => setCrashedCount(Object.values(s).filter((x) => x.crashed).length),
+    5000,
+  );
 
   return (
     <div className="app">
