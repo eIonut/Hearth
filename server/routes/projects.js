@@ -1,63 +1,22 @@
 import express from 'express';
-import { read, write, id } from '../lib/store.js';
-import { expandHome, requirePathExists } from '../lib/validate.js';
-import { ValidationError, NotFoundError } from '../lib/errors.js';
+import * as projects from '../lib/projects.js';
 
 const router = express.Router();
-const NAME = 'projects';
-
-// Project shape: { id, name, path, envFile, services: [{ name, cmd }] }
 
 router.get('/', (req, res) => {
-  res.json(read(NAME));
+  res.json(projects.list());
 });
 
 router.post('/', (req, res) => {
-  const { name, envFile, envTargets, services, previews, links } = req.body;
-  const projectPath = expandHome(req.body.path);
-  if (!name || !projectPath) throw new ValidationError('name and path are required');
-  requirePathExists(projectPath);
-
-  const projects = read(NAME);
-  const project = {
-    id: id(),
-    name,
-    path: projectPath,
-    envFile: envFile || '.env',
-    envTargets: Array.isArray(envTargets) ? envTargets : [],
-    services: Array.isArray(services) ? services : [],
-    previews: Array.isArray(previews) ? previews : [],
-    links: Array.isArray(links) ? links : [],
-  };
-  projects.push(project);
-  write(NAME, projects);
-  res.json(project);
+  res.json(projects.create(req.body));
 });
 
 router.put('/:id', (req, res) => {
-  const projects = read(NAME);
-  const idx = projects.findIndex((p) => p.id === req.params.id);
-  if (idx === -1) throw new NotFoundError();
-  const { name, envFile, envTargets, services, previews, links } = req.body;
-  const projectPath = req.body.path !== undefined ? expandHome(req.body.path) : undefined;
-  if (projectPath !== undefined) requirePathExists(projectPath);
-  projects[idx] = {
-    ...projects[idx],
-    ...(name !== undefined && { name }),
-    ...(projectPath !== undefined && { path: projectPath }),
-    ...(envFile !== undefined && { envFile }),
-    ...(envTargets !== undefined && { envTargets }),
-    ...(services !== undefined && { services }),
-    ...(previews !== undefined && { previews }),
-    ...(links !== undefined && { links }),
-  };
-  write(NAME, projects);
-  res.json(projects[idx]);
+  res.json(projects.update(req.params.id, req.body));
 });
 
 router.delete('/:id', (req, res) => {
-  const projects = read(NAME).filter((p) => p.id !== req.params.id);
-  write(NAME, projects);
+  projects.remove(req.params.id);
   res.json({ ok: true });
 });
 
