@@ -73,28 +73,7 @@
   padding: 9px 0;
 }
 
-.nav-item {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--muted);
-  text-decoration: none;
-  padding: 9px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.nav-item:hover {
-  background: var(--bg-3);
-  color: var(--text);
-}
-.nav-item.active {
-  background: var(--bg-3);
-  color: var(--text);
-  font-weight: 600;
-}
+/* .nav-item family → index.css @layer components */
 
 .sidebar-footer {
   margin-top: auto;
@@ -128,57 +107,12 @@
   flex: 1;
 }
 
-/* --- Cards + grid --- */
-.card {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin: 10px 0;
-}
-.card.compact {
-  padding: 10px 12px;
-}
-.card.empty {
-  color: var(--muted);
-  text-align: center;
-  padding: 28px;
-}
-
+/* --- Grid --- */
+/* .card family + .btn family → index.css @layer components */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
   gap: 10px;
-}
-
-/* --- Buttons --- */
-.btn {
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  margin-left: 4px;
-}
-.btn:hover {
-  border-color: var(--muted);
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-.btn.danger {
-  color: var(--red);
-}
-.btn.small {
-  padding: 3px 9px;
-  font-size: 12px;
 }
 
 /* --- Forms --- */
@@ -206,23 +140,7 @@
   margin: 6px 0;
 }
 
-/* --- Status dots + service rows --- */
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.dot.green {
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-}
-.dot.gray {
-  background: var(--muted);
-  opacity: 0.5;
-}
-
+/* --- Service rows (.dot family → index.css @layer components) --- */
 .service-row {
   display: flex;
   align-items: center;
@@ -260,38 +178,7 @@
   bottom: 8px;
 }
 
-/* --- Chips, badges, tags --- */
-.chip {
-  border-radius: 10px;
-  padding: 2px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-left: 8px;
-}
-.chip.green {
-  background: rgba(63, 185, 80, 0.15);
-  color: var(--green);
-}
-.chip.gray {
-  background: var(--bg-3);
-  color: var(--muted);
-}
-.chip.orange {
-  background: rgba(210, 153, 34, 0.15);
-  color: #d29922;
-}
-.chip.red {
-  background: rgba(248, 81, 73, 0.15);
-  color: var(--red);
-}
-.dot.orange {
-  background: #d29922;
-}
-.dot.red {
-  background: var(--red);
-  box-shadow: 0 0 6px var(--red);
-}
-
+/* --- Badges, tags (.chip family + .dot.orange/.red → @layer components) --- */
 .crash-badge {
   display: inline-block;
   min-width: 8px;
@@ -331,74 +218,14 @@
   padding-bottom: 6px;
 }
 
-/* --- Sub-tabs (hub pages + project cards) --- */
-.subnav {
-  display: flex;
-  gap: 4px;
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 3px;
-  width: fit-content;
-}
-.subnav-item {
-  background: none;
-  border: none;
-  color: var(--muted);
-  text-decoration: none;
-  padding: 5px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-}
-.subnav-item:hover {
-  color: var(--text);
-}
-.subnav-item.active {
-  background: var(--bg-3);
-  color: var(--text);
-  font-weight: 600;
-}
-.subnav.small {
-  background: var(--bg);
-}
-.subnav.small .subnav-item {
-  padding: 3px 10px;
-  font-size: 12px;
-}
+/* --- Sub-tabs: .subnav family → index.css @layer components --- */
 
-/* --- Workspace tabs --- */
+/* --- Workspace tabs (.tab family → @layer components) --- */
 .tab-bar {
   display: flex;
   gap: 4px;
   margin: 8px 0;
   flex-wrap: wrap;
-}
-.tab {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 6px 6px 0 0;
-  padding: 5px 12px;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--muted);
-}
-.tab.active {
-  color: var(--text);
-  border-bottom-color: var(--bg);
-  background: var(--bg-3);
-}
-.tab-close {
-  margin-left: 8px;
-  opacity: 0.6;
-}
-.tab-close:hover {
-  opacity: 1;
-  color: var(--red);
-}
-.tab-glyph {
-  margin-right: 6px;
-  opacity: 0.7;
 }
 
 /* --- Workspace (terminals + previews) --- */
@@ -505,11 +332,7 @@ a.btn {
   gap: 10px;
   margin: 10px 0;
 }
-.card.stat {
-  text-align: center;
-  padding: 16px 10px;
-  margin: 0;
-}
+/* .card.stat → index.css @layer components */
 .stat-value {
   font-size: 28px;
   font-weight: 700;
@@ -564,15 +387,7 @@ a.btn {
 .modal-actions .btn {
   margin-left: 0;
 }
-.btn.danger-solid {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
-}
-.btn.danger-solid:hover {
-  border-color: var(--red);
-  opacity: 0.9;
-}
+/* .btn.danger-solid → index.css @layer components */
 
 @keyframes modal-fade {
   from {
