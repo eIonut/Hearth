@@ -14,9 +14,9 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "concurrently": "^9.0.0",
+    "concurrently": "^10.0.3",
     "express": "^4.19.2",
-    "ws": "^8.17.0"
+    "ws": "^8.21.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
