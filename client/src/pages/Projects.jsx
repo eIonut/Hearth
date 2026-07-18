@@ -3,6 +3,14 @@ import { AnsiUp } from 'ansi_up';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
 import { usePoll } from '../hooks/usePoll.js';
+import {
+  parseServices,
+  parseEnvTargets,
+  parsePreviews,
+  parseLinks,
+  serializeServices,
+  serializeNamedLines,
+} from '../lib/parsers.js';
 import SubTabs from '../components/SubTabs.jsx';
 import EnvPanel from '../components/EnvPanel.jsx';
 import PatchPanel from '../components/PatchPanel.jsx';
@@ -22,59 +30,19 @@ const CARD_TABS = [
   { id: 'patches', label: 'Patches' },
 ];
 
-function parseServices(text) {
-  // one per line: "web: yarn dev" — add * after the name for auto-restart on crash: "web*: yarn dev"
-  return text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const i = l.indexOf(':');
-      let name = i === -1 ? l : l.slice(0, i).trim();
-      const cmd = i === -1 ? l : l.slice(i + 1).trim();
-      let autoRestart = false;
-      if (name.endsWith('*')) {
-        autoRestart = true;
-        name = name.slice(0, -1).trim();
-      }
-      return { name, cmd, autoRestart };
-    });
-}
-
-function parseEnvTargets(text) {
-  // one per line: "web: apps/web/.env" or just ".env" (named default)
-  return text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => {
-      const i = l.indexOf(':');
-      if (i === -1) return { name: 'default', file: l };
-      return { name: l.slice(0, i).trim(), file: l.slice(i + 1).trim() };
-    });
-}
-
 function ProjectForm({ initial, onSaved, onCancel }) {
   const [name, setName] = useState(initial?.name || '');
   const [path, setPath] = useState(initial?.path || '');
-  const [servicesText, setServicesText] = useState(
-    (initial?.services || [])
-      .map((s) => `${s.name}${s.autoRestart ? '*' : ''}: ${s.cmd}`)
-      .join('\n'),
-  );
+  const [servicesText, setServicesText] = useState(serializeServices(initial?.services));
   const [envText, setEnvText] = useState(
     initial?.envTargets?.length
-      ? initial.envTargets.map((t) => `${t.name}: ${t.file}`).join('\n')
+      ? serializeNamedLines(initial.envTargets, 'file')
       : initial?.envFile
         ? `default: ${initial.envFile}`
         : 'default: .env',
   );
-  const [previewsText, setPreviewsText] = useState(
-    (initial?.previews || []).map((p) => `${p.name}: ${p.url}`).join('\n'),
-  );
-  const [linksText, setLinksText] = useState(
-    (initial?.links || []).map((l) => `${l.name}: ${l.url}`).join('\n'),
-  );
+  const [previewsText, setPreviewsText] = useState(serializeNamedLines(initial?.previews, 'url'));
+  const [linksText, setLinksText] = useState(serializeNamedLines(initial?.links, 'url'));
   const [error, setError] = useState('');
 
   async function save() {
@@ -84,24 +52,8 @@ function ProjectForm({ initial, onSaved, onCancel }) {
       path,
       services: parseServices(servicesText),
       envTargets: parseEnvTargets(envText),
-      previews: previewsText
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((l) => {
-          const i = l.indexOf(':');
-          if (i === -1) return { name: 'app', url: l };
-          return { name: l.slice(0, i).trim(), url: l.slice(i + 1).trim() };
-        }),
-      links: linksText
-        .split('\n')
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((l) => {
-          const i = l.indexOf(':');
-          if (i === -1) return { name: l, url: l };
-          return { name: l.slice(0, i).trim(), url: l.slice(i + 1).trim() };
-        }),
+      previews: parsePreviews(previewsText),
+      links: parseLinks(linksText),
     };
     try {
       if (initial?.id) await api(`/projects/${initial.id}`, { method: 'PUT', body });
