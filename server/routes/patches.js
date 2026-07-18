@@ -1,6 +1,8 @@
-const express = require('express');
-const { read, write, id } = require('../lib/store');
-const patchops = require('../lib/patchops');
+import express from 'express';
+import { read, write, id } from '../lib/store.js';
+import * as patchops from '../lib/patchops.js';
+import { requireFields } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'patches';
@@ -19,24 +21,27 @@ router.get('/', (req, res) => {
   let patches = read(NAME);
   if (projectId) patches = patches.filter((p) => p.projectId === projectId);
   const projects = read('projects');
-  res.json(patches.map((p) => {
-    const project = projects.find((pr) => pr.id === p.projectId);
-    return {
-      ...p,
-      status: project ? patchops.overallStatus(project, p.ops) : 'project-missing',
-      opStatuses: project ? p.ops.map((op) => patchops.opStatus(project, op)) : [],
-    };
-  }));
+  res.json(
+    patches.map((p) => {
+      const project = projects.find((pr) => pr.id === p.projectId);
+      return {
+        ...p,
+        status: project ? patchops.overallStatus(project, p.ops) : 'project-missing',
+        opStatuses: project ? p.ops.map((op) => patchops.opStatus(project, op)) : [],
+      };
+    }),
+  );
 });
 
 router.post('/', (req, res) => {
   const { projectId, name, ops } = req.body;
-  if (!name || !projectId) return res.status(400).json({ error: 'name and projectId are required' });
-  if (!getProject(projectId)) return res.status(404).json({ error: 'project not found' });
-  if (!Array.isArray(ops) || ops.length === 0) return res.status(400).json({ error: 'at least one op is required' });
+  requireFields(req.body, ['name', 'projectId']);
+  if (!getProject(projectId)) throw new NotFoundError('project not found');
+  if (!Array.isArray(ops) || ops.length === 0)
+    throw new ValidationError('at least one op is required');
   for (const op of ops) {
     const err = patchops.validateOp(op);
-    if (err) return res.status(400).json({ error: err });
+    if (err) throw new ValidationError(err);
   }
   const patches = read(NAME);
   const patch = { id: id(), projectId, name, ops };
@@ -48,13 +53,14 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const patches = read(NAME);
   const idx = patches.findIndex((p) => p.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { name, ops } = req.body;
   if (ops !== undefined) {
-    if (!Array.isArray(ops) || ops.length === 0) return res.status(400).json({ error: 'at least one op is required' });
+    if (!Array.isArray(ops) || ops.length === 0)
+      throw new ValidationError('at least one op is required');
     for (const op of ops) {
       const err = patchops.validateOp(op);
-      if (err) return res.status(400).json({ error: err });
+      if (err) throw new ValidationError(err);
     }
   }
   patches[idx] = {
@@ -67,20 +73,24 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  write(NAME, read(NAME).filter((p) => p.id !== req.params.id));
+  write(
+    NAME,
+    read(NAME).filter((p) => p.id !== req.params.id),
+  );
   patchops.clearState(req.params.id);
   res.json({ ok: true });
 });
 
 function runAction(req, res, fn) {
   const patch = read(NAME).find((p) => p.id === req.params.id);
-  if (!patch) return res.status(404).json({ error: 'not found' });
+  if (!patch) throw new NotFoundError();
   const project = getProject(patch.projectId);
-  if (!project) return res.status(404).json({ error: 'project not found' });
+  if (!project) throw new NotFoundError('project not found');
   try {
     fn(project, patch);
   } catch (e) {
-    return res.status(400).json({ error: e.message });
+    // patchops throws plain Errors for bad ops (e.g. file missing) — surface as 400.
+    throw new ValidationError(e.message);
   }
   res.json({ ok: true, status: patchops.overallStatus(project, patch.ops) });
 }
@@ -88,4 +98,4 @@ function runAction(req, res, fn) {
 router.post('/:id/apply', (req, res) => runAction(req, res, patchops.applyPatch));
 router.post('/:id/revert', (req, res) => runAction(req, res, patchops.revertPatch));
 
-module.exports = router;
+export default router;

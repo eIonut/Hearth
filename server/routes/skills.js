@@ -1,7 +1,9 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { read, write } = require('../lib/store');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { read, write } from '../lib/store.js';
+import { requirePathExists } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 
@@ -18,7 +20,7 @@ router.put('/settings', (req, res) => {
   const settings = { ...getSettings() };
   if (req.body.skillsRepoPath !== undefined) {
     const p = req.body.skillsRepoPath;
-    if (p && !fs.existsSync(p)) return res.status(400).json({ error: `path does not exist: ${p}` });
+    if (p) requirePathExists(p);
     settings.skillsRepoPath = p;
   }
   write('settings', settings);
@@ -30,7 +32,8 @@ router.put('/settings', (req, res) => {
 router.get('/', (req, res) => {
   const { skillsRepoPath } = getSettings();
   if (!skillsRepoPath) return res.json({ configured: false, skills: [] });
-  if (!fs.existsSync(skillsRepoPath)) return res.json({ configured: true, missing: true, skills: [] });
+  if (!fs.existsSync(skillsRepoPath))
+    return res.json({ configured: true, missing: true, skills: [] });
 
   const skills = [];
   for (const entry of fs.readdirSync(skillsRepoPath, { withFileTypes: true })) {
@@ -42,8 +45,14 @@ router.get('/', (req, res) => {
         try {
           const content = fs.readFileSync(skillMd, 'utf8');
           const m = content.match(/^description:\s*(.+)$/m);
-          description = m ? m[1].trim() : content.split('\n').find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---')) || '';
-        } catch {}
+          description = m
+            ? m[1].trim()
+            : content
+                .split('\n')
+                .find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---')) || '';
+        } catch {
+          /* unreadable SKILL.md — skip description */
+        }
         skills.push({ name: entry.name, type: 'dir', description: description.slice(0, 160) });
       }
     } else if (entry.name.endsWith('.md') && entry.name !== 'README.md') {
@@ -56,7 +65,7 @@ router.get('/', (req, res) => {
 // --- which skills a project already has ---
 router.get('/installed/:projectId', (req, res) => {
   const project = read('projects').find((p) => p.id === req.params.projectId);
-  if (!project) return res.status(404).json({ error: 'project not found' });
+  if (!project) throw new NotFoundError('project not found');
   const dir = path.join(project.path, '.claude', 'skills');
   if (!fs.existsSync(dir)) return res.json({ installed: [] });
   res.json({ installed: fs.readdirSync(dir).filter((f) => !f.startsWith('.')) });
@@ -66,17 +75,17 @@ router.get('/installed/:projectId', (req, res) => {
 router.post('/install', (req, res) => {
   const { projectId, names } = req.body;
   const { skillsRepoPath } = getSettings();
-  if (!skillsRepoPath) return res.status(400).json({ error: 'skills repo path not configured' });
+  if (!skillsRepoPath) throw new ValidationError('skills repo path not configured');
 
   const project = read('projects').find((p) => p.id === projectId);
-  if (!project) return res.status(404).json({ error: 'project not found' });
-  if (!Array.isArray(names) || names.length === 0) return res.status(400).json({ error: 'names is required' });
+  if (!project) throw new NotFoundError('project not found');
+  if (!Array.isArray(names) || names.length === 0) throw new ValidationError('names is required');
 
   const targetDir = path.join(project.path, '.claude', 'skills');
   try {
     fs.mkdirSync(targetDir, { recursive: true });
   } catch (e) {
-    return res.status(400).json({ error: `cannot create ${targetDir}: ${e.message}` });
+    throw new ValidationError(`cannot create ${targetDir}: ${e.message}`);
   }
 
   const installed = [];
@@ -102,4 +111,4 @@ router.post('/install', (req, res) => {
   res.json({ installed, errors });
 });
 
-module.exports = router;
+export default router;

@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const { backup } = require('./backup');
+import fs from 'fs';
+import path from 'path';
+import { backup } from './backup.js';
 
-const ENVS_DIR = path.join(__dirname, '..', '..', 'envs');
+const ENVS_DIR = path.join(import.meta.dirname, '..', '..', 'envs');
 
 function targetsFor(project) {
   if (Array.isArray(project.envTargets) && project.envTargets.length) return project.envTargets;
@@ -55,7 +55,9 @@ function computeTargets(project) {
             current = name;
             break;
           }
-        } catch {}
+        } catch {
+          /* skip unreadable preset */
+        }
       }
     }
     return { name: t.name, file: t.file, exists, presets, current };
@@ -91,4 +93,4 @@ function deletePreset(projectId, targetName, preset) {
   if (fs.existsSync(file)) fs.unlinkSync(file);
 }
 
-module.exports = { targetsFor, computeTargets, applyPreset, savePreset, deletePreset, listPresets };
+export { targetsFor, computeTargets, applyPreset, savePreset, deletePreset, listPresets };

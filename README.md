@@ -1,12 +1,18 @@
 # ⚡ Dev Hub
 
-Your personal local mission control: start/stop project services, swap env presets, run terminals (and Claude Code) in the browser, save snippets, and track what to learn next.
+Your personal local mission control: start/stop project services, swap env presets, run terminals in the browser, save snippets, and track what to learn next.
 
 Everything runs on **localhost only** and stores data as JSON files inside this folder. Nothing leaves your machine.
 
+## Why this exists
+
+I got tired of re-running the same setup rituals every morning — start three services, swap the right `.env`, comment out that one auth line, open the right tabs. So I built the tool I wanted, then kept adding the rest of my workflow: what I'm learning and snippets I keep googling.
+
+It's free and MIT-licensed. Clone it, gut it for parts, make it yours.
+
 ## Setup
 
-Requires Node 18+.
+Requires Node 20.19+ or 22.12+ (Vite 8 floor).
 
 ```bash
 cd dev-hub
@@ -16,46 +22,92 @@ npm run dev        # starts server (:5001) + client (:5173)
 
 Open **http://localhost:5173**.
 
-> **Terminals:** they need `node-pty`, which compiles natively. On macOS you need Xcode Command Line Tools (`xcode-select --install`). If it fails to install, everything else still works — the Terminals page will tell you.
-
-> **Claude-powered features** (content drafts, digest reviews) need `@anthropic-ai/claude-agent-sdk` (installed automatically with `npm install`). It authenticates via your existing Claude Code login or `ANTHROPIC_API_KEY`. If it's missing, those features tell you and everything else still works. For chatting with Claude Code, use a terminal (embedded or your own) or the Claude desktop app.
+> **Terminals:** they need `node-pty`, which compiles natively. On macOS you need Xcode Command Line Tools (`xcode-select --install`). If it fails to install, everything else still works — the Workspace will tell you.
 
 ## Using it
 
-**Dashboard** — add each project: name, absolute path, and services one per line (`web: yarn dev`). Then start/stop with one click and watch live logs. Green dot = running.
+The sidebar has four pages, grouped by what you're doing — managing projects, working in them, learning, or reaching for reference material.
 
-**Env Presets** — replaces your Fork stash workflow. Open a project, save its current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
+### Projects
 
-**Workflows** — your setup rituals as one click. A workflow is an ordered list of steps: start/stop services, apply env presets, apply/revert patches, open previews. Run from the Workflows page or the quick-run buttons at the top of the Dashboard. Failed steps are reported individually; the rest still run.
+**Projects** — add each project: name, absolute path, and services one per line (`web: yarn dev`). Then start/stop with one click and watch live logs. Green dot = running. Each project card also shows its Git branch, commits to push or pull, and changed files. Non-Git folders work normally too. The card has three tabs — **Services**, **Env presets**, **Patches** — so a whole setup ritual happens in one place.
 
-**Crash awareness** — a service that exits non-zero shows a red dot + "crashed (code)" chip, and a red badge appears on Dashboard in the sidebar from any page. Mark a service with `*` in its name (`api*: yarn start`) to auto-restart it up to 3 times after a crash. Stopping a crashed service acknowledges it.
+**Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
 
-**Patches** — named file tweaks you apply/revert on demand. Two op types: *Env value* (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and *Text replace* (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
+**Patches** — named file tweaks you apply/revert on demand. Two op types: _Env value_ (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and _Text replace_ (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
 
-**Preview** — run your apps inside the hub. Set preview URLs per service (Dashboard → Edit, e.g. `web: localhost:4000`), then hit Preview on a running service or open any URL from the Preview page. Tabs stay alive across page switches (HMR keeps working). Your browser DevTools inspect the embedded app normally — pick its frame in the Console's context dropdown. Apps that send `X-Frame-Options`/`frame-ancestors` are detected and flagged with an "open in new tab" fallback.
+**Workflows** — your setup rituals as one click. A workflow is an ordered list of steps: start/stop services, apply env presets, apply/revert patches, run any command in a project or home-folder terminal, and open any URL in the Workspace or a browser tab. Edit them under Projects → Workflows; run them from the quick-run buttons at the top of the Projects page. Failed steps are reported individually; the rest still run.
 
-**Links** — per-project shortcuts (repo, MRs, pipelines, docs) shown on the project card. Each link is checked for embeddability: sites that allow framing open inside the hub's Preview; sites that block it (github.com, gitlab.com, most self-hosted GitLab) open in a new browser tab via ↗.
+**Templates** — spin up a _new_ project in one click. A template is a named command sequence (e.g. `npm create vite@latest my-app`, `cd my-app`, `npm install`, `npm run dev`) with an optional folder to run in. Edit them under Projects → Templates; scaffold from there or from the quick-run buttons at the top of the Projects page. Clicking **Scaffold** opens a Workspace terminal in that folder and runs the commands chained together — so interactive scaffolders (framework pickers) work, and the final `npm run dev` stays live in that tab. Nothing is auto-added as a project; add it with **+ Add project** when you're ready.
 
-**Terminals** — real shells in browser tabs, opened in your home folder or any project. Run `claude` in one to use Claude Code inside the hub. Terminals survive switching pages.
+**Crash awareness** — a service that exits non-zero shows a red dot + "crashed (code)" chip, and a red badge appears on Projects in the sidebar from any page. Mark a service with `*` in its name (`api*: yarn start`) to auto-restart it up to 3 times after a crash. Stopping a crashed service acknowledges it.
+
+**Links** — per-project shortcuts (repo, MRs, pipelines, docs) shown on the project card. Each link is checked for embeddability: sites that allow framing open inside the hub's Workspace; sites that block it (github.com, gitlab.com, most self-hosted GitLab) open in a new browser tab via ↗.
+
+### Workspace
+
+One surface for shells and running apps, with a mixed tab strip — terminal tabs and preview tabs side by side. All tabs survive switching pages.
+
+**Terminals** — real shells opened in your home folder or any project.
+
+**Previews** — run your apps inside the hub. Set preview URLs per service (Projects → Edit, e.g. `web: localhost:4000`), then hit Preview on a running service or open any URL from the Workspace toolbar. HMR keeps working, and your browser DevTools inspect the embedded app normally — pick its frame in the Console's context dropdown. Apps that send `X-Frame-Options`/`frame-ancestors` are detected and flagged with an "open in new tab" fallback.
+
+### Learning
+
+**Learning queue** — queued → learning → done board so nothing you want to learn gets lost, with finished items retained as a record of your progress.
+
+### Library
 
 **Snippets** — the commands you keep googling. Search + one-click copy.
 
-**Learning Queue** — queued → learning → done board so nothing you want to learn gets lost. Done items are your future content ideas.
+**AI skills** — point it at your skills repo (subfolders with `SKILL.md`, or loose `.md` files); select skills and install them into any project's `.claude/skills` with one click.
 
-**AI Skills** — point it at your skills repo (subfolders with `SKILL.md`, or loose `.md` files); select skills and install them into any project's `.claude/skills` with one click.
+## Architecture
 
-**TIL bar** — the input at the top of every page. Log what you learn in 3 seconds; it feeds Content and Digest.
+Two independent halves, connected only over HTTP/WebSocket on localhost:
 
-**Content** — select TILs (or just type a title), create an idea, and Claude generates a TikTok script, X thread, and LinkedIn post. Edit drafts inline, copy per platform, move ideas idea → drafted → posted.
+**Server** (`server/`, Express 5, ESM) — a thin HTTP layer over the filesystem:
 
-**Digest** — your last 7/14/30 days at a glance (TILs, learning finished, content shipped) plus a Claude-written weekly review with content ideas for next week.
+```
+server/routes/*   parse & validate requests, shape JSON responses (thin)
+      ↓
+server/lib/*      all fs / process / data access (projects, envops, patchops,
+                  procman, terminals, workflows, store, backup)
+      ↓
+data/*.json       persisted state       envs/  env presets
+```
+
+Routes stay thin; `lib/` owns every side effect. Errors are thrown as typed
+errors from `lib/` and mapped once to `{ error }` responses by the terminal
+error middleware in `server/index.js`. The server binds to localhost only.
+
+**Client** (`client/`, React 19 + Vite 8, React Router v8) — a small SPA:
+
+```
+client/src/pages/*        containers: data loading + composition
+      ↓
+client/src/components/*    layout/ · common/ · projects/ · workspace/
+      ↓
+client/src/api.js          single fetch wrapper to the server
+```
+
+Navigation is URL-driven (deep-linkable, refresh-safe). The Workspace stays
+mounted across route changes so terminals and preview iframes survive
+navigation. Shared logic lives in `hooks/` (`usePoll`) and `lib/`
+(`parsers`, `bus`).
+
+Styling is **Tailwind CSS v4** (CSS-first, no `tailwind.config.js`). Design
+tokens live in `client/src/index.css` under `@theme`; shared primitives
+(`.btn`, `.chip`, `.dot`, `.card`, `.nav-item`, sub-tabs, workspace tabs) are
+defined with `@apply` in `@layer components`; everything else is inline
+utilities in the JSX. There is no separate stylesheet.
 
 ## Where data lives
 
-| What | Where |
-|---|---|
-| Projects, snippets, learning items | `data/*.json` |
-| Env presets | `envs/<projectId>/<name>.env` |
+| What                               | Where                         |
+| ---------------------------------- | ----------------------------- |
+| Projects, snippets, learning items | `data/*.json`                 |
+| Env presets                        | `envs/<projectId>/<name>.env` |
 
 Both are gitignored (env presets contain secrets — keep them out of any remote).
 
@@ -63,5 +115,7 @@ Both are gitignored (env presets contain secrets — keep them out of any remote
 
 1. **Git dashboard** — branch/stash/dirty state across all repos at a glance.
 2. **Money tracker** — income streams and goals with a scoreboard.
-3. **Learning → TIL flow** — mark a learning item done and turn it into a TIL in one step.
-# Personal-Dev-Hub
+
+## License
+
+[MIT](LICENSE) — do whatever you want with it. If it saves you time, that's the point.

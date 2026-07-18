@@ -1,9 +1,11 @@
-const { WebSocketServer } = require('ws');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+import { WebSocketServer } from 'ws';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 
-const { execFileSync } = require('child_process');
+const require = createRequire(import.meta.url);
 
 let pty = null;
 let ptyVersion = null;
@@ -17,7 +19,11 @@ function findSpawnHelpers(dir) {
   while (stack.length) {
     const d = stack.pop();
     let entries;
-    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { continue; }
+    try {
+      entries = fs.readdirSync(d, { withFileTypes: true });
+    } catch {
+      continue;
+    }
     for (const e of entries) {
       const p = path.join(d, e.name);
       if (e.isDirectory()) stack.push(p);
@@ -35,18 +41,34 @@ try {
     // "posix_spawnp failed" on macOS is almost always the spawn-helper binary
     // being non-executable, quarantined, or badly signed. Repair all of that.
     for (const helper of findSpawnHelpers(ptyDir)) {
-      try { fs.chmodSync(helper, 0o755); } catch {}
+      try {
+        fs.chmodSync(helper, 0o755);
+      } catch {
+        /* chmod best-effort */
+      }
       if (process.platform === 'darwin') {
-        try { execFileSync('xattr', ['-d', 'com.apple.quarantine', helper], { stdio: 'ignore' }); } catch {}
-        try { execFileSync('codesign', ['--force', '--sign', '-', helper], { stdio: 'ignore' }); } catch {}
+        try {
+          execFileSync('xattr', ['-d', 'com.apple.quarantine', helper], { stdio: 'ignore' });
+        } catch {
+          /* quarantine attr may be absent */
+        }
+        try {
+          execFileSync('codesign', ['--force', '--sign', '-', helper], { stdio: 'ignore' });
+        } catch {
+          /* codesign best-effort */
+        }
       }
       const mode = fs.statSync(helper).mode;
       helperInfo.push({ path: helper, executable: !!(mode & 0o100) });
     }
     if (helperInfo.length === 0) {
-      console.warn('[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source');
+      console.warn(
+        '[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source',
+      );
     }
-  } catch {}
+  } catch {
+    /* spawn-helper diagnostics best-effort */
+  }
 } catch {
   console.warn('[dev-hub] node-pty not installed — embedded terminals disabled.');
 }
@@ -69,7 +91,9 @@ function pickShell() {
   for (const c of candidates) {
     try {
       if (fs.existsSync(c)) return c;
-    } catch {}
+    } catch {
+      /* stat may fail — try next candidate */
+    }
   }
   return null;
 }
@@ -92,10 +116,22 @@ function spawnTest(cmd, args, cwd) {
     try {
       const t = spawnPty(cmd, args, cwd);
       const timer = setTimeout(() => {
-        if (!done) { done = true; try { t.kill(); } catch {} resolve({ ok: true, note: 'spawned ok' }); }
+        if (!done) {
+          done = true;
+          try {
+            t.kill();
+          } catch {
+            /* probe cleanup */
+          }
+          resolve({ ok: true, note: 'spawned ok' });
+        }
       }, 1500);
       t.onExit(({ exitCode }) => {
-        if (!done) { done = true; clearTimeout(timer); resolve({ ok: true, exitCode }); }
+        if (!done) {
+          done = true;
+          clearTimeout(timer);
+          resolve({ ok: true, exitCode });
+        }
       });
     } catch (e) {
       resolve({ ok: false, error: e.message });
@@ -130,8 +166,13 @@ async function diagnose(rawCwd) {
     out.cwd = cwd;
     out.cwd_exists = fs.existsSync(cwd);
     if (out.cwd_exists) {
-      try { fs.accessSync(cwd, fs.constants.R_OK | fs.constants.X_OK); out.cwd_accessible = true; }
-      catch (e) { out.cwd_accessible = false; out.cwd_access_error = e.message; }
+      try {
+        fs.accessSync(cwd, fs.constants.R_OK | fs.constants.X_OK);
+        out.cwd_accessible = true;
+      } catch (e) {
+        out.cwd_accessible = false;
+        out.cwd_access_error = e.message;
+      }
       out.spawn_shell_in_cwd = await spawnTest(shell, ['-c', 'exit 0'], cwd);
     }
   }
@@ -144,7 +185,9 @@ function attach(server) {
 
   wss.on('connection', (ws, req) => {
     if (!pty) {
-      ws.send('\r\n[dev-hub] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n');
+      ws.send(
+        '\r\n[dev-hub] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n',
+      );
       ws.close();
       return;
     }
@@ -152,6 +195,10 @@ function attach(server) {
     const url = new URL(req.url, 'http://localhost');
     const home = process.env.HOME || os.homedir();
     let cwd = expandHome(url.searchParams.get('cwd')) || home;
+    // Optional command to auto-run once the shell is up (used by project
+    // templates / one-click scaffolding). Written as one line so a chained
+    // "a && b && c" sequences correctly and interactive steps can read the tty.
+    const initCmd = url.searchParams.get('cmd');
 
     if (!fs.existsSync(cwd)) {
       ws.send(`\r\n[dev-hub] folder not found: ${cwd} — opening in home folder instead.\r\n`);
@@ -185,7 +232,9 @@ function attach(server) {
       try {
         term = spawnPty(a.cmd, a.args, a.dir);
         if (a.fallback) {
-          ws.send(`\r\n[dev-hub] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`);
+          ws.send(
+            `\r\n[dev-hub] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`,
+          );
         }
         break;
       } catch (e) {
@@ -196,37 +245,70 @@ function attach(server) {
     if (!term) {
       ws.send(
         `\r\n[dev-hub] could not spawn any shell.\r\n` +
-        errors.map((e) => `  · ${e}`).join('\r\n') + '\r\n' +
-        `\r\nnode ${process.version} (${process.arch}) · node-pty ${ptyVersion || '?'} · helpers found: ${helperInfo.length}\r\n` +
-        `Try, in the dev-hub folder:  npm rebuild node-pty --build-from-source\r\n` +
-        `(needs Xcode Command Line Tools: xcode-select --install)\r\n` +
-        `Then restart. Diagnostics: http://localhost:5001/api/termdiag?cwd=${encodeURIComponent(cwd)}\r\n`
+          errors.map((e) => `  · ${e}`).join('\r\n') +
+          '\r\n' +
+          `\r\nnode ${process.version} (${process.arch}) · node-pty ${ptyVersion || '?'} · helpers found: ${helperInfo.length}\r\n` +
+          `Try, in the dev-hub folder:  npm rebuild node-pty --build-from-source\r\n` +
+          `(needs Xcode Command Line Tools: xcode-select --install)\r\n` +
+          `Then restart. Diagnostics: http://localhost:5001/api/termdiag?cwd=${encodeURIComponent(cwd)}\r\n`,
       );
       ws.close();
       return;
     }
 
     term.onData((d) => {
-      try { ws.send(d); } catch {}
+      try {
+        ws.send(d);
+      } catch {
+        /* client socket gone */
+      }
     });
+
+    if (initCmd) {
+      // Give the login shell a moment to print its prompt so the typed command
+      // reads cleanly, then submit it as if the user had entered it.
+      setTimeout(() => {
+        try {
+          term.write(initCmd + '\r');
+        } catch {
+          /* terminal may already be gone */
+        }
+      }, 300);
+    }
+
     term.onExit(() => {
-      try { ws.close(); } catch {}
+      try {
+        ws.close();
+      } catch {
+        /* socket may already be closed */
+      }
     });
 
     ws.on('message', (msg) => {
       const s = msg.toString();
       if (s.startsWith('\x00resize:')) {
         const [cols, rows] = s.slice(8).split(',').map(Number);
-        if (cols > 0 && rows > 0) { try { term.resize(cols, rows); } catch {} }
+        if (cols > 0 && rows > 0) {
+          try {
+            term.resize(cols, rows);
+          } catch {
+            /* resize best-effort */
+          }
+        }
         return;
       }
       term.write(s);
     });
 
     ws.on('close', () => {
-      try { term.kill(); } catch {}
+      try {
+        term.kill();
+      } catch {
+        /* terminal may have already exited */
+      }
     });
   });
 }
 
-module.exports = { attach, available: () => !!pty, diagnose };
+export { attach, diagnose };
+export const available = () => !!pty;

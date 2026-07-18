@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Backups live inside the hub folder, never inside the user's project.
-const BACKUPS_DIR = path.join(__dirname, '..', '..', 'backups');
+const BACKUPS_DIR = path.join(import.meta.dirname, '..', '..', 'backups');
 
 function backup(projectId, absFile, relPath) {
   try {
@@ -11,7 +11,9 @@ function backup(projectId, absFile, relPath) {
     const dir = path.join(BACKUPS_DIR, projectId);
     fs.mkdirSync(dir, { recursive: true });
     fs.copyFileSync(absFile, path.join(dir, safe));
-  } catch {}
+  } catch {
+    /* backup is best-effort */
+  }
 }
 
-module.exports = { backup, BACKUPS_DIR };
+export { backup, BACKUPS_DIR };
