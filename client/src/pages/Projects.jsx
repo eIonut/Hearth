@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
 import { usePoll } from '../hooks/usePoll.js';
-import SubTabs from '../components/common/SubTabs.jsx';
+import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import ProjectForm from '../components/projects/ProjectForm.jsx';
 import ProjectCard from '../components/projects/ProjectCard.jsx';
 import LogPanel from '../components/projects/LogPanel.jsx';
@@ -11,12 +12,12 @@ import Workflows from './Workflows.jsx';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
 const PAGE_TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'workflows', label: 'Workflows' },
+  { to: '/projects', label: 'Overview', end: true },
+  { to: '/projects/workflows', label: 'Workflows' },
 ];
 
 export default function Projects() {
-  const [pageTab, setPageTab] = useState('overview');
+  const pageTab = useLocation().pathname === '/projects/workflows' ? 'workflows' : 'overview';
   const [projects, setProjects] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [workflows, setWorkflows] = useState([]);
@@ -80,7 +81,7 @@ export default function Projects() {
     <div className="page">
       <div className="row space-between">
         <h2>Projects</h2>
-        <SubTabs tabs={PAGE_TABS} active={pageTab} onChange={setPageTab} />
+        <SubTabsNav tabs={PAGE_TABS} />
       </div>
 
       {pageTab === 'workflows' ? (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router';
 import Projects from './pages/Projects.jsx';
 import Workspace from './pages/Workspace.jsx';
 import ContentHub from './pages/ContentHub.jsx';
@@ -9,23 +10,19 @@ import Sidebar from './components/layout/Sidebar.jsx';
 import TilBar from './components/layout/TilBar.jsx';
 
 const PAGES = [
-  { id: 'projects', label: 'Projects', component: Projects },
-  { id: 'workspace', label: 'Workspace', component: Workspace },
-  { id: 'content', label: 'Content', component: ContentHub },
-  { id: 'library', label: 'Library', component: Library },
+  { path: '/projects', label: 'Projects', badge: true },
+  { path: '/workspace', label: 'Workspace' },
+  { path: '/content', label: 'Content' },
+  { path: '/library', label: 'Library' },
 ];
 
-// Workspace stays mounted across page switches so its terminals and preview
-// iframes survive navigation (they'd otherwise be torn down and reconnected).
-const KEEP_MOUNTED = ['workspace'];
-
 export default function App() {
-  const [page, setPage] = useState('projects');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem('hub-sidebar-collapsed') === '1',
   );
   const [crashedCount, setCrashedCount] = useState(0);
-  const Active = PAGES.find((p) => p.id === page).component;
 
   function toggleSidebar() {
     setCollapsed((c) => {
@@ -35,10 +32,10 @@ export default function App() {
   }
 
   useEffect(() => {
-    const onPreview = () => setPage('workspace');
+    const onPreview = () => navigate('/workspace');
     window.addEventListener('hub:open-preview', onPreview);
     return () => window.removeEventListener('hub:open-preview', onPreview);
-  }, []);
+  }, [navigate]);
 
   // crash badge: poll service statuses on every page
   usePoll(
@@ -51,19 +48,32 @@ export default function App() {
     <div className="app">
       <Sidebar
         pages={PAGES}
-        page={page}
         collapsed={collapsed}
         crashedCount={crashedCount}
-        onNavigate={setPage}
         onToggle={toggleSidebar}
       />
       <main className="content">
         <TilBar />
         <div className="page-area">
-          <div style={{ display: page === 'workspace' ? 'block' : 'none', height: '100%' }}>
+          {/* Workspace stays mounted across navigation so its terminals and preview
+              iframes survive route changes (they'd otherwise be torn down and
+              reconnected). It's shown/hidden by pathname, never routed. */}
+          <div
+            style={{ display: location.pathname === '/workspace' ? 'block' : 'none', height: '100%' }}
+          >
             <Workspace />
           </div>
-          {!KEEP_MOUNTED.includes(page) && <Active />}
+          <Routes>
+            <Route path="/" element={<Navigate to="/projects" replace />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects/workflows" element={<Projects />} />
+            <Route path="/workspace" element={null} />
+            <Route path="/content" element={<Navigate to="/content/learning" replace />} />
+            <Route path="/content/:tab" element={<ContentHub />} />
+            <Route path="/library" element={<Navigate to="/library/snippets" replace />} />
+            <Route path="/library/:tab" element={<Library />} />
+            <Route path="*" element={<Navigate to="/projects" replace />} />
+          </Routes>
         </div>
       </main>
     </div>

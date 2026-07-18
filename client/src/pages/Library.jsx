@@ -1,20 +1,20 @@
-import { useState } from 'react';
-import SubTabs from '../components/common/SubTabs.jsx';
+import { useParams } from 'react-router';
+import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import Snippets from './Snippets.jsx';
 import SkillsPage from './SkillsPage.jsx';
 
 const TABS = [
-  { id: 'snippets', label: 'Snippets' },
-  { id: 'skills', label: 'AI skills' },
+  { to: '/library/snippets', label: 'Snippets' },
+  { to: '/library/skills', label: 'AI skills' },
 ];
 
 export default function Library() {
-  const [tab, setTab] = useState('snippets');
+  const { tab } = useParams();
   return (
     <div className="page">
       <div className="row space-between">
         <h2>Library</h2>
-        <SubTabs tabs={TABS} active={tab} onChange={setTab} />
+        <SubTabsNav tabs={TABS} />
       </div>
       {tab === 'snippets' && <Snippets />}
       {tab === 'skills' && <SkillsPage />}

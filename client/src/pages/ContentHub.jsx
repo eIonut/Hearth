@@ -1,22 +1,22 @@
-import { useState } from 'react';
-import SubTabs from '../components/common/SubTabs.jsx';
+import { useParams } from 'react-router';
+import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import Learning from './Learning.jsx';
 import ContentPage from './ContentPage.jsx';
 import DigestPage from './DigestPage.jsx';
 
 const TABS = [
-  { id: 'learning', label: 'Learning queue' },
-  { id: 'pipeline', label: 'Ideas & drafts' },
-  { id: 'digest', label: 'Digest' },
+  { to: '/content/learning', label: 'Learning queue' },
+  { to: '/content/pipeline', label: 'Ideas & drafts' },
+  { to: '/content/digest', label: 'Digest' },
 ];
 
 export default function ContentHub() {
-  const [tab, setTab] = useState('learning');
+  const { tab } = useParams();
   return (
     <div className="page">
       <div className="row space-between">
         <h2>Content</h2>
-        <SubTabs tabs={TABS} active={tab} onChange={setTab} />
+        <SubTabsNav tabs={TABS} />
       </div>
       {tab === 'learning' && <Learning />}
       {tab === 'pipeline' && <ContentPage />}

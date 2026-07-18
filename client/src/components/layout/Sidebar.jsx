@@ -1,5 +1,7 @@
-// Left navigation rail: logo, collapse toggle, page buttons, crash badge.
-export default function Sidebar({ pages, page, collapsed, crashedCount, onNavigate, onToggle }) {
+import { NavLink } from 'react-router';
+
+// Left navigation rail: logo, collapse toggle, page links, crash badge.
+export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
   return (
     <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
       <div className="logo-row">
@@ -14,14 +16,14 @@ export default function Sidebar({ pages, page, collapsed, crashedCount, onNaviga
       </div>
       <nav>
         {pages.map((p) => (
-          <button
-            key={p.id}
-            className={'nav-item' + (page === p.id ? ' active' : '')}
-            onClick={() => onNavigate(p.id)}
+          <NavLink
+            key={p.path}
+            to={p.path}
+            className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
             title={p.label}
           >
             {collapsed ? p.label[0] : p.label}
-            {p.id === 'projects' && crashedCount > 0 && (
+            {p.badge && crashedCount > 0 && (
               <span
                 className="crash-badge"
                 title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}
@@ -29,7 +31,7 @@ export default function Sidebar({ pages, page, collapsed, crashedCount, onNaviga
                 {collapsed ? '' : crashedCount}
               </span>
             )}
-          </button>
+          </NavLink>
         ))}
       </nav>
       {!collapsed && <div className="sidebar-footer">localhost only</div>}

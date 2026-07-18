@@ -90,6 +90,7 @@ body {
   background: none;
   border: none;
   color: var(--muted);
+  text-decoration: none;
   padding: 9px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -400,6 +401,7 @@ select:focus {
   background: none;
   border: none;
   color: var(--muted);
+  text-decoration: none;
   padding: 5px 14px;
   border-radius: 6px;
   cursor: pointer;
