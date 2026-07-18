@@ -1,27 +1,17 @@
-/* --- Base & design tokens --- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* --- Design tokens: aliases onto the Tailwind @theme vars (index.css).
+   Legacy rules below still reference var(--bg) etc.; deleted in Phase 3 once
+   the last consumer is migrated. Base element styles + reset now live in
+   index.css @layer base. --- */
 :root {
-  --bg: #0d1117;
-  --bg-2: #161b22;
-  --bg-3: #21262d;
-  --border: #30363d;
-  --text: #e6edf3;
-  --muted: #8b949e;
-  --accent: #2f81f7;
-  --green: #3fb950;
-  --red: #f85149;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
+  --bg: var(--color-bg);
+  --bg-2: var(--color-bg-2);
+  --bg-3: var(--color-bg-3);
+  --border: var(--color-border);
+  --text: var(--color-text);
+  --muted: var(--color-muted);
+  --accent: var(--color-accent);
+  --green: var(--color-green);
+  --red: var(--color-red);
 }
 
 /* --- Layout: app shell + sidebar --- */
@@ -123,15 +113,6 @@ body {
   max-width: 1100px;
 }
 
-/* --- Typography --- */
-h2 {
-  margin-bottom: 12px;
-}
-h3 {
-  margin: 12px 0 8px;
-  font-size: 15px;
-}
-
 /* --- Row / flex utilities --- */
 .row {
   display: flex;
@@ -201,34 +182,6 @@ h3 {
 }
 
 /* --- Forms --- */
-label {
-  display: block;
-  margin: 8px 0;
-  color: var(--muted);
-  font-size: 13px;
-  flex: 1;
-}
-
-input,
-textarea,
-select {
-  display: block;
-  width: 100%;
-  margin-top: 4px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-family: inherit;
-}
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
 .search {
   max-width: 420px;
   margin: 8px 0;
@@ -446,15 +399,6 @@ select:focus {
 .tab-glyph {
   margin-right: 6px;
   opacity: 0.7;
-}
-
-/* --- Links --- */
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
 }
 
 /* --- Workspace (terminals + previews) --- */

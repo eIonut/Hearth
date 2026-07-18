@@ -1,15 +1,96 @@
 @import 'tailwindcss';
 @import './styles.css'; /* legacy — shrinks to zero over this migration */
 
-/* Phase 0: restore browser-default heading typography that Tailwind Preflight
-   resets to `inherit`. styles.css only overrode h2 margin / h3 size, so h2 size +
-   weight and h3 weight regressed. Folded into the full base layer in Phase 1. */
+@theme {
+  --color-bg: #0d1117;
+  --color-bg-2: #161b22;
+  --color-bg-3: #21262d;
+  --color-border: #30363d;
+  --color-text: #e6edf3;
+  --color-muted: #8b949e;
+  --color-accent: #2f81f7;
+  --color-green: #3fb950;
+  --color-red: #f85149;
+  --color-orange: #d29922; /* was a raw hex in chips/dots — tokenized */
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: Menlo, Monaco, monospace;
+
+  --animate-modal-fade: modal-fade 0.12s ease-out;
+  --animate-modal-pop: modal-pop 0.12s ease-out;
+
+  @keyframes modal-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes modal-pop {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
 @layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-bg font-sans text-text;
+    font-size: 14px;
+  }
+
   h2 {
     font-size: 1.5em;
     font-weight: bold;
+    margin-bottom: 12px;
   }
+
   h3 {
+    font-size: 15px;
     font-weight: bold;
+    margin: 12px 0 8px;
+  }
+
+  label {
+    @apply block flex-1 text-muted;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply block w-full border border-border bg-bg text-text;
+    margin-top: 4px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  a {
+    @apply text-accent no-underline;
+  }
+  a:hover {
+    @apply underline;
   }
 }
