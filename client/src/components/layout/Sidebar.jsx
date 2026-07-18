@@ -3,11 +3,23 @@ import { NavLink } from 'react-router';
 // Left navigation rail: logo, collapse toggle, page links, crash badge.
 export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
   return (
-    <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
-      <div className="logo-row">
-        <span className="logo">{collapsed ? '⚡' : '⚡ Dev Hub'}</span>
+    <aside
+      className={
+        'flex shrink-0 flex-col border-r border-border bg-bg-2 py-4 ' +
+        (collapsed ? 'w-[52px] px-1' : 'w-[200px] px-2')
+      }
+    >
+      <div
+        className={
+          'flex items-center justify-between pt-0 ' +
+          (collapsed ? 'flex-col gap-2.5 px-0 pb-3' : 'px-1.5 pb-4')
+        }
+      >
+        <span className="whitespace-nowrap px-1 text-base font-bold">
+          {collapsed ? '⚡' : '⚡ Dev Hub'}
+        </span>
         <button
-          className="collapse-btn"
+          className="size-6 shrink-0 cursor-pointer rounded-md border border-border bg-transparent text-[12px] leading-none text-muted hover:border-muted hover:text-text"
           onClick={onToggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
@@ -19,7 +31,9 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
           <NavLink
             key={p.path}
             to={p.path}
-            className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+            className={({ isActive }) =>
+              'nav-item' + (isActive ? ' active' : '') + (collapsed ? ' px-0 text-center' : '')
+            }
             title={p.label}
           >
             {collapsed ? p.label[0] : p.label}
@@ -34,7 +48,7 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
           </NavLink>
         ))}
       </nav>
-      {!collapsed && <div className="sidebar-footer">localhost only</div>}
+      {!collapsed && <div className="mt-auto p-2.5 text-[11px] text-muted">localhost only</div>}
     </aside>
   );
 }

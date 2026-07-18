@@ -11,7 +11,7 @@ const TABS = [
 export default function Library() {
   const { tab } = useParams();
   return (
-    <div className="page">
+    <div className="max-w-[1100px] p-6">
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h2>Library</h2>
         <SubTabsNav tabs={TABS} />

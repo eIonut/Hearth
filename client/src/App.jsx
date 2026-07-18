@@ -45,16 +45,16 @@ export default function App() {
   );
 
   return (
-    <div className="app">
+    <div className="flex h-screen">
       <Sidebar
         pages={PAGES}
         collapsed={collapsed}
         crashedCount={crashedCount}
         onToggle={toggleSidebar}
       />
-      <main className="content">
+      <main className="flex flex-1 flex-col overflow-y-auto">
         <TilBar />
-        <div className="page-area">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {/* Workspace stays mounted across navigation so its terminals and preview
               iframes survive route changes (they'd otherwise be torn down and
               reconnected). It's shown/hidden by pathname, never routed. */}
