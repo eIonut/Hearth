@@ -15,7 +15,7 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
           (collapsed ? 'flex-col gap-2.5 px-0 pb-3' : 'px-1.5 pb-4')
         }
       >
-        <span className="whitespace-nowrap px-1 text-base font-bold">
+        <span className="px-1 text-base font-bold whitespace-nowrap">
           {collapsed ? '⚡' : '⚡ Dev Hub'}
         </span>
         <button
@@ -39,7 +39,7 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
             {collapsed ? p.label[0] : p.label}
             {p.badge && crashedCount > 0 && (
               <span
-                className="ml-1.5 inline-block h-4 min-w-2 rounded-lg bg-red px-[5px] align-middle text-[10px] font-bold leading-4 text-white"
+                className="ml-1.5 inline-block h-4 min-w-2 rounded-lg bg-red px-[5px] align-middle text-[10px] leading-4 font-bold text-white"
                 title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}
               >
                 {collapsed ? '' : crashedCount}

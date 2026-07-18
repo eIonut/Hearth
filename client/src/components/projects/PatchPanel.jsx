@@ -12,7 +12,7 @@ function OpEditor({ op, onChange, onRemove }) {
 
   return (
     <div className="card compact bg-bg">
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <select
           value={op.type}
           onChange={(e) =>
@@ -42,7 +42,7 @@ function OpEditor({ op, onChange, onRemove }) {
 
       {op.type === 'env-set' ? (
         <>
-          <div className="flex gap-2 items-center flex-wrap my-1.5">
+          <div className="my-1.5 flex flex-wrap items-center gap-2">
             <label>
               Key
               <input
@@ -134,7 +134,7 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
         />
       ))}
 
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_ENV_OP }])}>
           + Env value
         </button>
@@ -146,8 +146,8 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
         </button>
       </div>
 
-      {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      {error && <div className="my-1.5 text-red">{error}</div>}
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button className="btn primary" onClick={save} disabled={!name.trim() || ops.length === 0}>
           Save
         </button>
@@ -234,8 +234,8 @@ export default function PatchPanel({ projectId }) {
           onCancel={() => setEditing(null)}
         />
       ) : (
-        <div className="flex gap-2 items-center flex-wrap my-1.5">
-          <span className="text-muted text-[12px]">
+        <div className="my-1.5 flex flex-wrap items-center gap-2">
+          <span className="text-[12px] text-muted">
             Named file tweaks you apply and revert on demand.
           </span>
           <span className="flex-1" />
@@ -245,19 +245,19 @@ export default function PatchPanel({ projectId }) {
         </div>
       )}
 
-      {msg && <div className="text-green my-1.5">{msg}</div>}
-      {error && <div className="text-red my-1.5">{error}</div>}
+      {msg && <div className="my-1.5 text-green">{msg}</div>}
+      {error && <div className="my-1.5 text-red">{error}</div>}
 
       {patches.length === 0 && !editing && (
-        <div className="text-muted text-[12px]" style={{ padding: '8px 0' }}>
+        <div className="text-[12px] text-muted" style={{ padding: '8px 0' }}>
           No patches for this project yet.
         </div>
       )}
 
       {patches.map((p) => (
         <div className="card compact bg-bg" key={p.id}>
-          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
-            <div className="flex gap-2 items-center flex-wrap my-1.5">
+          <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="my-1.5 flex flex-wrap items-center gap-2">
               <strong>{p.name}</strong>
               {statusChip(p.status)}
             </div>
@@ -281,7 +281,10 @@ export default function PatchPanel({ projectId }) {
             </div>
           </div>
           {p.ops.map((op, i) => (
-            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={i}>
+            <div
+              className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0"
+              key={i}
+            >
               <span
                 className={
                   'dot ' +

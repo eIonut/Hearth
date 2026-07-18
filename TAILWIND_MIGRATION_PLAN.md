@@ -18,21 +18,21 @@ Execution plan for an agent. Goal: replace `client/src/styles.css` (~650 lines) 
 
 ### Target versions (latest on npm as of 2026-07-18 — re-check at execution time)
 
-| Package                     | Version | Notes                                       |
-| --------------------------- | ------- | ------------------------------------------- |
+| Package                     | Version | Notes                                         |
+| --------------------------- | ------- | --------------------------------------------- |
 | tailwindcss                 | ^4.3.3  | v4: CSS-first config, no `tailwind.config.js` |
-| @tailwindcss/vite           | ^4.3.3  | first-party Vite plugin (no PostCSS setup)  |
-| prettier-plugin-tailwindcss | ^0.8.1  | class sorting (Phase 5)                     |
+| @tailwindcss/vite           | ^4.3.3  | first-party Vite plugin (no PostCSS setup)    |
+| prettier-plugin-tailwindcss | ^0.8.1  | class sorting (Phase 5)                       |
 
 ## Strategy decisions (settled — don't relitigate mid-migration)
 
 1. **Tailwind v4, CSS-first.** No `tailwind.config.js`. Tokens live in an `@theme` block in the CSS entry file. Content scanning is automatic in v4 (respects `.gitignore`).
 2. **Three-tier approach**, matching how the CSS is actually used:
    - Tokens → `@theme` variables (`--color-bg`, `--color-accent`, …). Tailwind emits them as CSS variables, so the few places that need raw `var()` (e.g. box-shadow glows) keep working.
-   - Element base styles (`body`, headings, forms, links) → a small `@layer base` block. These are *intentionally* global (every `<input>` in the app is styled identically); adding 10 utility classes to every input would be strictly worse.
+   - Element base styles (`body`, headings, forms, links) → a small `@layer base` block. These are _intentionally_ global (every `<input>` in the app is styled identically); adding 10 utility classes to every input would be strictly worse.
    - Reused primitives (`.btn`, `.chip`, `.dot`, `.card`, `.subnav*`, `.nav-item`, `.tab`) → keep as classes, redefined with `@apply` in `@layer components`. **Rationale:** call sites compose variants dynamically (`'chip ' + color`, `'btn small ' + (running ? 'danger' : 'primary')`); converting these to inline utilities would require touching every call site's logic and inventing a `cn()`/variant helper — a bigger diff for zero behavior gain. This is the pragmatic subset of Tailwind for a small app.
    - Everything else (one-off layout: `.app`, `.sidebar`, `.workspace-page`, `.til-bar`, `.content-layout`, `.board`, `.stats-grid`, `.modal*`, `.logs`, etc.) → **inline utilities in JSX**, deleting the CSS rules as you go.
-3. **Full literal class names only.** Tailwind's scanner can't see interpolated fragments. `'dot ' + (running ? 'green' : 'red')` is fine while `dot`/`green` are `@layer components` classes, but any *utility* chosen at runtime must be a complete literal in source (`running ? 'bg-green' : 'bg-red'`, never `` `bg-${color}` ``).
+3. **Full literal class names only.** Tailwind's scanner can't see interpolated fragments. `'dot ' + (running ? 'green' : 'red')` is fine while `dot`/`green` are `@layer components` classes, but any _utility_ chosen at runtime must be a complete literal in source (`running ? 'bg-green' : 'bg-red'`, never `` `bg-${color}` ``).
 4. **Keyframes** (`modal-fade`, `modal-pop`) → `@theme` `--animate-*` definitions, applied via `animate-modal-fade` / `animate-modal-pop` utilities.
 5. **Breakpoint**: use `max-[900px]:grid-cols-1` for the one media query — not worth a named breakpoint.
 6. **Preflight stays on.** It overlaps the existing `* { margin:0; padding:0; box-sizing:border-box }` reset. Import order in the entry CSS: Tailwind first, then (during migration) the legacy `styles.css` so unmigrated rules win. Known Preflight deltas to check in Phase 0: buttons lose `cursor: pointer`-adjacent assumptions (the app sets cursor per class — fine), `h2`/`h3` lose default margins/size (the app overrides — keep those overrides in `@layer base`), placeholder color, `img` display.
@@ -78,8 +78,12 @@ Execution plan for an agent. Goal: replace `client/src/styles.css` (~650 lines) 
      --font-mono: Menlo, Monaco, monospace;
      --animate-modal-fade: modal-fade 0.12s ease-out;
      --animate-modal-pop: modal-pop 0.12s ease-out;
-     @keyframes modal-fade { /* … copy from styles.css … */ }
-     @keyframes modal-pop { /* … */ }
+     @keyframes modal-fade {
+       /* … copy from styles.css … */
+     }
+     @keyframes modal-pop {
+       /* … */
+     }
    }
    ```
    This yields utilities like `bg-bg-2`, `text-muted`, `border-border`, `text-accent`, `font-mono`.

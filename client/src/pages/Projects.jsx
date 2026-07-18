@@ -79,7 +79,7 @@ export default function Projects() {
 
   return (
     <div className="max-w-[1100px] p-6">
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <h2>Projects</h2>
         <SubTabsNav tabs={PAGE_TABS} />
       </div>
@@ -88,14 +88,18 @@ export default function Projects() {
         <Workflows />
       ) : (
         <>
-          <div className="flex gap-2 items-center flex-wrap my-1.5">
+          <div className="my-1.5 flex flex-wrap items-center gap-2">
             <WorkflowQuickRun workflows={workflows} running={wfRunning} onRun={runWorkflow} />
             <span className="flex-1" />
             <button className="btn primary" onClick={() => setEditing({})}>
               + Add project
             </button>
           </div>
-          {wfMsg && <div className={wfMsg.includes('failed') ? 'text-red my-1.5' : 'text-green my-1.5'}>{wfMsg}</div>}
+          {wfMsg && (
+            <div className={wfMsg.includes('failed') ? 'my-1.5 text-red' : 'my-1.5 text-green'}>
+              {wfMsg}
+            </div>
+          )}
 
           {editing && (
             <ProjectForm

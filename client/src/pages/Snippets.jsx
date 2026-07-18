@@ -40,7 +40,7 @@ function SnippetForm({ initial, onSaved, onCancel }) {
           placeholder="Kill process on port"
         />
       </label>
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <label>
           Language
           <input value={language} onChange={(e) => setLanguage(e.target.value)} />
@@ -60,8 +60,8 @@ function SnippetForm({ initial, onSaved, onCancel }) {
           placeholder="lsof -ti:3000 | xargs kill -9"
         />
       </label>
-      {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      {error && <div className="my-1.5 text-red">{error}</div>}
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button className="btn primary" onClick={save}>
           Save
         </button>
@@ -111,7 +111,7 @@ export default function Snippets() {
 
   return (
     <div>
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <input
           className="my-2 max-w-[420px]"
           value={query}
@@ -145,7 +145,7 @@ export default function Snippets() {
 
       {filtered.map((s) => (
         <div className="card" key={s.id}>
-          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+          <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
             <h3>{s.title}</h3>
             <div>
               <button className="btn small primary" onClick={() => copy(s)}>
@@ -159,15 +159,19 @@ export default function Snippets() {
               </button>
             </div>
           </div>
-          <div className="text-muted text-[12px]">
+          <div className="text-[12px] text-muted">
             {s.language}
             {s.tags.length > 0 && ' · '}
             {s.tags.map((t) => (
-              <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted" key={t}>
+              <span
+                className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted"
+                key={t}
+              >
                 {t}
               </span>
             ))}
           </div>
+          {/* prettier-ignore */}
           <pre className="mt-2 whitespace-pre-wrap break-all rounded-md border border-border bg-bg p-2.5 font-mono text-[12px]">{s.body}</pre>
         </div>
       ))}

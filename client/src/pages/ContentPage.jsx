@@ -27,7 +27,7 @@ function DraftViewer({ item, onClose, onSaved }) {
 
   return (
     <div className="card">
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <h3>{item.title} — drafts</h3>
         <div>
           <button className="btn small primary" onClick={copy}>
@@ -125,19 +125,22 @@ export default function ContentPage() {
         Turn what you learn into TikTok scripts, X threads, and LinkedIn posts. Log TILs with the
         bar at the top of the app.
       </p>
-      {error && <div className="text-red my-1.5">{error}</div>}
+      {error && <div className="my-1.5 text-red">{error}</div>}
 
       <div className="grid grid-cols-[280px_1fr] items-start gap-4 max-[900px]:grid-cols-1">
         <div className="max-h-[75vh] overflow-y-auto">
           <h3>TIL log ({tils.length})</h3>
           {tils.length === 0 && (
-            <div className="text-muted text-[12px]">
+            <div className="text-[12px] text-muted">
               Nothing yet. Log what you learn — it becomes content.
             </div>
           )}
           {tils.map((t) => (
             <div className="card compact" key={t.id}>
-              <div className="flex gap-2 items-center flex-wrap my-1.5" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>
+              <div
+                className="my-1.5 flex flex-wrap items-center gap-2"
+                style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}
+              >
                 <input
                   type="checkbox"
                   style={{ width: 'auto', marginTop: 3 }}
@@ -146,7 +149,7 @@ export default function ContentPage() {
                 />
                 <div style={{ flex: 1 }}>
                   <div className="text-[12px]">{t.text}</div>
-                  <div className="text-muted text-[12px]">
+                  <div className="text-[12px] text-muted">
                     {new Date(t.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -161,7 +164,7 @@ export default function ContentPage() {
         <div className="ideas-column">
           <div className="card form-card">
             <h3>New content idea</h3>
-            <div className="flex gap-2 items-center flex-wrap my-1.5">
+            <div className="my-1.5 flex flex-wrap items-center gap-2">
               <input
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
@@ -183,18 +186,18 @@ export default function ContentPage() {
                   </h3>
                   {colItems.map((item) => (
                     <div className="card compact" key={item.id}>
-                      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+                      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
                         <strong className="text-[12px]">{item.title}</strong>
                         <button className="btn small danger" onClick={() => removeItem(item)}>
                           ✕
                         </button>
                       </div>
                       {item.sourceTilIds.length > 0 && (
-                        <div className="text-muted text-[12px]">
+                        <div className="text-[12px] text-muted">
                           {item.sourceTilIds.length} TIL{item.sourceTilIds.length > 1 ? 's' : ''}
                         </div>
                       )}
-                      <div className="flex gap-2 items-center flex-wrap my-1.5">
+                      <div className="my-1.5 flex flex-wrap items-center gap-2">
                         <button
                           className="btn small primary"
                           disabled={generating[item.id]}

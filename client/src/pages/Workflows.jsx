@@ -31,7 +31,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
 
   return (
     <div className="card compact bg-bg">
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <select value={step.type} onChange={(e) => setType(e.target.value)}>
           {Object.entries(STEP_LABELS).map(([k, v]) => (
             <option key={k} value={k}>
@@ -45,7 +45,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
       </div>
 
       {['start', 'stop', 'env-apply'].includes(step.type) && (
-        <div className="flex gap-2 items-center flex-wrap my-1.5">
+        <div className="my-1.5 flex flex-wrap items-center gap-2">
           <label>
             Project
             <select value={step.projectId || ''} onChange={(e) => set('projectId', e.target.value)}>
@@ -127,7 +127,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
       )}
 
       {step.type === 'preview' && (
-        <div className="flex gap-2 items-center flex-wrap my-1.5">
+        <div className="my-1.5 flex flex-wrap items-center gap-2">
           <label>
             Label
             <input
@@ -200,8 +200,8 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
         + Add step
       </button>
 
-      {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      {error && <div className="my-1.5 text-red">{error}</div>}
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button
           className="btn primary"
           onClick={save}
@@ -277,7 +277,7 @@ export default function Workflows() {
         ))}
       </datalist>
 
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted">
           Your setup rituals as one click: start services, swap env presets, apply patches, open
           previews — in order.
@@ -306,13 +306,16 @@ export default function Workflows() {
         <div className="card">
           <h3>Run: {results.name}</h3>
           {results.results.map((r, i) => (
-            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={i}>
+            <div
+              className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0"
+              key={i}
+            >
               <span
                 className={'dot ' + (r.ok ? 'green' : 'gray')}
                 style={!r.ok ? { background: 'var(--color-red)' } : {}}
               />
               <span className="text-[12px]">{r.label}</span>
-              {r.error && <span className="text-red my-1.5 text-[12px]">{r.error}</span>}
+              {r.error && <span className="my-1.5 text-[12px] text-red">{r.error}</span>}
             </div>
           ))}
         </div>
@@ -327,7 +330,7 @@ export default function Workflows() {
 
       {workflows.map((wf) => (
         <div className="card" key={wf.id}>
-          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+          <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
             <h3 style={{ margin: 0 }}>{wf.name}</h3>
             <div>
               <button
@@ -345,7 +348,7 @@ export default function Workflows() {
               </button>
             </div>
           </div>
-          <div className="text-muted text-[12px]">{wf.stepLabels.join('  →  ')}</div>
+          <div className="text-[12px] text-muted">{wf.stepLabels.join('  →  ')}</div>
         </div>
       ))}
     </div>

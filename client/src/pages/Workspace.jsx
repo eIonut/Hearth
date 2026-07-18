@@ -202,7 +202,7 @@ export default function Workspace() {
       )}
 
       {!ptyAvailable && (
-        <div className="card text-red my-1.5">
+        <div className="card my-1.5 text-red">
           node-pty is not installed, so terminals are disabled. Run{' '}
           <span className="font-mono">npm install node-pty</span> in the dev-hub folder (needs Xcode
           Command Line Tools), then restart the server.
@@ -212,9 +212,9 @@ export default function Workspace() {
       {tabs.length === 0 && (
         <div className="card empty">
           One surface for shells and running apps. Open a terminal in your home folder or any
-          project (tip: run <span className="font-mono">claude</span> inside one), and open previews of
-          your services next to it — set preview URLs per project (Projects → Edit) to get one-click
-          entries. Tabs stay alive while you move around the hub.
+          project (tip: run <span className="font-mono">claude</span> inside one), and open previews
+          of your services next to it — set preview URLs per project (Projects → Edit) to get
+          one-click entries. Tabs stay alive while you move around the hub.
         </div>
       )}
 

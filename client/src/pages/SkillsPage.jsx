@@ -69,7 +69,7 @@ export default function SkillsPage() {
 
       <div className="card">
         <h3>Skills repo location</h3>
-        <div className="flex gap-2 items-center flex-wrap my-1.5">
+        <div className="my-1.5 flex flex-wrap items-center gap-2">
           <input
             value={repoPath}
             onChange={(e) => setRepoPath(e.target.value)}
@@ -79,18 +79,18 @@ export default function SkillsPage() {
             Save
           </button>
         </div>
-        {saved && <div className="text-green my-1.5">Saved.</div>}
-        <div className="text-muted text-[12px]">
+        {saved && <div className="my-1.5 text-green">Saved.</div>}
+        <div className="text-[12px] text-muted">
           A skill is a subfolder containing SKILL.md, or a loose .md file.
         </div>
       </div>
 
       {skillsInfo.configured && (
         <div className="card">
-          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+          <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
             <h3>Skills ({skillsInfo.skills.length})</h3>
             {projects.length > 0 && (
-              <div className="flex gap-2 items-center flex-wrap my-1.5">
+              <div className="my-1.5 flex flex-wrap items-center gap-2">
                 <span className="text-muted">Install into:</span>
                 <select
                   value={projectId}
@@ -114,13 +114,18 @@ export default function SkillsPage() {
             )}
           </div>
 
-          {skillsInfo.missing && <div className="text-red my-1.5">Configured path no longer exists.</div>}
+          {skillsInfo.missing && (
+            <div className="my-1.5 text-red">Configured path no longer exists.</div>
+          )}
           {skillsInfo.skills.length === 0 && !skillsInfo.missing && (
             <div className="text-muted">No skills found in the repo yet.</div>
           )}
 
           {skillsInfo.skills.map((s) => (
-            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={s.name}>
+            <div
+              className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0"
+              key={s.name}
+            >
               <input
                 type="checkbox"
                 style={{ width: 'auto', margin: 0 }}
@@ -128,13 +133,17 @@ export default function SkillsPage() {
                 onChange={(e) => setSelected((sel) => ({ ...sel, [s.name]: e.target.checked }))}
               />
               <span className="font-semibold">{s.name}</span>
-              {installed.includes(s.name) && <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted">installed</span>}
-              <span className="text-muted text-[12px]">{s.description}</span>
+              {installed.includes(s.name) && (
+                <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted">
+                  installed
+                </span>
+              )}
+              <span className="text-[12px] text-muted">{s.description}</span>
             </div>
           ))}
 
-          {msg && <div className="text-green my-1.5">{msg}</div>}
-          {error && <div className="text-red my-1.5">{error}</div>}
+          {msg && <div className="my-1.5 text-green">{msg}</div>}
+          {error && <div className="my-1.5 text-red">{error}</div>}
         </div>
       )}
     </div>

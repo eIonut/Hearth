@@ -64,8 +64,8 @@ function ItemForm({ onSaved, onCancel }) {
           placeholder="Why this matters / what to focus on"
         />
       </label>
-      {error && <div className="text-red my-1.5">{error}</div>}
-      <div className="flex gap-2 items-center flex-wrap my-1.5">
+      {error && <div className="my-1.5 text-red">{error}</div>}
+      <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button className="btn primary" onClick={save}>
           Add
         </button>
@@ -109,7 +109,7 @@ export default function Learning() {
 
   return (
     <div>
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted">
           Everything you want to learn next, so nothing gets lost. Finished items are raw material
           for your content.
@@ -146,7 +146,7 @@ export default function Learning() {
               </h3>
               {colItems.map((item) => (
                 <div className="card compact" key={item.id}>
-                  <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+                  <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
                     <strong>{item.title}</strong>
                     <button className="btn small danger" onClick={() => remove(item)}>
                       ✕
@@ -160,14 +160,17 @@ export default function Learning() {
                   {item.tags.length > 0 && (
                     <div className="text-[12px]">
                       {item.tags.map((t) => (
-                        <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted" key={t}>
+                        <span
+                          className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted"
+                          key={t}
+                        >
                           {t}
                         </span>
                       ))}
                     </div>
                   )}
-                  {item.notes && <div className="text-muted text-[12px]">{item.notes}</div>}
-                  <div className="flex gap-2 items-center flex-wrap my-1.5">
+                  {item.notes && <div className="text-[12px] text-muted">{item.notes}</div>}
+                  <div className="my-1.5 flex flex-wrap items-center gap-2">
                     {col.id !== 'queued' && (
                       <button
                         className="btn small"

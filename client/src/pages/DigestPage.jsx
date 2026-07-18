@@ -46,11 +46,11 @@ export default function DigestPage() {
 
   return (
     <div>
-      <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+      <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted">
           Your last stretch at a glance — and a Claude-written review when you want one.
         </p>
-        <div className="flex gap-2 items-center flex-wrap my-1.5">
+        <div className="my-1.5 flex flex-wrap items-center gap-2">
           <select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
@@ -70,16 +70,16 @@ export default function DigestPage() {
         {stats.map((s) => (
           <div className="card stat" key={s.label}>
             <div className="text-[28px] font-bold text-accent">{s.value}</div>
-            <div className="text-muted text-[12px]">{s.label}</div>
+            <div className="text-[12px] text-muted">{s.label}</div>
           </div>
         ))}
       </div>
 
-      {error && <div className="text-red my-1.5">{error}</div>}
+      {error && <div className="my-1.5 text-red">{error}</div>}
 
       {summary && (
         <div className="card">
-          <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
+          <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
             <h3>Your review</h3>
             <button className="btn small primary" onClick={copySummary}>
               {copied ? 'Copied!' : 'Copy'}
@@ -97,7 +97,7 @@ export default function DigestPage() {
             <>
               <strong className="text-[12px]">TILs</strong>
               {data.tils.map((t) => (
-                <div className="text-muted text-[12px]" key={t.id}>
+                <div className="text-[12px] text-muted" key={t.id}>
                   · {t.text}
                 </div>
               ))}
@@ -107,7 +107,7 @@ export default function DigestPage() {
             <>
               <strong className="text-[12px]">Learning completed</strong>
               {data.learningDone.map((l) => (
-                <div className="text-muted text-[12px]" key={l.id}>
+                <div className="text-[12px] text-muted" key={l.id}>
                   · {l.title}
                 </div>
               ))}
@@ -117,7 +117,7 @@ export default function DigestPage() {
             <>
               <strong className="text-[12px]">Posted</strong>
               {data.contentPosted.map((c) => (
-                <div className="text-muted text-[12px]" key={c.id}>
+                <div className="text-[12px] text-muted" key={c.id}>
                   · {c.title}
                 </div>
               ))}

@@ -60,11 +60,11 @@ function ConfirmModal({ options, onClose }) {
 
   return (
     <div
-      className="animate-modal-fade fixed inset-0 z-[1000] flex items-center justify-center bg-[rgba(1,4,9,0.7)] p-5"
+      className="fixed inset-0 z-[1000] flex animate-modal-fade items-center justify-center bg-[rgba(1,4,9,0.7)] p-5"
       onClick={() => onClose(false)}
     >
       <div
-        className="animate-modal-pop w-full max-w-[420px] rounded-[10px] border border-border bg-bg-2 p-5 shadow-[0_12px_40px_rgba(1,4,9,0.6)]"
+        className="w-full max-w-[420px] animate-modal-pop rounded-[10px] border border-border bg-bg-2 p-5 shadow-[0_12px_40px_rgba(1,4,9,0.6)]"
         role="dialog"
         aria-modal="true"
         aria-label={title}
