@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+@import './styles.css'; /* legacy — shrinks to zero over this migration */
+
+/* Phase 0: restore browser-default heading typography that Tailwind Preflight
+   resets to `inherit`. styles.css only overrode h2 margin / h3 size, so h2 size +
+   weight and h3 weight regressed. Folded into the full base layer in Phase 1. */
+@layer base {
+  h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  h3 {
+    font-weight: bold;
+  }
+}
