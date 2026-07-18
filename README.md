@@ -12,7 +12,7 @@ It's free and MIT-licensed. Clone it, gut it for parts, make it yours.
 
 ## Setup
 
-Requires Node 18+.
+Requires Node 20.19+ or 22.12+ (Vite 8 floor).
 
 ```bash
 cd dev-hub
