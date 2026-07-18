@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const DATA_DIR = path.join(__dirname, '..', '..', 'data');
+const DATA_DIR = path.join(import.meta.dirname, '..', '..', 'data');
 
 function file(name) {
   return path.join(DATA_DIR, name + '.json');
@@ -24,4 +24,4 @@ function id() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
-module.exports = { read, write, id, DATA_DIR };
+export { read, write, id, DATA_DIR };

@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const { read, write } = require('./store');
-const { backup } = require('./backup');
+import fs from 'fs';
+import path from 'path';
+import { read, write } from './store.js';
+import { backup } from './backup.js';
 
 const STATE = 'patchstate'; // { [patchId]: { [opIndex]: { prev } } }
 const PH = '\x00__HUB_PH__\x00';
@@ -137,4 +137,4 @@ function clearState(patchId) {
   write(STATE, state);
 }
 
-module.exports = { validateOp, opStatus, overallStatus, applyPatch, revertPatch, clearState };
+export { validateOp, opStatus, overallStatus, applyPatch, revertPatch, clearState };

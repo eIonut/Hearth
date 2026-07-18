@@ -1,9 +1,11 @@
-const { WebSocketServer } = require('ws');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+import { WebSocketServer } from 'ws';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 
-const { execFileSync } = require('child_process');
+const require = createRequire(import.meta.url);
 
 let pty = null;
 let ptyVersion = null;
@@ -291,4 +293,5 @@ function attach(server) {
   });
 }
 
-module.exports = { attach, available: () => !!pty, diagnose };
+export { attach, diagnose };
+export const available = () => !!pty;

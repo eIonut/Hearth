@@ -1,6 +1,6 @@
-const express = require('express');
-const { read, write, id } = require('../lib/store');
-const patchops = require('../lib/patchops');
+import express from 'express';
+import { read, write, id } from '../lib/store.js';
+import * as patchops from '../lib/patchops.js';
 
 const router = express.Router();
 const NAME = 'patches';
@@ -96,4 +96,4 @@ function runAction(req, res, fn) {
 router.post('/:id/apply', (req, res) => runAction(req, res, patchops.applyPatch));
 router.post('/:id/revert', (req, res) => runAction(req, res, patchops.revertPatch));
 
-module.exports = router;
+export default router;

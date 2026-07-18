@@ -1,6 +1,6 @@
-const express = require('express');
-const { read } = require('../lib/store');
-const envops = require('../lib/envops');
+import express from 'express';
+import { read } from '../lib/store.js';
+import * as envops from '../lib/envops.js';
 
 const router = express.Router();
 
@@ -45,4 +45,4 @@ router.delete('/:projectId/:target/:preset', (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = router;
+export default router;

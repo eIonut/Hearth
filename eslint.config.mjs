@@ -10,12 +10,12 @@ export default [
 
   js.configs.recommended,
 
-  // Server: Node + CommonJS
+  // Server: Node + ESM
   {
     files: ['server/**/*.js'],
     languageOptions: {
       ecmaVersion: 2023,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: { ...globals.node },
     },
   },

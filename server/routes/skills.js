@@ -1,7 +1,7 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { read, write } = require('../lib/store');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { read, write } from '../lib/store.js';
 
 const router = express.Router();
 
@@ -110,4 +110,4 @@ router.post('/install', (req, res) => {
   res.json({ installed, errors });
 });
 
-module.exports = router;
+export default router;

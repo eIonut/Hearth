@@ -1,6 +1,6 @@
-const express = require('express');
-const { read } = require('../lib/store');
-const procman = require('../lib/procman');
+import express from 'express';
+import { read } from '../lib/store.js';
+import * as procman from '../lib/procman.js';
 
 const router = express.Router();
 
@@ -32,4 +32,4 @@ router.get('/logs', (req, res) => {
   res.json(procman.logs(projectId, service));
 });
 
-module.exports = router;
+export default router;

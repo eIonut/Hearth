@@ -2,6 +2,7 @@
   "name": "dev-hub",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "description": "Personal local dev hub: services, env presets, terminals, snippets, learning queue",
   "engines": {

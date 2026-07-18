@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+import { spawn } from 'child_process';
 
 const MAX_LINES = 800;
 const MAX_AUTO_RESTARTS = 3;
@@ -134,4 +134,4 @@ function stopAll() {
   }
 }
 
-module.exports = { start, stop, status, logs, stopAll, key };
+export { start, stop, status, logs, stopAll, key };

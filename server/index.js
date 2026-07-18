@@ -1,23 +1,35 @@
-const express = require('express');
-const http = require('http');
-const terminals = require('./lib/terminals');
-const procman = require('./lib/procman');
+import express from 'express';
+import http from 'http';
+import * as terminals from './lib/terminals.js';
+import * as procman from './lib/procman.js';
+import projects from './routes/projects.js';
+import services from './routes/services.js';
+import env from './routes/env.js';
+import patches from './routes/patches.js';
+import preview from './routes/preview.js';
+import workflows from './routes/workflows.js';
+import snippets from './routes/snippets.js';
+import learning from './routes/learning.js';
+import skills from './routes/skills.js';
+import tils from './routes/tils.js';
+import content from './routes/content.js';
+import digest from './routes/digest.js';
 
 const app = express();
 app.use(express.json({ limit: '2mb' }));
 
-app.use('/api/projects', require('./routes/projects'));
-app.use('/api/services', require('./routes/services'));
-app.use('/api/env', require('./routes/env'));
-app.use('/api/patches', require('./routes/patches'));
-app.use('/api/preview', require('./routes/preview'));
-app.use('/api/workflows', require('./routes/workflows'));
-app.use('/api/snippets', require('./routes/snippets'));
-app.use('/api/learning', require('./routes/learning'));
-app.use('/api/skills', require('./routes/skills'));
-app.use('/api/tils', require('./routes/tils'));
-app.use('/api/content', require('./routes/content'));
-app.use('/api/digest', require('./routes/digest'));
+app.use('/api/projects', projects);
+app.use('/api/services', services);
+app.use('/api/env', env);
+app.use('/api/patches', patches);
+app.use('/api/preview', preview);
+app.use('/api/workflows', workflows);
+app.use('/api/snippets', snippets);
+app.use('/api/learning', learning);
+app.use('/api/skills', skills);
+app.use('/api/tils', tils);
+app.use('/api/content', content);
+app.use('/api/digest', digest);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, terminals: terminals.available() });

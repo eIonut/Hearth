@@ -1,8 +1,8 @@
-const express = require('express');
-const { read, write, id } = require('../lib/store');
-const procman = require('../lib/procman');
-const envops = require('../lib/envops');
-const patchops = require('../lib/patchops');
+import express from 'express';
+import { read, write, id } from '../lib/store.js';
+import * as procman from '../lib/procman.js';
+import * as envops from '../lib/envops.js';
+import * as patchops from '../lib/patchops.js';
 
 const router = express.Router();
 const NAME = 'workflows';
@@ -158,4 +158,4 @@ router.post('/:id/run', (req, res) => {
   res.json({ results });
 });
 
-module.exports = router;
+export default router;

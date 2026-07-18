@@ -1,6 +1,6 @@
-const express = require('express');
-const { read } = require('../lib/store');
-const claude = require('../lib/claude');
+import express from 'express';
+import { read } from '../lib/store.js';
+import * as claude from '../lib/claude.js';
 
 const router = express.Router();
 
@@ -69,4 +69,4 @@ End with a section "Content ideas for next week" — 2-3 specific post ideas bas
   }
 });
 
-module.exports = router;
+export default router;

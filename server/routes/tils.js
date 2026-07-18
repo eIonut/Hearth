@@ -1,5 +1,5 @@
-const express = require('express');
-const { read, write, id } = require('../lib/store');
+import express from 'express';
+import { read, write, id } from '../lib/store.js';
 
 const router = express.Router();
 const NAME = 'tils';
@@ -33,4 +33,4 @@ router.delete('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = router;
+export default router;

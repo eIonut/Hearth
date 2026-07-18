@@ -1,4 +1,7 @@
-const path = require('path');
+import path from 'path';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 let sdk = null;
 try {
@@ -9,7 +12,7 @@ try {
   );
 }
 
-const HUB_DIR = path.join(__dirname, '..', '..');
+const HUB_DIR = path.join(import.meta.dirname, '..', '..');
 
 function available() {
   return !!sdk;
@@ -49,4 +52,4 @@ function extractJSON(text) {
   return JSON.parse(match[0]);
 }
 
-module.exports = { available, query, runText, extractJSON, HUB_DIR };
+export { available, query, runText, extractJSON, HUB_DIR };

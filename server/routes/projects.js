@@ -1,7 +1,7 @@
-const express = require('express');
-const fs = require('fs');
-const os = require('os');
-const { read, write, id } = require('../lib/store');
+import express from 'express';
+import fs from 'fs';
+import os from 'os';
+import { read, write, id } from '../lib/store.js';
 
 function expandHome(p) {
   if (typeof p === 'string' && (p === '~' || p.startsWith('~/'))) {
@@ -71,4 +71,4 @@ router.delete('/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-module.exports = router;
+export default router;

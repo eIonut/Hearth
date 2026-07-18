@@ -1,6 +1,6 @@
-const express = require('express');
-const { read, write, id } = require('../lib/store');
-const claude = require('../lib/claude');
+import express from 'express';
+import { read, write, id } from '../lib/store.js';
+import * as claude from '../lib/claude.js';
 
 const router = express.Router();
 const NAME = 'content';
@@ -99,4 +99,4 @@ Reply with ONLY a valid JSON object (no markdown fences, no commentary):
   }
 });
 
-module.exports = router;
+export default router;
