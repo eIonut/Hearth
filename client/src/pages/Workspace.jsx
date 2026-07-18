@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
-import { consumePendingPreview } from '../lib/bus.js';
+import { consumePendingPreview, consumePendingTerm } from '../lib/bus.js';
 import TermView from '../components/workspace/TermView.jsx';
 import PreviewFrame from '../components/workspace/PreviewFrame.jsx';
 
@@ -26,9 +26,9 @@ export default function Workspace() {
       .catch(() => {});
   }, []);
 
-  function openTerm(label, cwd) {
+  function openTerm(label, cwd, cmd) {
     const id = ++counter.current;
-    setTabs((t) => [...t, { id, kind: 'term', label: `${label} #${id}`, cwd }]);
+    setTabs((t) => [...t, { id, kind: 'term', label: `${label} #${id}`, cwd, cmd }]);
     setActiveTab(id);
   }
 
@@ -69,6 +69,22 @@ export default function Workspace() {
     onOpen(); // consume anything queued before mount
     window.addEventListener('hub:open-preview', onOpen);
     return () => window.removeEventListener('hub:open-preview', onOpen);
+  }, []);
+
+  // Terminal requests coming from other pages (Templates "Scaffold" buttons).
+  // Same pattern as previews: keep the opener in a ref so we subscribe once.
+  const openTermRef = useRef(openTerm);
+  useEffect(() => {
+    openTermRef.current = openTerm;
+  });
+  useEffect(() => {
+    function onOpenTerm() {
+      const t = consumePendingTerm();
+      if (t) openTermRef.current(t.label, t.cwd, t.cmd);
+    }
+    onOpenTerm(); // consume anything queued before mount
+    window.addEventListener('hub:open-term', onOpenTerm);
+    return () => window.removeEventListener('hub:open-term', onOpenTerm);
   }, []);
 
   function closeTab(id) {
@@ -221,7 +237,7 @@ export default function Workspace() {
       <div className="flex min-h-0 flex-1 flex-col">
         {tabs.map((t) =>
           t.kind === 'term' ? (
-            <TermView key={'t' + t.id} cwd={t.cwd} visible={activeTab === t.id} />
+            <TermView key={'t' + t.id} cwd={t.cwd} cmd={t.cmd} visible={activeTab === t.id} />
           ) : (
             <PreviewFrame key={'p' + t.id} tab={t} visible={activeTab === t.id} />
           ),

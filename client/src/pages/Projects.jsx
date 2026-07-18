@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { api } from '../api.js';
-import { openPreview } from '../lib/bus.js';
+import { openPreview, openTerm } from '../lib/bus.js';
 import { usePoll } from '../hooks/usePoll.js';
 import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import ProjectForm from '../components/projects/ProjectForm.jsx';
@@ -9,18 +9,27 @@ import ProjectCard from '../components/projects/ProjectCard.jsx';
 import LogPanel from '../components/projects/LogPanel.jsx';
 import WorkflowQuickRun from '../components/projects/WorkflowQuickRun.jsx';
 import Workflows from './Workflows.jsx';
+import Templates from './Templates.jsx';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
 const PAGE_TABS = [
   { to: '/projects', label: 'Overview', end: true },
   { to: '/projects/workflows', label: 'Workflows' },
+  { to: '/projects/templates', label: 'Templates' },
 ];
 
+function pageTabFromPath(pathname) {
+  if (pathname === '/projects/workflows') return 'workflows';
+  if (pathname === '/projects/templates') return 'templates';
+  return 'overview';
+}
+
 export default function Projects() {
-  const pageTab = useLocation().pathname === '/projects/workflows' ? 'workflows' : 'overview';
+  const pageTab = pageTabFromPath(useLocation().pathname);
   const [projects, setProjects] = useState([]);
   const [statuses, setStatuses] = useState({});
   const [workflows, setWorkflows] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [wfRunning, setWfRunning] = useState({});
   const [wfMsg, setWfMsg] = useState('');
   const [editing, setEditing] = useState(null); // null | {} | project
@@ -31,6 +40,9 @@ export default function Projects() {
     setProjects(await api('/projects'));
     api('/workflows')
       .then(setWorkflows)
+      .catch(() => {});
+    api('/templates')
+      .then(setTemplates)
       .catch(() => {});
   }
 
@@ -86,10 +98,22 @@ export default function Projects() {
 
       {pageTab === 'workflows' ? (
         <Workflows />
+      ) : pageTab === 'templates' ? (
+        <Templates />
       ) : (
         <>
           <div className="my-1.5 flex flex-wrap items-center gap-2">
             <WorkflowQuickRun workflows={workflows} running={wfRunning} onRun={runWorkflow} />
+            {templates.map((t) => (
+              <button
+                key={t.id}
+                className="btn small"
+                onClick={() => openTerm(t.name, t.cwd, t.commands.join(' && '))}
+                title={t.commands.join(' → ')}
+              >
+                ⛭ {t.name}
+              </button>
+            ))}
             <span className="flex-1" />
             <button className="btn primary" onClick={() => setEditing({})}>
               + Add project

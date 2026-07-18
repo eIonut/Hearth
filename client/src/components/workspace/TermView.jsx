@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
 
-export default function TermView({ cwd, visible }) {
+export default function TermView({ cwd, cmd, visible }) {
   const containerRef = useRef(null);
   const termRef = useRef(null);
 
@@ -20,8 +20,9 @@ export default function TermView({ cwd, visible }) {
     fit.fit();
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const cmdParam = cmd ? `&cmd=${encodeURIComponent(cmd)}` : '';
     const ws = new WebSocket(
-      `${proto}://${location.host}/term?cwd=${encodeURIComponent(cwd || '')}`,
+      `${proto}://${location.host}/term?cwd=${encodeURIComponent(cwd || '')}${cmdParam}`,
     );
     ws.onmessage = (e) => term.write(e.data);
     ws.onclose = () => term.write('\r\n[connection closed]\r\n');
@@ -47,7 +48,7 @@ export default function TermView({ cwd, visible }) {
       }
       term.dispose();
     };
-  }, [cwd]);
+  }, [cwd, cmd]);
 
   useEffect(() => {
     if (visible && termRef.current) setTimeout(() => termRef.current.doFit(), 30);

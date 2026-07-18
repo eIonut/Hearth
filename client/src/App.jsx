@@ -32,9 +32,13 @@ export default function App() {
   }
 
   useEffect(() => {
-    const onPreview = () => navigate('/workspace');
-    window.addEventListener('hub:open-preview', onPreview);
-    return () => window.removeEventListener('hub:open-preview', onPreview);
+    const toWorkspace = () => navigate('/workspace');
+    window.addEventListener('hub:open-preview', toWorkspace);
+    window.addEventListener('hub:open-term', toWorkspace);
+    return () => {
+      window.removeEventListener('hub:open-preview', toWorkspace);
+      window.removeEventListener('hub:open-term', toWorkspace);
+    };
   }, [navigate]);
 
   // crash badge: poll service statuses on every page
@@ -70,6 +74,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/projects" replace />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/projects/workflows" element={<Projects />} />
+            <Route path="/projects/templates" element={<Projects />} />
             <Route path="/workspace" element={null} />
             <Route path="/content" element={<Navigate to="/content/learning" replace />} />
             <Route path="/content/:tab" element={<ContentHub />} />

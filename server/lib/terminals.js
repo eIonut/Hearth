@@ -195,6 +195,10 @@ function attach(server) {
     const url = new URL(req.url, 'http://localhost');
     const home = process.env.HOME || os.homedir();
     let cwd = expandHome(url.searchParams.get('cwd')) || home;
+    // Optional command to auto-run once the shell is up (used by project
+    // templates / one-click scaffolding). Written as one line so a chained
+    // "a && b && c" sequences correctly and interactive steps can read the tty.
+    const initCmd = url.searchParams.get('cmd');
 
     if (!fs.existsSync(cwd)) {
       ws.send(`\r\n[dev-hub] folder not found: ${cwd} — opening in home folder instead.\r\n`);
@@ -259,6 +263,19 @@ function attach(server) {
         /* client socket gone */
       }
     });
+
+    if (initCmd) {
+      // Give the login shell a moment to print its prompt so the typed command
+      // reads cleanly, then submit it as if the user had entered it.
+      setTimeout(() => {
+        try {
+          term.write(initCmd + '\r');
+        } catch {
+          /* terminal may already be gone */
+        }
+      }, 300);
+    }
+
     term.onExit(() => {
       try {
         ws.close();

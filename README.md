@@ -40,6 +40,8 @@ The sidebar has four pages, grouped by what you're doing — managing projects, 
 
 **Workflows** — your setup rituals as one click. A workflow is an ordered list of steps: start/stop services, apply env presets, apply/revert patches, open previews. Edit them under Projects → Workflows; run them from the quick-run buttons at the top of the Projects page. Failed steps are reported individually; the rest still run.
 
+**Templates** — spin up a _new_ project in one click. A template is a named command sequence (e.g. `npm create vite@latest my-app`, `cd my-app`, `npm install`, `npm run dev`) with an optional folder to run in. Edit them under Projects → Templates; scaffold from there or from the quick-run buttons at the top of the Projects page. Clicking **Scaffold** opens a Workspace terminal in that folder and runs the commands chained together — so interactive scaffolders (framework pickers) work, and the final `npm run dev` stays live in that tab. Nothing is auto-added as a project; add it with **+ Add project** when you're ready.
+
 **Crash awareness** — a service that exits non-zero shows a red dot + "crashed (code)" chip, and a red badge appears on Projects in the sidebar from any page. Mark a service with `*` in its name (`api*: yarn start`) to auto-restart it up to 3 times after a crash. Stopping a crashed service acknowledges it.
 
 **Links** — per-project shortcuts (repo, MRs, pipelines, docs) shown on the project card. Each link is checked for embeddability: sites that allow framing open inside the hub's Workspace; sites that block it (github.com, gitlab.com, most self-hosted GitLab) open in a new browser tab via ↗.
