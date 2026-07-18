@@ -34,7 +34,8 @@ Tests live in `server/test/` (supertest against the exported app, with a temp
 ## Guidelines
 
 - **Keep it lean.** Minimal dependencies is a feature here — no state-management
-  or CSS libraries. Plain JS (no TypeScript), functional React components.
+  library. Styling is Tailwind CSS v4 (the one sanctioned CSS dependency); don't
+  add other CSS frameworks. Plain JS (no TypeScript), functional React components.
 - **Don't change on-disk data formats** (`data/*.json`, `envs/`, patch
   definitions) without a very good reason — people have real data in them.
 - **Match the surrounding style.** Prettier settles formatting; match the

@@ -104,6 +104,12 @@ mounted across route changes so terminals and preview iframes survive
 navigation. Shared logic lives in `hooks/` (`usePoll`) and `lib/`
 (`parsers`, `bus`).
 
+Styling is **Tailwind CSS v4** (CSS-first, no `tailwind.config.js`). Design
+tokens live in `client/src/index.css` under `@theme`; shared primitives
+(`.btn`, `.chip`, `.dot`, `.card`, `.nav-item`, sub-tabs, workspace tabs) are
+defined with `@apply` in `@layer components`; everything else is inline
+utilities in the JSX. There is no separate stylesheet.
+
 ## Where data lives
 
 | What                               | Where                         |

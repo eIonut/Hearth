@@ -35,6 +35,7 @@ Re-run `npm view <pkg> version` at execution time; use whatever is latest then.
 3. **Behavior-preserving.** No feature changes, no UI redesign, no renamed API routes, no changes to `data/*.json` shapes. If you find a bug, fix it in its own commit with a note, or leave a `TODO` — don't silently change semantics.
 4. **Never commit `data/`, `envs/`, `backups/`, or `client/dist/`** (already gitignored — keep it that way). These contain personal data and secrets.
 5. Match existing code style: plain JS (no TypeScript migration in this plan), functional React components, minimal dependencies. Do not introduce state-management or CSS libraries — the lean-dependency approach is a feature of this project. The one sanctioned addition is **React Router** (Phase 5), for deep-linkable pages.
+   > **Superseded (2026-07-18):** the "no CSS libraries" part no longer holds. Once this refactor was done, `TAILWIND_MIGRATION_PLAN.md` migrated the single global `styles.css` to **Tailwind CSS v4**, now the sanctioned styling dependency.
 
 ---
 
