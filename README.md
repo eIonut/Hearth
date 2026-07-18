@@ -22,7 +22,7 @@ npm run dev        # starts server (:5001) + client (:5173)
 
 Open **http://localhost:5173**.
 
-> **Terminals:** they need `node-pty`, which compiles natively. On macOS you need Xcode Command Line Tools (`xcode-select --install`). If it fails to install, everything else still works — the Terminals page will tell you.
+> **Terminals:** they need `node-pty`, which compiles natively. On macOS you need Xcode Command Line Tools (`xcode-select --install`). If it fails to install, everything else still works — the Workspace will tell you.
 
 > **Claude-powered features** (content drafts, digest reviews) need `@anthropic-ai/claude-agent-sdk` (installed automatically with `npm install`). It authenticates via your existing Claude Code login or `ANTHROPIC_API_KEY`. If it's missing, those features tell you and everything else still works. For chatting with Claude Code, use a terminal (embedded or your own) or the Claude desktop app.
 
@@ -69,6 +69,40 @@ The learn → post pipeline as three sub-tabs: **Learning queue**, **Ideas & dra
 **Snippets** — the commands you keep googling. Search + one-click copy.
 
 **AI skills** — point it at your skills repo (subfolders with `SKILL.md`, or loose `.md` files); select skills and install them into any project's `.claude/skills` with one click.
+
+## Architecture
+
+Two independent halves, connected only over HTTP/WebSocket on localhost:
+
+**Server** (`server/`, Express 5, ESM) — a thin HTTP layer over the filesystem:
+
+```
+server/routes/*   parse & validate requests, shape JSON responses (thin)
+      ↓
+server/lib/*      all fs / process / data access (projects, envops, patchops,
+                  procman, terminals, workflows, store, backup, claude)
+      ↓
+data/*.json       persisted state       envs/  env presets
+```
+
+Routes stay thin; `lib/` owns every side effect. Errors are thrown as typed
+errors from `lib/` and mapped once to `{ error }` responses by the terminal
+error middleware in `server/index.js`. The server binds to localhost only.
+
+**Client** (`client/`, React 19 + Vite 8, React Router v8) — a small SPA:
+
+```
+client/src/pages/*        containers: data loading + composition
+      ↓
+client/src/components/*    layout/ · common/ · projects/ · workspace/
+      ↓
+client/src/api.js          single fetch wrapper to the server
+```
+
+Navigation is URL-driven (deep-linkable, refresh-safe). The Workspace stays
+mounted across route changes so terminals and preview iframes survive
+navigation. Shared logic lives in `hooks/` (`usePoll`) and `lib/`
+(`parsers`, `bus`).
 
 ## Where data lives
 

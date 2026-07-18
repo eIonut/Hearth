@@ -59,7 +59,10 @@ export default function App() {
               iframes survive route changes (they'd otherwise be torn down and
               reconnected). It's shown/hidden by pathname, never routed. */}
           <div
-            style={{ display: location.pathname === '/workspace' ? 'block' : 'none', height: '100%' }}
+            style={{
+              display: location.pathname === '/workspace' ? 'block' : 'none',
+              height: '100%',
+            }}
           >
             <Workspace />
           </div>
