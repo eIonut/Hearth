@@ -11,11 +11,11 @@ import {
   serializeServices,
   serializeNamedLines,
 } from '../lib/parsers.js';
-import SubTabs from '../components/SubTabs.jsx';
-import EnvPanel from '../components/EnvPanel.jsx';
-import PatchPanel from '../components/PatchPanel.jsx';
+import SubTabs from '../components/common/SubTabs.jsx';
+import EnvPanel from '../components/projects/EnvPanel.jsx';
+import PatchPanel from '../components/projects/PatchPanel.jsx';
 import Workflows from './Workflows.jsx';
-import { useConfirm } from '../components/ConfirmDialog.jsx';
+import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
 const ansi = new AnsiUp();
 

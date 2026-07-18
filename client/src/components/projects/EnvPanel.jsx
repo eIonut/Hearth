@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api.js';
-import { useConfirm } from './ConfirmDialog.jsx';
+import { api } from '../../api.js';
+import { useConfirm } from '../common/ConfirmDialog.jsx';
 
 function TargetCard({ projectId, target, onChanged }) {
   const [newName, setNewName] = useState('');

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
-import { useConfirm } from '../components/ConfirmDialog.jsx';
+import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
 const COLUMNS = [
   { id: 'queued', label: 'Queued' },

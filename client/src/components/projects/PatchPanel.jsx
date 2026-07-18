@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from '../api.js';
-import { useConfirm } from './ConfirmDialog.jsx';
+import { api } from '../../api.js';
+import { useConfirm } from '../common/ConfirmDialog.jsx';
 
 const EMPTY_ENV_OP = { type: 'env-set', file: '.env', key: '', value: '', revert: '' };
 const EMPTY_REPLACE_OP = { type: 'replace', file: '', find: '', replace: '' };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import SubTabs from '../components/SubTabs.jsx';
+import SubTabs from '../components/common/SubTabs.jsx';
 import Learning from './Learning.jsx';
 import ContentPage from './ContentPage.jsx';
 import DigestPage from './DigestPage.jsx';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import SubTabs from '../components/SubTabs.jsx';
+import SubTabs from '../components/common/SubTabs.jsx';
 import Snippets from './Snippets.jsx';
 import SkillsPage from './SkillsPage.jsx';
 
