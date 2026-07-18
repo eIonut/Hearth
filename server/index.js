@@ -11,6 +11,7 @@ app.use('/api/services', require('./routes/services'));
 app.use('/api/env', require('./routes/env'));
 app.use('/api/patches', require('./routes/patches'));
 app.use('/api/preview', require('./routes/preview'));
+app.use('/api/workflows', require('./routes/workflows'));
 app.use('/api/snippets', require('./routes/snippets'));
 app.use('/api/learning', require('./routes/learning'));
 app.use('/api/skills', require('./routes/skills'));

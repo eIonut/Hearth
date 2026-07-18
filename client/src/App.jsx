@@ -6,6 +6,7 @@ import Terminals from './pages/Terminals.jsx';
 import Snippets from './pages/Snippets.jsx';
 import Learning from './pages/Learning.jsx';
 import Preview from './pages/Preview.jsx';
+import Workflows from './pages/Workflows.jsx';
 import ContentPage from './pages/ContentPage.jsx';
 import DigestPage from './pages/DigestPage.jsx';
 import SkillsPage from './pages/SkillsPage.jsx';
@@ -13,6 +14,7 @@ import { api } from './api.js';
 
 const PAGES = [
   { id: 'dashboard', label: 'Dashboard', component: Dashboard },
+  { id: 'workflows', label: 'Workflows', component: Workflows },
   { id: 'env', label: 'Env Presets', component: EnvPage },
   { id: 'patches', label: 'Patches', component: Patches },
   { id: 'terminals', label: 'Terminals', component: Terminals },
@@ -72,6 +74,21 @@ export default function App() {
     return () => window.removeEventListener('hub:open-preview', onPreview);
   }, []);
 
+  // crash badge: poll service statuses on every page
+  const [crashedCount, setCrashedCount] = useState(0);
+  React.useEffect(() => {
+    let alive = true;
+    async function poll() {
+      try {
+        const s = await api('/services/status');
+        if (alive) setCrashedCount(Object.values(s).filter((x) => x.crashed).length);
+      } catch {}
+    }
+    poll();
+    const t = setInterval(poll, 5000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+
   return (
     <div className="app">
       <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
@@ -90,6 +107,11 @@ export default function App() {
               title={p.label}
             >
               {collapsed ? p.label[0] : p.label}
+              {p.id === 'dashboard' && crashedCount > 0 && (
+                <span className="crash-badge" title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}>
+                  {collapsed ? '' : crashedCount}
+                </span>
+              )}
             </button>
           ))}
         </nav>

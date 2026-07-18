@@ -26,6 +26,10 @@ Open **http://localhost:5173**.
 
 **Env Presets** — replaces your Fork stash workflow. Open a project, save its current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
 
+**Workflows** — your setup rituals as one click. A workflow is an ordered list of steps: start/stop services, apply env presets, apply/revert patches, open previews. Run from the Workflows page or the quick-run buttons at the top of the Dashboard. Failed steps are reported individually; the rest still run.
+
+**Crash awareness** — a service that exits non-zero shows a red dot + "crashed (code)" chip, and a red badge appears on Dashboard in the sidebar from any page. Mark a service with `*` in its name (`api*: yarn start`) to auto-restart it up to 3 times after a crash. Stopping a crashed service acknowledges it.
+
 **Patches** — named file tweaks you apply/revert on demand. Two op types: *Env value* (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and *Text replace* (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
 
 **Preview** — run your apps inside the hub. Set preview URLs per service (Dashboard → Edit, e.g. `web: localhost:4000`), then hit Preview on a running service or open any URL from the Preview page. Tabs stay alive across page switches (HMR keeps working). Your browser DevTools inspect the embedded app normally — pick its frame in the Console's context dropdown. Apps that send `X-Frame-Options`/`frame-ancestors` are detected and flagged with an "open in new tab" fallback.

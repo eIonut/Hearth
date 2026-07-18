@@ -1,17 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { AnsiUp } from 'ansi_up';
 import { api } from '../api.js';
 import { openPreview } from '../lib/bus.js';
 
+const ansi = new AnsiUp();
+
 function parseServices(text) {
-  // one per line: "web: yarn dev"
+  // one per line: "web: yarn dev" — add * after the name for auto-restart on crash: "web*: yarn dev"
   return text
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean)
     .map((l) => {
       const i = l.indexOf(':');
-      if (i === -1) return { name: l, cmd: l };
-      return { name: l.slice(0, i).trim(), cmd: l.slice(i + 1).trim() };
+      let name = i === -1 ? l : l.slice(0, i).trim();
+      const cmd = i === -1 ? l : l.slice(i + 1).trim();
+      let autoRestart = false;
+      if (name.endsWith('*')) { autoRestart = true; name = name.slice(0, -1).trim(); }
+      return { name, cmd, autoRestart };
     });
 }
 
@@ -32,7 +38,7 @@ function ProjectForm({ initial, onSaved, onCancel }) {
   const [name, setName] = useState(initial?.name || '');
   const [path, setPath] = useState(initial?.path || '');
   const [servicesText, setServicesText] = useState(
-    (initial?.services || []).map((s) => `${s.name}: ${s.cmd}`).join('\n')
+    (initial?.services || []).map((s) => `${s.name}${s.autoRestart ? '*' : ''}: ${s.cmd}`).join('\n')
   );
   const [envText, setEnvText] = useState(
     initial?.envTargets?.length
@@ -89,8 +95,8 @@ function ProjectForm({ initial, onSaved, onCancel }) {
       <h3>{initial?.id ? 'Edit project' : 'Add project'}</h3>
       <label>Name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="my-app" /></label>
       <label>Absolute path<input value={path} onChange={(e) => setPath(e.target.value)} placeholder="/Users/you/code/my-app" /></label>
-      <label>Services (one per line, "name: command")
-        <textarea rows={3} value={servicesText} onChange={(e) => setServicesText(e.target.value)} placeholder={'web: yarn dev\napi: yarn start'} />
+      <label>Services (one per line, "name: command" — add * for auto-restart on crash, e.g. "api*: yarn start")
+        <textarea rows={3} value={servicesText} onChange={(e) => setServicesText(e.target.value)} placeholder={'web: yarn dev\napi*: yarn start'} />
       </label>
       <label>Env files (one per line, "name: relative/path" — one per service if needed)
         <textarea rows={3} value={envText} onChange={(e) => setEnvText(e.target.value)} placeholder={'web: apps/web/.env\napi: apps/api/.env'} />
@@ -164,13 +170,18 @@ function LogPanel({ target, onClose }) {
     if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight;
   }, [logs]);
 
+  const html = logs.lines.map((l) => ansi.ansi_to_html(l)).join('\n') || 'No output yet…';
+
   return (
     <div className="card log-panel">
       <div className="row space-between">
-        <h3>{target.projectName} / {target.service} {logs.running ? '· running' : logs.exitCode !== null ? `· exited (${logs.exitCode})` : ''}</h3>
+        <h3>
+          {target.projectName} / {target.service}{' '}
+          {logs.running ? '· running' : logs.crashed ? `· crashed (${logs.exitCode})` : logs.exitCode !== null ? `· exited (${logs.exitCode})` : ''}
+        </h3>
         <button className="btn" onClick={onClose}>Close</button>
       </div>
-      <pre className="logs" ref={boxRef}>{logs.lines.join('\n') || 'No output yet…'}</pre>
+      <pre className="logs" ref={boxRef} dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
 }
@@ -178,14 +189,37 @@ function LogPanel({ target, onClose }) {
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [statuses, setStatuses] = useState({});
+  const [workflows, setWorkflows] = useState([]);
+  const [wfRunning, setWfRunning] = useState({});
+  const [wfMsg, setWfMsg] = useState('');
   const [editing, setEditing] = useState(null); // null | {} | project
   const [logTarget, setLogTarget] = useState(null);
 
   async function load() {
     setProjects(await api('/projects'));
+    api('/workflows').then(setWorkflows).catch(() => {});
   }
 
   useEffect(() => { load(); }, []);
+
+  async function runWorkflow(wf) {
+    setWfRunning((r) => ({ ...r, [wf.id]: true }));
+    setWfMsg('');
+    try {
+      const r = await api(`/workflows/${wf.id}/run`, { method: 'POST', body: {} });
+      const failed = r.results.filter((x) => !x.ok);
+      for (const step of r.results) {
+        if (step.clientPreview) openPreview(step.clientPreview.label, step.clientPreview.url);
+      }
+      setWfMsg(failed.length === 0
+        ? `"${wf.name}" done — ${r.results.length} steps ✓`
+        : `"${wf.name}": ${failed.length} step(s) failed — ${failed.map((f) => `${f.label}: ${f.error}`).join('; ')}`);
+      setStatuses(await api('/services/status'));
+    } catch (e) {
+      setWfMsg(`"${wf.name}" failed: ${e.message}`);
+    }
+    setWfRunning((r) => ({ ...r, [wf.id]: false }));
+  }
 
   useEffect(() => {
     let alive = true;
@@ -222,6 +256,17 @@ export default function Dashboard() {
         <button className="btn primary" onClick={() => setEditing({})}>+ Add project</button>
       </div>
 
+      {workflows.length > 0 && (
+        <div className="row">
+          {workflows.map((wf) => (
+            <button key={wf.id} className="btn small" disabled={wfRunning[wf.id]} onClick={() => runWorkflow(wf)} title={wf.stepLabels.join(' → ')}>
+              {wfRunning[wf.id] ? '…' : '▶'} {wf.name}
+            </button>
+          ))}
+        </div>
+      )}
+      {wfMsg && <div className={wfMsg.includes('failed') ? 'error' : 'success'}>{wfMsg}</div>}
+
       {editing && (
         <ProjectForm
           initial={editing.id ? editing : null}
@@ -254,12 +299,14 @@ export default function Dashboard() {
               {(p.services || []).map((s) => {
                 const st = statuses[`${p.id}::${s.name}`];
                 const running = st?.running;
+                const crashed = st?.crashed;
                 const preview = (p.previews || []).find((pr) => pr.name === s.name);
                 return (
                   <div className="service-row" key={s.name}>
-                    <span className={'dot ' + (running ? 'green' : 'gray')} />
-                    <span className="service-name">{s.name}</span>
+                    <span className={'dot ' + (running ? 'green' : crashed ? 'red' : 'gray')} />
+                    <span className="service-name">{s.name}{s.autoRestart ? ' ↻' : ''}</span>
                     <span className="muted mono small-text">{s.cmd}</span>
+                    {crashed && <span className="chip red">crashed ({st.exitCode})</span>}
                     <span className="spacer" />
                     {preview && (
                       <button className="btn small" onClick={() => openPreview(`${p.name}/${s.name}`, preview.url)}>Preview</button>

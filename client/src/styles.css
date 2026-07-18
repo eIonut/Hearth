@@ -166,6 +166,22 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .chip.orange { background: rgba(210, 153, 34, 0.15); color: #d29922; }
 .chip.red { background: rgba(248, 81, 73, 0.15); color: var(--red); }
 .dot.orange { background: #d29922; }
+.dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+.crash-badge {
+  display: inline-block;
+  min-width: 8px;
+  height: 16px;
+  line-height: 16px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 .op-editor { background: var(--bg); }
 
 .tag {
