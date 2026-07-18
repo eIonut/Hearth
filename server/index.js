@@ -27,6 +27,19 @@ app.get('/api/termdiag', async (req, res) => {
   res.json(await terminals.diagnose(req.query.cwd));
 });
 
+// JSON 404 for unmatched API routes (Express 5 otherwise returns HTML).
+app.use((req, res) => {
+  res.status(404).json({ error: 'not found' });
+});
+
+// Terminal error handler. Express 5 auto-forwards rejected promises from async
+// handlers here, so an async throw returns a clean 500 instead of hanging.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error('[dev-hub]', err);
+  res.status(err.status || 500).json({ error: err.message || 'internal error' });
+});
+
 const server = http.createServer(app);
 terminals.attach(server);
 
