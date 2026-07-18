@@ -1,114 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import '@xterm/xterm/css/xterm.css';
 import { api } from '../api.js';
 import { consumePendingPreview } from '../lib/bus.js';
+import TermView from '../components/workspace/TermView.jsx';
+import PreviewFrame from '../components/workspace/PreviewFrame.jsx';
 
 function normalize(url) {
   if (!url) return '';
   return /^https?:\/\//i.test(url) ? url : 'http://' + url;
-}
-
-function TermView({ cwd, visible }) {
-  const containerRef = useRef(null);
-  const termRef = useRef(null);
-
-  useEffect(() => {
-    const term = new Terminal({
-      fontSize: 13,
-      fontFamily: 'Menlo, Monaco, monospace',
-      theme: { background: '#0d1117' },
-      cursorBlink: true,
-    });
-    const fit = new FitAddon();
-    term.loadAddon(fit);
-    term.open(containerRef.current);
-    fit.fit();
-
-    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(
-      `${proto}://${location.host}/term?cwd=${encodeURIComponent(cwd || '')}`,
-    );
-    ws.onmessage = (e) => term.write(e.data);
-    ws.onclose = () => term.write('\r\n[connection closed]\r\n');
-    term.onData((d) => {
-      if (ws.readyState === 1) ws.send(d);
-    });
-
-    function doFit() {
-      fit.fit();
-      if (ws.readyState === 1) ws.send(`\x00resize:${term.cols},${term.rows}`);
-    }
-    const onResize = () => doFit();
-    window.addEventListener('resize', onResize);
-    ws.onopen = () => doFit();
-
-    termRef.current = { term, fit, ws, doFit };
-    return () => {
-      window.removeEventListener('resize', onResize);
-      try {
-        ws.close();
-      } catch {
-        /* socket may already be closed */
-      }
-      term.dispose();
-    };
-  }, [cwd]);
-
-  useEffect(() => {
-    if (visible && termRef.current) setTimeout(() => termRef.current.doFit(), 30);
-  }, [visible]);
-
-  return (
-    <div
-      ref={containerRef}
-      className="term-container"
-      style={{ display: visible ? 'block' : 'none' }}
-    />
-  );
-}
-
-function FrameTab({ tab, visible }) {
-  const [check, setCheck] = useState(null);
-
-  useEffect(() => {
-    setCheck(null);
-    api(`/preview/check?url=${encodeURIComponent(tab.url)}`)
-      .then(setCheck)
-      .catch(() => {});
-  }, [tab.url, tab.reloadKey]);
-
-  const problem = check && (!check.reachable || check.blocked);
-
-  return (
-    <div style={{ display: visible ? 'flex' : 'none' }} className="preview-frame-wrap">
-      {problem && (
-        <div className="row preview-notice">
-          {!check.reachable && (
-            <span className="chip red">not reachable — is the service running?</span>
-          )}
-          {check.blocked && (
-            <span className="chip red">blocks iframes ({check.reason}) — use ↗</span>
-          )}
-        </div>
-      )}
-      {check?.blocked ? (
-        <div className="card empty" style={{ flex: 1 }}>
-          This app refuses to render inside an iframe ({check.reason}). Use ↗ to open it in a new
-          tab, or remove the header in the app's dev config.
-        </div>
-      ) : (
-        <iframe
-          key={tab.reloadKey}
-          src={tab.url}
-          className="preview-iframe"
-          title={tab.label}
-          allow="clipboard-read; clipboard-write; geolocation; microphone; camera"
-        />
-      )}
-    </div>
-  );
 }
 
 export default function Workspace() {
@@ -317,7 +215,7 @@ export default function Workspace() {
           t.kind === 'term' ? (
             <TermView key={'t' + t.id} cwd={t.cwd} visible={activeTab === t.id} />
           ) : (
-            <FrameTab key={'p' + t.id} tab={t} visible={activeTab === t.id} />
+            <PreviewFrame key={'p' + t.id} tab={t} visible={activeTab === t.id} />
           ),
         )}
       </div>
