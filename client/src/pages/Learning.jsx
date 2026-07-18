@@ -120,7 +120,7 @@ export default function Learning() {
       </div>
 
       <input
-        className="search"
+        className="my-2 max-w-[420px]"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         placeholder="Filter by title or tag…"
@@ -160,7 +160,7 @@ export default function Learning() {
                   {item.tags.length > 0 && (
                     <div className="text-[12px]">
                       {item.tags.map((t) => (
-                        <span className="tag" key={t}>
+                        <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted" key={t}>
                           {t}
                         </span>
                       ))}

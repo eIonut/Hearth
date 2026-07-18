@@ -46,7 +46,7 @@ function TargetCard({ projectId, target, onChanged }) {
   }
 
   return (
-    <div className="card compact op-editor">
+    <div className="card compact bg-bg">
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <strong>{target.name}</strong>
         <span className="text-muted font-mono text-[12px]">
@@ -59,9 +59,9 @@ function TargetCard({ projectId, target, onChanged }) {
         <div className="text-muted text-[12px]">No presets yet — save the current file below.</div>
       )}
       {target.presets.map((name) => (
-        <div className="service-row" key={name}>
+        <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={name}>
           <span className={'dot ' + (target.current === name ? 'green' : 'gray')} />
-          <span className="service-name">{name}</span>
+          <span className="font-semibold">{name}</span>
           {target.current === name && <span className="text-muted text-[12px]">active</span>}
           <span className="flex-1" />
           <button

@@ -120,15 +120,15 @@ export default function SkillsPage() {
           )}
 
           {skillsInfo.skills.map((s) => (
-            <div className="service-row" key={s.name}>
+            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={s.name}>
               <input
                 type="checkbox"
                 style={{ width: 'auto', margin: 0 }}
                 checked={!!selected[s.name]}
                 onChange={(e) => setSelected((sel) => ({ ...sel, [s.name]: e.target.checked }))}
               />
-              <span className="service-name">{s.name}</span>
-              {installed.includes(s.name) && <span className="tag">installed</span>}
+              <span className="font-semibold">{s.name}</span>
+              {installed.includes(s.name) && <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted">installed</span>}
               <span className="text-muted text-[12px]">{s.description}</span>
             </div>
           ))}

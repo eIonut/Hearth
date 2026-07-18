@@ -30,7 +30,7 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
   const envTargets = envCache[step.projectId] || [];
 
   return (
-    <div className="card compact op-editor">
+    <div className="card compact bg-bg">
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <select value={step.type} onChange={(e) => setType(e.target.value)}>
           {Object.entries(STEP_LABELS).map(([k, v]) => (
@@ -306,7 +306,7 @@ export default function Workflows() {
         <div className="card">
           <h3>Run: {results.name}</h3>
           {results.results.map((r, i) => (
-            <div className="service-row" key={i}>
+            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={i}>
               <span
                 className={'dot ' + (r.ok ? 'green' : 'gray')}
                 style={!r.ok ? { background: 'var(--red)' } : {}}

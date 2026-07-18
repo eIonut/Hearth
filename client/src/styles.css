@@ -24,85 +24,14 @@
    gap-2.5 in Projects.jsx — pulled forward from the projects area so the legacy
    .grid selector stops shadowing Tailwind's `grid`/`grid-cols-*` utilities. */
 
-/* --- Forms --- */
-.search {
-  max-width: 420px;
-  margin: 8px 0;
-}
-
-/* Text utilities (.mono/.muted/.small-text/.error/.success) → real Tailwind
-   utilities at call sites: font-mono / text-muted / text-[12px] /
-   text-red my-1.5 / text-green my-1.5 */
-
-/* --- Service rows (.dot family → index.css @layer components) --- */
-.service-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  border-top: 1px solid var(--border);
-}
-.service-row:first-of-type {
-  border-top: none;
-}
-.service-name {
-  font-weight: 600;
-}
-
-/* --- Logs + code blocks --- */
-.logs,
-.snippet-body {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px;
-  font-family: Menlo, Monaco, monospace;
-  font-size: 12px;
-  white-space: pre-wrap;
-  word-break: break-all;
-  margin-top: 8px;
-}
-.logs {
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.log-panel {
-  position: sticky;
-  bottom: 8px;
-}
-
-/* --- Badges, tags (.chip family + .dot.orange/.red → @layer components) --- */
-.crash-badge {
-  display: inline-block;
-  min-width: 8px;
-  height: 16px;
-  line-height: 16px;
-  background: var(--red);
-  color: #fff;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 0 5px;
-  margin-left: 6px;
-  vertical-align: middle;
-}
-.op-editor {
-  background: var(--bg);
-}
-
-.tag {
-  background: var(--bg-3);
-  border-radius: 10px;
-  padding: 1px 8px;
-  margin-right: 4px;
-  font-size: 11px;
-  color: var(--muted);
-}
-
-/* Learning board (.board → grid grid-cols-3 gap-3 mt-2; .column h3 → border-b
-   border-border pb-1.5 on the header) → inline utilities in Learning.jsx /
-   ContentPage.jsx */
+/* Projects area → inline utilities at call sites:
+   .search → my-2 max-w-[420px]; .service-row → flex items-center gap-2 border-t
+   border-border py-1.5 [&:first-of-type]:border-t-0; .service-name → font-semibold;
+   .logs/.snippet-body → bg-bg border border-border rounded-md p-2.5 font-mono
+   text-[12px] whitespace-pre-wrap break-all mt-2 (+ .logs max-h-[320px]
+   overflow-y-auto); .log-panel → sticky bottom-2; .crash-badge, .op-editor (→ bg-bg),
+   .tag → inline utilities. Text utilities (.mono/.muted/.small-text/.error/.success)
+   and the learning board (.board/.column h3) already inlined. */
 
 /* --- Sub-tabs: .subnav family → index.css @layer components --- */
 

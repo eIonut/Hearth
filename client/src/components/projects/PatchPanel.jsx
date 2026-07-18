@@ -11,7 +11,7 @@ function OpEditor({ op, onChange, onRemove }) {
   }
 
   return (
-    <div className="card compact op-editor">
+    <div className="card compact bg-bg">
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <select
           value={op.type}
@@ -255,7 +255,7 @@ export default function PatchPanel({ projectId }) {
       )}
 
       {patches.map((p) => (
-        <div className="card compact op-editor" key={p.id}>
+        <div className="card compact bg-bg" key={p.id}>
           <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
             <div className="flex gap-2 items-center flex-wrap my-1.5">
               <strong>{p.name}</strong>
@@ -281,7 +281,7 @@ export default function PatchPanel({ projectId }) {
             </div>
           </div>
           {p.ops.map((op, i) => (
-            <div className="service-row" key={i}>
+            <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0" key={i}>
               <span
                 className={
                   'dot ' +

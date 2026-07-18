@@ -26,7 +26,7 @@ export default function LogPanel({ target, onClose }) {
   const html = logs.lines.map((l) => ansi.ansi_to_html(l)).join('\n') || 'No output yet…';
 
   return (
-    <div className="card log-panel">
+    <div className="card sticky bottom-2">
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <h3>
           {target.projectName} / {target.service}{' '}
@@ -42,7 +42,7 @@ export default function LogPanel({ target, onClose }) {
           Close
         </button>
       </div>
-      <pre className="logs" ref={boxRef} dangerouslySetInnerHTML={{ __html: html }} />
+      <pre className="mt-2 max-h-[320px] overflow-y-auto whitespace-pre-wrap break-all rounded-md border border-border bg-bg p-2.5 font-mono text-[12px]" ref={boxRef} dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
 }

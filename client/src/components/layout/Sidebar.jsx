@@ -39,7 +39,7 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
             {collapsed ? p.label[0] : p.label}
             {p.badge && crashedCount > 0 && (
               <span
-                className="crash-badge"
+                className="ml-1.5 inline-block h-4 min-w-2 rounded-lg bg-red px-[5px] align-middle text-[10px] font-bold leading-4 text-white"
                 title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}
               >
                 {collapsed ? '' : crashedCount}

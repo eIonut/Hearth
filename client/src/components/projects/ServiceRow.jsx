@@ -6,9 +6,9 @@ export default function ServiceRow({ project, service, status, onToggle, onLogs 
   const preview = (project.previews || []).find((pr) => pr.name === service.name);
 
   return (
-    <div className="service-row">
+    <div className="flex items-center gap-2 border-t border-border py-1.5 [&:first-of-type]:border-t-0">
       <span className={'dot ' + (running ? 'green' : crashed ? 'red' : 'gray')} />
-      <span className="service-name">
+      <span className="font-semibold">
         {service.name}
         {service.autoRestart ? ' ↻' : ''}
       </span>

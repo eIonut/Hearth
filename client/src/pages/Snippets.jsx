@@ -113,7 +113,7 @@ export default function Snippets() {
     <div>
       <div className="flex gap-2 items-center flex-wrap my-1.5 justify-between">
         <input
-          className="search"
+          className="my-2 max-w-[420px]"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by title, tag, language, or content…"
@@ -163,12 +163,12 @@ export default function Snippets() {
             {s.language}
             {s.tags.length > 0 && ' · '}
             {s.tags.map((t) => (
-              <span className="tag" key={t}>
+              <span className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted" key={t}>
                 {t}
               </span>
             ))}
           </div>
-          <pre className="snippet-body">{s.body}</pre>
+          <pre className="mt-2 whitespace-pre-wrap break-all rounded-md border border-border bg-bg p-2.5 font-mono text-[12px]">{s.body}</pre>
         </div>
       ))}
     </div>
