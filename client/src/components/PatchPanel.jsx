@@ -15,35 +15,81 @@ function OpEditor({ op, onChange, onRemove }) {
       <div className="row space-between">
         <select
           value={op.type}
-          onChange={(e) => onChange(e.target.value === 'env-set' ? { ...EMPTY_ENV_OP, file: op.file } : { ...EMPTY_REPLACE_OP, file: op.file })}
+          onChange={(e) =>
+            onChange(
+              e.target.value === 'env-set'
+                ? { ...EMPTY_ENV_OP, file: op.file }
+                : { ...EMPTY_REPLACE_OP, file: op.file },
+            )
+          }
         >
           <option value="env-set">Env value</option>
           <option value="replace">Text replace</option>
         </select>
-        <button className="btn small danger" onClick={onRemove}>✕</button>
+        <button className="btn small danger" onClick={onRemove}>
+          ✕
+        </button>
       </div>
 
-      <label>File (relative to project)
-        <input value={op.file} onChange={(e) => set('file', e.target.value)} placeholder={op.type === 'env-set' ? '.env' : 'src/routes/index.jsx'} />
+      <label>
+        File (relative to project)
+        <input
+          value={op.file}
+          onChange={(e) => set('file', e.target.value)}
+          placeholder={op.type === 'env-set' ? '.env' : 'src/routes/index.jsx'}
+        />
       </label>
 
       {op.type === 'env-set' ? (
         <>
           <div className="row">
-            <label>Key<input value={op.key} onChange={(e) => set('key', e.target.value)} placeholder="IAM_API_URL" /></label>
-            <label>Value when applied<input value={op.value} onChange={(e) => set('value', e.target.value)} placeholder="iam-a-dev-1.infra.al:30374" /></label>
+            <label>
+              Key
+              <input
+                value={op.key}
+                onChange={(e) => set('key', e.target.value)}
+                placeholder="IAM_API_URL"
+              />
+            </label>
+            <label>
+              Value when applied
+              <input
+                value={op.value}
+                onChange={(e) => set('value', e.target.value)}
+                placeholder="iam-a-dev-1.infra.al:30374"
+              />
+            </label>
           </div>
-          <label>Value when reverted (optional — otherwise the previous value is restored)
-            <input value={op.revert || ''} onChange={(e) => set('revert', e.target.value)} placeholder="leave empty to auto-restore" />
+          <label>
+            Value when reverted (optional — otherwise the previous value is restored)
+            <input
+              value={op.revert || ''}
+              onChange={(e) => set('revert', e.target.value)}
+              placeholder="leave empty to auto-restore"
+            />
           </label>
         </>
       ) : (
         <>
-          <label>Find
-            <textarea rows={2} className="mono" value={op.find} onChange={(e) => set('find', e.target.value)} placeholder={'loader={checkAccessToken}'} />
+          <label>
+            Find
+            <textarea
+              rows={2}
+              className="mono"
+              value={op.find}
+              onChange={(e) => set('find', e.target.value)}
+              placeholder={'loader={checkAccessToken}'}
+            />
           </label>
-          <label>Replace with (revert swaps them back)
-            <textarea rows={2} className="mono" value={op.replace} onChange={(e) => set('replace', e.target.value)} placeholder={'// loader={checkAccessToken}'} />
+          <label>
+            Replace with (revert swaps them back)
+            <textarea
+              rows={2}
+              className="mono"
+              value={op.replace}
+              onChange={(e) => set('replace', e.target.value)}
+              placeholder={'// loader={checkAccessToken}'}
+            />
           </label>
         </>
       )}
@@ -62,13 +108,22 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
       if (initial?.id) await api(`/patches/${initial.id}`, { method: 'PUT', body: { name, ops } });
       else await api('/patches', { method: 'POST', body: { projectId, name, ops } });
       onSaved();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   return (
     <div className="card form-card">
       <h3>{initial?.id ? 'Edit patch' : 'New patch'}</h3>
-      <label>Name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="point IAM at dev-1 + disable auth loader" /></label>
+      <label>
+        Name
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="point IAM at dev-1 + disable auth loader"
+        />
+      </label>
 
       {ops.map((op, i) => (
         <OpEditor
@@ -80,14 +135,25 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
       ))}
 
       <div className="row">
-        <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_ENV_OP }])}>+ Env value</button>
-        <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_REPLACE_OP }])}>+ Text replace</button>
+        <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_ENV_OP }])}>
+          + Env value
+        </button>
+        <button
+          className="btn small"
+          onClick={() => setOps((o) => [...o, { ...EMPTY_REPLACE_OP }])}
+        >
+          + Text replace
+        </button>
       </div>
 
       {error && <div className="error">{error}</div>}
       <div className="row">
-        <button className="btn primary" onClick={save} disabled={!name.trim() || ops.length === 0}>Save</button>
-        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn primary" onClick={save} disabled={!name.trim() || ops.length === 0}>
+          Save
+        </button>
+        <button className="btn" onClick={onCancel}>
+          Cancel
+        </button>
       </div>
     </div>
   );
@@ -95,10 +161,10 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
 
 function statusChip(status) {
   const map = {
-    'applied': ['green', 'applied'],
+    applied: ['green', 'applied'],
     'not-applied': ['gray', 'not applied'],
-    'mixed': ['orange', 'partially applied'],
-    'partial': ['orange', 'partial'],
+    mixed: ['orange', 'partially applied'],
+    partial: ['orange', 'partial'],
     'file-missing': ['red', 'file missing'],
     'not-found': ['red', 'text not found'],
   };
@@ -121,18 +187,32 @@ export default function PatchPanel({ projectId }) {
   const confirm = useConfirm();
 
   async function load() {
-    try { setPatches(await api(`/patches?projectId=${projectId}`)); } catch { setPatches([]); }
+    try {
+      setPatches(await api(`/patches?projectId=${projectId}`));
+    } catch {
+      setPatches([]);
+    }
   }
 
-  useEffect(() => { setMsg(''); setError(''); setEditing(null); load(); }, [projectId]);
+  useEffect(() => {
+    setMsg('');
+    setError('');
+    setEditing(null);
+    load();
+  }, [projectId]);
 
   async function run(patch, action) {
-    setMsg(''); setError('');
+    setMsg('');
+    setError('');
     try {
       await api(`/patches/${patch.id}/${action}`, { method: 'POST', body: {} });
-      setMsg(`${action === 'apply' ? 'Applied' : 'Reverted'} "${patch.name}" — files changed in place, previous versions saved in dev-hub/backups`);
+      setMsg(
+        `${action === 'apply' ? 'Applied' : 'Reverted'} "${patch.name}" — files changed in place, previous versions saved in dev-hub/backups`,
+      );
       load();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function remove(patch) {
@@ -147,14 +227,21 @@ export default function PatchPanel({ projectId }) {
         <PatchForm
           projectId={projectId}
           initial={editing.id ? editing : null}
-          onSaved={() => { setEditing(null); load(); }}
+          onSaved={() => {
+            setEditing(null);
+            load();
+          }}
           onCancel={() => setEditing(null)}
         />
       ) : (
         <div className="row">
-          <span className="muted small-text">Named file tweaks you apply and revert on demand.</span>
+          <span className="muted small-text">
+            Named file tweaks you apply and revert on demand.
+          </span>
           <span className="spacer" />
-          <button className="btn small primary" onClick={() => setEditing({})}>+ New patch</button>
+          <button className="btn small primary" onClick={() => setEditing({})}>
+            + New patch
+          </button>
         </div>
       )}
 
@@ -162,7 +249,9 @@ export default function PatchPanel({ projectId }) {
       {error && <div className="error">{error}</div>}
 
       {patches.length === 0 && !editing && (
-        <div className="muted small-text" style={{ padding: '8px 0' }}>No patches for this project yet.</div>
+        <div className="muted small-text" style={{ padding: '8px 0' }}>
+          No patches for this project yet.
+        </div>
       )}
 
       {patches.map((p) => (
@@ -173,15 +262,36 @@ export default function PatchPanel({ projectId }) {
               {statusChip(p.status)}
             </div>
             <div>
-              {p.status !== 'applied' && <button className="btn small primary" onClick={() => run(p, 'apply')}>Apply</button>}
-              {p.status !== 'not-applied' && <button className="btn small" onClick={() => run(p, 'revert')}>Revert</button>}
-              <button className="btn small" onClick={() => setEditing(p)}>Edit</button>
-              <button className="btn small danger" onClick={() => remove(p)}>✕</button>
+              {p.status !== 'applied' && (
+                <button className="btn small primary" onClick={() => run(p, 'apply')}>
+                  Apply
+                </button>
+              )}
+              {p.status !== 'not-applied' && (
+                <button className="btn small" onClick={() => run(p, 'revert')}>
+                  Revert
+                </button>
+              )}
+              <button className="btn small" onClick={() => setEditing(p)}>
+                Edit
+              </button>
+              <button className="btn small danger" onClick={() => remove(p)}>
+                ✕
+              </button>
             </div>
           </div>
           {p.ops.map((op, i) => (
             <div className="service-row" key={i}>
-              <span className={'dot ' + (p.opStatuses[i] === 'applied' ? 'green' : p.opStatuses[i] === 'not-applied' ? 'gray' : 'orange')} />
+              <span
+                className={
+                  'dot ' +
+                  (p.opStatuses[i] === 'applied'
+                    ? 'green'
+                    : p.opStatuses[i] === 'not-applied'
+                      ? 'gray'
+                      : 'orange')
+                }
+              />
               <span className="mono small-text">{opSummary(op)}</span>
             </div>
           ))}

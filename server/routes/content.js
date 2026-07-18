@@ -44,14 +44,20 @@ router.put('/:id', (req, res) => {
     ...(title !== undefined && { title }),
     ...(notes !== undefined && { notes }),
     ...(drafts !== undefined && { drafts }),
-    ...(status !== undefined && { status, postedAt: status === 'posted' ? Date.now() : items[idx].postedAt }),
+    ...(status !== undefined && {
+      status,
+      postedAt: status === 'posted' ? Date.now() : items[idx].postedAt,
+    }),
   };
   write(NAME, items);
   res.json(items[idx]);
 });
 
 router.delete('/:id', (req, res) => {
-  write(NAME, read(NAME).filter((c) => c.id !== req.params.id));
+  write(
+    NAME,
+    read(NAME).filter((c) => c.id !== req.params.id),
+  );
   res.json({ ok: true });
 });
 

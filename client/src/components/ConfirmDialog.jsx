@@ -17,7 +17,7 @@ export function ConfirmProvider({ children }) {
   const resolveRef = useRef(null);
 
   const confirm = useCallback((opts) => {
-    const options = typeof opts === 'string' ? { message: opts } : (opts || {});
+    const options = typeof opts === 'string' ? { message: opts } : opts || {};
     return new Promise((resolve) => {
       resolveRef.current = resolve;
       setState({ options });
@@ -70,7 +70,9 @@ function ConfirmModal({ options, onClose }) {
         <h3 className="modal-title">{title}</h3>
         {message && <p className="modal-message">{message}</p>}
         <div className="row space-between modal-actions">
-          <button className="btn" onClick={() => onClose(false)}>{cancelText}</button>
+          <button className="btn" onClick={() => onClose(false)}>
+            {cancelText}
+          </button>
           <button
             ref={confirmRef}
             className={'btn ' + (danger ? 'danger-solid' : 'primary')}

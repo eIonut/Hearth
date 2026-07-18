@@ -30,7 +30,9 @@ function TilBar() {
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') save();
+        }}
         placeholder="What did you just learn? Log it in 3 seconds…"
       />
       <button className="btn primary small" onClick={save} disabled={!text.trim()}>
@@ -44,7 +46,9 @@ const KEEP_MOUNTED = ['workspace']; // shells and iframes survive page switches
 
 export default function App() {
   const [page, setPage] = useState('projects');
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('hub-sidebar-collapsed') === '1');
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem('hub-sidebar-collapsed') === '1',
+  );
   const Active = PAGES.find((p) => p.id === page).component;
 
   function toggleSidebar() {
@@ -72,7 +76,10 @@ export default function App() {
     }
     poll();
     const t = setInterval(poll, 5000);
-    return () => { alive = false; clearInterval(t); };
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
   }, []);
 
   return (
@@ -80,7 +87,11 @@ export default function App() {
       <aside className={'sidebar' + (collapsed ? ' collapsed' : '')}>
         <div className="logo-row">
           <span className="logo">{collapsed ? '⚡' : '⚡ Dev Hub'}</span>
-          <button className="collapse-btn" onClick={toggleSidebar} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+          <button
+            className="collapse-btn"
+            onClick={toggleSidebar}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
             {collapsed ? '»' : '«'}
           </button>
         </div>
@@ -94,7 +105,10 @@ export default function App() {
             >
               {collapsed ? p.label[0] : p.label}
               {p.id === 'projects' && crashedCount > 0 && (
-                <span className="crash-badge" title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}>
+                <span
+                  className="crash-badge"
+                  title={`${crashedCount} crashed service${crashedCount > 1 ? 's' : ''}`}
+                >
                   {collapsed ? '' : crashedCount}
                 </span>
               )}

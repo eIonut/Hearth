@@ -27,41 +27,62 @@ export default function SkillsPage() {
 
   useEffect(() => {
     if (!projectId) return;
-    api(`/skills/installed/${projectId}`).then((r) => setInstalled(r.installed)).catch(() => setInstalled([]));
+    api(`/skills/installed/${projectId}`)
+      .then((r) => setInstalled(r.installed))
+      .catch(() => setInstalled([]));
   }, [projectId, msg]);
 
   async function savePath() {
-    setError(''); setSaved(false);
+    setError('');
+    setSaved(false);
     try {
       await api('/skills/settings', { method: 'PUT', body: { skillsRepoPath: repoPath } });
       setSaved(true);
       loadSkills();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function install() {
-    setError(''); setMsg('');
+    setError('');
+    setMsg('');
     const names = Object.keys(selected).filter((n) => selected[n]);
     if (!names.length) return;
     try {
       const r = await api('/skills/install', { method: 'POST', body: { projectId, names } });
-      setMsg(`Installed: ${r.installed.join(', ')}${r.errors.length ? ` · Errors: ${r.errors.join('; ')}` : ''}`);
+      setMsg(
+        `Installed: ${r.installed.join(', ')}${r.errors.length ? ` · Errors: ${r.errors.join('; ')}` : ''}`,
+      );
       setSelected({});
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   return (
     <div>
-      <p className="muted">Your reusable skills repo, installable into any project's <span className="mono">.claude/skills</span> with one click.</p>
+      <p className="muted">
+        Your reusable skills repo, installable into any project's{' '}
+        <span className="mono">.claude/skills</span> with one click.
+      </p>
 
       <div className="card">
         <h3>Skills repo location</h3>
         <div className="row">
-          <input value={repoPath} onChange={(e) => setRepoPath(e.target.value)} placeholder="/Users/you/code/my-ai-skills" />
-          <button className="btn primary" onClick={savePath}>Save</button>
+          <input
+            value={repoPath}
+            onChange={(e) => setRepoPath(e.target.value)}
+            placeholder="/Users/you/code/my-ai-skills"
+          />
+          <button className="btn primary" onClick={savePath}>
+            Save
+          </button>
         </div>
         {saved && <div className="success">Saved.</div>}
-        <div className="muted small-text">A skill is a subfolder containing SKILL.md, or a loose .md file.</div>
+        <div className="muted small-text">
+          A skill is a subfolder containing SKILL.md, or a loose .md file.
+        </div>
       </div>
 
       {skillsInfo.configured && (
@@ -71,10 +92,22 @@ export default function SkillsPage() {
             {projects.length > 0 && (
               <div className="row">
                 <span className="muted">Install into:</span>
-                <select value={projectId} onChange={(e) => setProjectId(e.target.value)} style={{ width: 'auto', marginTop: 0 }}>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                <select
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  style={{ width: 'auto', marginTop: 0 }}
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
                 </select>
-                <button className="btn primary" onClick={install} disabled={!Object.values(selected).some(Boolean)}>
+                <button
+                  className="btn primary"
+                  onClick={install}
+                  disabled={!Object.values(selected).some(Boolean)}
+                >
                   Install selected
                 </button>
               </div>

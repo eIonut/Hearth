@@ -9,22 +9,34 @@ function TargetCard({ projectId, target, onChanged }) {
   const confirm = useConfirm();
 
   async function apply(preset) {
-    setMsg(''); setError('');
+    setMsg('');
+    setError('');
     try {
-      await api(`/env/${projectId}/apply`, { method: 'POST', body: { target: target.name, preset } });
+      await api(`/env/${projectId}/apply`, {
+        method: 'POST',
+        body: { target: target.name, preset },
+      });
       setMsg(`Applied "${preset}" (previous version saved in dev-hub/backups)`);
       onChanged();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function saveCurrent() {
-    setMsg(''); setError('');
+    setMsg('');
+    setError('');
     try {
-      await api(`/env/${projectId}/save`, { method: 'POST', body: { target: target.name, name: newName } });
+      await api(`/env/${projectId}/save`, {
+        method: 'POST',
+        body: { target: target.name, name: newName },
+      });
       setMsg(`Saved current ${target.file} as "${newName}"`);
       setNewName('');
       onChanged();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function removePreset(preset) {
@@ -37,7 +49,10 @@ function TargetCard({ projectId, target, onChanged }) {
     <div className="card compact op-editor">
       <div className="row space-between">
         <strong>{target.name}</strong>
-        <span className="muted mono small-text">{target.file}{!target.exists && ' (missing)'}</span>
+        <span className="muted mono small-text">
+          {target.file}
+          {!target.exists && ' (missing)'}
+        </span>
       </div>
 
       {target.presets.length === 0 && (
@@ -49,14 +64,28 @@ function TargetCard({ projectId, target, onChanged }) {
           <span className="service-name">{name}</span>
           {target.current === name && <span className="muted small-text">active</span>}
           <span className="spacer" />
-          <button className="btn small primary" onClick={() => apply(name)} disabled={target.current === name}>Apply</button>
-          <button className="btn small danger" onClick={() => removePreset(name)}>✕</button>
+          <button
+            className="btn small primary"
+            onClick={() => apply(name)}
+            disabled={target.current === name}
+          >
+            Apply
+          </button>
+          <button className="btn small danger" onClick={() => removePreset(name)}>
+            ✕
+          </button>
         </div>
       ))}
 
       <div className="row">
-        <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Save current as… (e.g. staging)" />
-        <button className="btn primary" onClick={saveCurrent} disabled={!newName || !target.exists}>Save</button>
+        <input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Save current as… (e.g. staging)"
+        />
+        <button className="btn primary" onClick={saveCurrent} disabled={!newName || !target.exists}>
+          Save
+        </button>
       </div>
 
       {msg && <div className="success">{msg}</div>}
@@ -73,13 +102,22 @@ export default function EnvPanel({ projectId }) {
     try {
       const r = await api(`/env/${projectId}`);
       setTargets(r.targets || []);
-    } catch { setTargets([]); }
+    } catch {
+      setTargets([]);
+    }
   }
 
-  useEffect(() => { load(); }, [projectId]);
+  useEffect(() => {
+    load();
+  }, [projectId]);
 
   if (targets.length === 0) {
-    return <div className="muted small-text" style={{ padding: '8px 0' }}>No env targets — add env files to this project via Edit. The current file is always backed up before a swap.</div>;
+    return (
+      <div className="muted small-text" style={{ padding: '8px 0' }}>
+        No env targets — add env files to this project via Edit. The current file is always backed
+        up before a swap.
+      </div>
+    );
   }
 
   return targets.map((t) => (

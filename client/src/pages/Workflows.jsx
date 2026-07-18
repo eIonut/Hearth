@@ -4,12 +4,12 @@ import { openPreview } from '../lib/bus.js';
 import { useConfirm } from '../components/ConfirmDialog.jsx';
 
 const STEP_LABELS = {
-  'start': 'Start service',
-  'stop': 'Stop service',
+  start: 'Start service',
+  stop: 'Stop service',
   'env-apply': 'Apply env preset',
   'patch-apply': 'Apply patch',
   'patch-revert': 'Revert patch',
-  'preview': 'Open preview',
+  preview: 'Open preview',
 };
 
 function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRemove }) {
@@ -33,40 +33,72 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
     <div className="card compact op-editor">
       <div className="row space-between">
         <select value={step.type} onChange={(e) => setType(e.target.value)}>
-          {Object.entries(STEP_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          {Object.entries(STEP_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>
+              {v}
+            </option>
+          ))}
         </select>
-        <button className="btn small danger" onClick={onRemove}>✕</button>
+        <button className="btn small danger" onClick={onRemove}>
+          ✕
+        </button>
       </div>
 
       {['start', 'stop', 'env-apply'].includes(step.type) && (
         <div className="row">
-          <label>Project
+          <label>
+            Project
             <select value={step.projectId || ''} onChange={(e) => set('projectId', e.target.value)}>
-              <option value="" disabled>choose…</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              <option value="" disabled>
+                choose…
+              </option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
             </select>
           </label>
           {['start', 'stop'].includes(step.type) && (
-            <label>Service
+            <label>
+              Service
               <select value={step.service || ''} onChange={(e) => set('service', e.target.value)}>
-                <option value="" disabled>choose…</option>
-                {(project?.services || []).map((s) => <option key={s.name} value={s.name}>{s.name}</option>)}
+                <option value="" disabled>
+                  choose…
+                </option>
+                {(project?.services || []).map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name}
+                  </option>
+                ))}
               </select>
             </label>
           )}
           {step.type === 'env-apply' && (
             <>
-              <label>Env target
+              <label>
+                Env target
                 <select value={step.target || ''} onChange={(e) => set('target', e.target.value)}>
-                  <option value="" disabled>choose…</option>
-                  {envTargets.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
+                  <option value="" disabled>
+                    choose…
+                  </option>
+                  {envTargets.map((t) => (
+                    <option key={t.name} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))}
                 </select>
               </label>
-              <label>Preset
+              <label>
+                Preset
                 <select value={step.preset || ''} onChange={(e) => set('preset', e.target.value)}>
-                  <option value="" disabled>choose…</option>
+                  <option value="" disabled>
+                    choose…
+                  </option>
                   {(envTargets.find((t) => t.name === step.target)?.presets || []).map((p) => (
-                    <option key={p} value={p}>{p}</option>
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -76,12 +108,19 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
       )}
 
       {['patch-apply', 'patch-revert'].includes(step.type) && (
-        <label>Patch
+        <label>
+          Patch
           <select value={step.patchId || ''} onChange={(e) => set('patchId', e.target.value)}>
-            <option value="" disabled>choose…</option>
+            <option value="" disabled>
+              choose…
+            </option>
             {patches.map((p) => {
               const proj = projects.find((pr) => pr.id === p.projectId);
-              return <option key={p.id} value={p.id}>{proj?.name || '?'} · {p.name}</option>;
+              return (
+                <option key={p.id} value={p.id}>
+                  {proj?.name || '?'} · {p.name}
+                </option>
+              );
             })}
           </select>
         </label>
@@ -89,9 +128,22 @@ function StepEditor({ step, projects, patches, envCache, loadEnv, onChange, onRe
 
       {step.type === 'preview' && (
         <div className="row">
-          <label>Label<input value={step.label || ''} onChange={(e) => set('label', e.target.value)} placeholder="web" /></label>
-          <label>URL
-            <input list="preview-urls" value={step.url || ''} onChange={(e) => set('url', e.target.value)} placeholder="localhost:4000" />
+          <label>
+            Label
+            <input
+              value={step.label || ''}
+              onChange={(e) => set('label', e.target.value)}
+              placeholder="web"
+            />
+          </label>
+          <label>
+            URL
+            <input
+              list="preview-urls"
+              value={step.url || ''}
+              onChange={(e) => set('url', e.target.value)}
+              placeholder="localhost:4000"
+            />
           </label>
         </div>
       )}
@@ -107,16 +159,26 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
   async function save() {
     setError('');
     try {
-      if (initial?.id) await api(`/workflows/${initial.id}`, { method: 'PUT', body: { name, steps } });
+      if (initial?.id)
+        await api(`/workflows/${initial.id}`, { method: 'PUT', body: { name, steps } });
       else await api('/workflows', { method: 'POST', body: { name, steps } });
       onSaved();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   return (
     <div className="card form-card">
       <h3>{initial?.id ? 'Edit workflow' : 'New workflow'}</h3>
-      <label>Name<input value={name} onChange={(e) => setName(e.target.value)} placeholder="morning: billing stack" /></label>
+      <label>
+        Name
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="morning: billing stack"
+        />
+      </label>
 
       {steps.map((s, i) => (
         <StepEditor
@@ -131,12 +193,25 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
         />
       ))}
 
-      <button className="btn small" onClick={() => setSteps((s) => [...s, { type: 'start', projectId: projects[0]?.id ?? '' }])}>+ Add step</button>
+      <button
+        className="btn small"
+        onClick={() => setSteps((s) => [...s, { type: 'start', projectId: projects[0]?.id ?? '' }])}
+      >
+        + Add step
+      </button>
 
       {error && <div className="error">{error}</div>}
       <div className="row">
-        <button className="btn primary" onClick={save} disabled={!name.trim() || steps.length === 0}>Save</button>
-        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button
+          className="btn primary"
+          onClick={save}
+          disabled={!name.trim() || steps.length === 0}
+        >
+          Save
+        </button>
+        <button className="btn" onClick={onCancel}>
+          Cancel
+        </button>
       </div>
     </div>
   );
@@ -157,7 +232,9 @@ export default function Workflows() {
     setProjects(await api('/projects'));
     setPatches(await api('/patches'));
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function loadEnv(projectId) {
     if (envCache[projectId]) return;
@@ -193,14 +270,19 @@ export default function Workflows() {
   return (
     <div>
       <datalist id="preview-urls">
-        {previewUrls.map((u) => <option key={u} value={u} />)}
+        {previewUrls.map((u) => (
+          <option key={u} value={u} />
+        ))}
       </datalist>
 
       <div className="row space-between">
         <p className="muted">
-          Your setup rituals as one click: start services, swap env presets, apply patches, open previews — in order.
+          Your setup rituals as one click: start services, swap env presets, apply patches, open
+          previews — in order.
         </p>
-        <button className="btn primary" onClick={() => setEditing({})}>+ New workflow</button>
+        <button className="btn primary" onClick={() => setEditing({})}>
+          + New workflow
+        </button>
       </div>
 
       {editing && (
@@ -210,7 +292,10 @@ export default function Workflows() {
           envCache={envCache}
           loadEnv={loadEnv}
           initial={editing.id ? editing : null}
-          onSaved={() => { setEditing(null); load(); }}
+          onSaved={() => {
+            setEditing(null);
+            load();
+          }}
           onCancel={() => setEditing(null)}
         />
       )}
@@ -220,7 +305,10 @@ export default function Workflows() {
           <h3>Run: {results.name}</h3>
           {results.results.map((r, i) => (
             <div className="service-row" key={i}>
-              <span className={'dot ' + (r.ok ? 'green' : 'gray')} style={!r.ok ? { background: 'var(--red)' } : {}} />
+              <span
+                className={'dot ' + (r.ok ? 'green' : 'gray')}
+                style={!r.ok ? { background: 'var(--red)' } : {}}
+              />
               <span className="small-text">{r.label}</span>
               {r.error && <span className="error small-text">{r.error}</span>}
             </div>
@@ -229,7 +317,10 @@ export default function Workflows() {
       )}
 
       {workflows.length === 0 && !editing && (
-        <div className="card empty">No workflows yet. Create one for your morning setup — it will save you clicks every single day.</div>
+        <div className="card empty">
+          No workflows yet. Create one for your morning setup — it will save you clicks every single
+          day.
+        </div>
       )}
 
       {workflows.map((wf) => (
@@ -237,11 +328,19 @@ export default function Workflows() {
           <div className="row space-between">
             <h3 style={{ margin: 0 }}>{wf.name}</h3>
             <div>
-              <button className="btn small primary" disabled={running[wf.id]} onClick={() => run(wf)}>
+              <button
+                className="btn small primary"
+                disabled={running[wf.id]}
+                onClick={() => run(wf)}
+              >
                 {running[wf.id] ? 'Running…' : '▶ Run'}
               </button>
-              <button className="btn small" onClick={() => setEditing(wf)}>Edit</button>
-              <button className="btn small danger" onClick={() => remove(wf)}>✕</button>
+              <button className="btn small" onClick={() => setEditing(wf)}>
+                Edit
+              </button>
+              <button className="btn small danger" onClick={() => remove(wf)}>
+                ✕
+              </button>
             </div>
           </div>
           <div className="muted small-text">{wf.stepLabels.join('  →  ')}</div>

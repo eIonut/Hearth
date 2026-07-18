@@ -19,21 +19,25 @@ router.get('/', (req, res) => {
   let patches = read(NAME);
   if (projectId) patches = patches.filter((p) => p.projectId === projectId);
   const projects = read('projects');
-  res.json(patches.map((p) => {
-    const project = projects.find((pr) => pr.id === p.projectId);
-    return {
-      ...p,
-      status: project ? patchops.overallStatus(project, p.ops) : 'project-missing',
-      opStatuses: project ? p.ops.map((op) => patchops.opStatus(project, op)) : [],
-    };
-  }));
+  res.json(
+    patches.map((p) => {
+      const project = projects.find((pr) => pr.id === p.projectId);
+      return {
+        ...p,
+        status: project ? patchops.overallStatus(project, p.ops) : 'project-missing',
+        opStatuses: project ? p.ops.map((op) => patchops.opStatus(project, op)) : [],
+      };
+    }),
+  );
 });
 
 router.post('/', (req, res) => {
   const { projectId, name, ops } = req.body;
-  if (!name || !projectId) return res.status(400).json({ error: 'name and projectId are required' });
+  if (!name || !projectId)
+    return res.status(400).json({ error: 'name and projectId are required' });
   if (!getProject(projectId)) return res.status(404).json({ error: 'project not found' });
-  if (!Array.isArray(ops) || ops.length === 0) return res.status(400).json({ error: 'at least one op is required' });
+  if (!Array.isArray(ops) || ops.length === 0)
+    return res.status(400).json({ error: 'at least one op is required' });
   for (const op of ops) {
     const err = patchops.validateOp(op);
     if (err) return res.status(400).json({ error: err });
@@ -51,7 +55,8 @@ router.put('/:id', (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'not found' });
   const { name, ops } = req.body;
   if (ops !== undefined) {
-    if (!Array.isArray(ops) || ops.length === 0) return res.status(400).json({ error: 'at least one op is required' });
+    if (!Array.isArray(ops) || ops.length === 0)
+      return res.status(400).json({ error: 'at least one op is required' });
     for (const op of ops) {
       const err = patchops.validateOp(op);
       if (err) return res.status(400).json({ error: err });
@@ -67,7 +72,10 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  write(NAME, read(NAME).filter((p) => p.id !== req.params.id));
+  write(
+    NAME,
+    read(NAME).filter((p) => p.id !== req.params.id),
+  );
   patchops.clearState(req.params.id);
   res.json({ ok: true });
 });

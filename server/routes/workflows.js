@@ -23,9 +23,12 @@ function getProject(projectId) {
 function describeStep(step) {
   const project = step.projectId ? getProject(step.projectId) : null;
   switch (step.type) {
-    case 'start': return `start ${project?.name || '?'}/${step.service}`;
-    case 'stop': return `stop ${project?.name || '?'}/${step.service}`;
-    case 'env-apply': return `env ${project?.name || '?'}/${step.target} → ${step.preset}`;
+    case 'start':
+      return `start ${project?.name || '?'}/${step.service}`;
+    case 'stop':
+      return `stop ${project?.name || '?'}/${step.service}`;
+    case 'env-apply':
+      return `env ${project?.name || '?'}/${step.target} → ${step.preset}`;
     case 'patch-apply': {
       const patch = read('patches').find((p) => p.id === step.patchId);
       return `apply patch "${patch?.name || '?'}"`;
@@ -34,31 +37,39 @@ function describeStep(step) {
       const patch = read('patches').find((p) => p.id === step.patchId);
       return `revert patch "${patch?.name || '?'}"`;
     }
-    case 'preview': return `preview ${step.label || step.url}`;
-    default: return step.type;
+    case 'preview':
+      return `preview ${step.label || step.url}`;
+    default:
+      return step.type;
   }
 }
 
 function validateStep(step) {
   if (!STEP_TYPES.includes(step.type)) return `unknown step type: ${step.type}`;
-  if (['start', 'stop'].includes(step.type) && (!step.projectId || !step.service)) return `${step.type} needs projectId and service`;
-  if (step.type === 'env-apply' && (!step.projectId || !step.target || !step.preset)) return 'env-apply needs projectId, target, preset';
-  if (['patch-apply', 'patch-revert'].includes(step.type) && !step.patchId) return `${step.type} needs patchId`;
+  if (['start', 'stop'].includes(step.type) && (!step.projectId || !step.service))
+    return `${step.type} needs projectId and service`;
+  if (step.type === 'env-apply' && (!step.projectId || !step.target || !step.preset))
+    return 'env-apply needs projectId, target, preset';
+  if (['patch-apply', 'patch-revert'].includes(step.type) && !step.patchId)
+    return `${step.type} needs patchId`;
   if (step.type === 'preview' && !step.url) return 'preview needs url';
   return null;
 }
 
 router.get('/', (req, res) => {
-  res.json(read(NAME).map((w) => ({
-    ...w,
-    stepLabels: w.steps.map(describeStep),
-  })));
+  res.json(
+    read(NAME).map((w) => ({
+      ...w,
+      stepLabels: w.steps.map(describeStep),
+    })),
+  );
 });
 
 router.post('/', (req, res) => {
   const { name, steps } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
-  if (!Array.isArray(steps) || steps.length === 0) return res.status(400).json({ error: 'at least one step is required' });
+  if (!Array.isArray(steps) || steps.length === 0)
+    return res.status(400).json({ error: 'at least one step is required' });
   for (const s of steps) {
     const err = validateStep(s);
     if (err) return res.status(400).json({ error: err });
@@ -76,7 +87,8 @@ router.put('/:id', (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'not found' });
   const { name, steps } = req.body;
   if (steps !== undefined) {
-    if (!Array.isArray(steps) || steps.length === 0) return res.status(400).json({ error: 'at least one step is required' });
+    if (!Array.isArray(steps) || steps.length === 0)
+      return res.status(400).json({ error: 'at least one step is required' });
     for (const s of steps) {
       const err = validateStep(s);
       if (err) return res.status(400).json({ error: err });
@@ -92,7 +104,10 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  write(NAME, read(NAME).filter((w) => w.id !== req.params.id));
+  write(
+    NAME,
+    read(NAME).filter((w) => w.id !== req.params.id),
+  );
   res.json({ ok: true });
 });
 
@@ -128,7 +143,11 @@ router.post('/:id/run', (req, res) => {
         if (step.type === 'patch-apply') patchops.applyPatch(project, patch);
         else patchops.revertPatch(project, patch);
       } else if (step.type === 'preview') {
-        results.push({ label, ok: true, clientPreview: { label: step.label || step.url, url: step.url } });
+        results.push({
+          label,
+          ok: true,
+          clientPreview: { label: step.label || step.url, url: step.url },
+        });
         continue;
       }
       results.push({ label, ok: true });

@@ -30,7 +30,8 @@ router.put('/settings', (req, res) => {
 router.get('/', (req, res) => {
   const { skillsRepoPath } = getSettings();
   if (!skillsRepoPath) return res.json({ configured: false, skills: [] });
-  if (!fs.existsSync(skillsRepoPath)) return res.json({ configured: true, missing: true, skills: [] });
+  if (!fs.existsSync(skillsRepoPath))
+    return res.json({ configured: true, missing: true, skills: [] });
 
   const skills = [];
   for (const entry of fs.readdirSync(skillsRepoPath, { withFileTypes: true })) {
@@ -42,7 +43,11 @@ router.get('/', (req, res) => {
         try {
           const content = fs.readFileSync(skillMd, 'utf8');
           const m = content.match(/^description:\s*(.+)$/m);
-          description = m ? m[1].trim() : content.split('\n').find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---')) || '';
+          description = m
+            ? m[1].trim()
+            : content
+                .split('\n')
+                .find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---')) || '';
         } catch {}
         skills.push({ name: entry.name, type: 'dir', description: description.slice(0, 160) });
       }
@@ -70,7 +75,8 @@ router.post('/install', (req, res) => {
 
   const project = read('projects').find((p) => p.id === projectId);
   if (!project) return res.status(404).json({ error: 'project not found' });
-  if (!Array.isArray(names) || names.length === 0) return res.status(400).json({ error: 'names is required' });
+  if (!Array.isArray(names) || names.length === 0)
+    return res.status(400).json({ error: 'names is required' });
 
   const targetDir = path.join(project.path, '.claude', 'skills');
   try {

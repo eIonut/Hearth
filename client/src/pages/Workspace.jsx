@@ -27,10 +27,14 @@ function TermView({ cwd, visible }) {
     fit.fit();
 
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${location.host}/term?cwd=${encodeURIComponent(cwd || '')}`);
+    const ws = new WebSocket(
+      `${proto}://${location.host}/term?cwd=${encodeURIComponent(cwd || '')}`,
+    );
     ws.onmessage = (e) => term.write(e.data);
     ws.onclose = () => term.write('\r\n[connection closed]\r\n');
-    term.onData((d) => { if (ws.readyState === 1) ws.send(d); });
+    term.onData((d) => {
+      if (ws.readyState === 1) ws.send(d);
+    });
 
     function doFit() {
       fit.fit();
@@ -43,7 +47,9 @@ function TermView({ cwd, visible }) {
     termRef.current = { term, fit, ws, doFit };
     return () => {
       window.removeEventListener('resize', onResize);
-      try { ws.close(); } catch {}
+      try {
+        ws.close();
+      } catch {}
       term.dispose();
     };
   }, [cwd]);
@@ -52,7 +58,13 @@ function TermView({ cwd, visible }) {
     if (visible && termRef.current) setTimeout(() => termRef.current.doFit(), 30);
   }, [visible]);
 
-  return <div ref={containerRef} className="term-container" style={{ display: visible ? 'block' : 'none' }} />;
+  return (
+    <div
+      ref={containerRef}
+      className="term-container"
+      style={{ display: visible ? 'block' : 'none' }}
+    />
+  );
 }
 
 function FrameTab({ tab, visible }) {
@@ -60,7 +72,9 @@ function FrameTab({ tab, visible }) {
 
   useEffect(() => {
     setCheck(null);
-    api(`/preview/check?url=${encodeURIComponent(tab.url)}`).then(setCheck).catch(() => {});
+    api(`/preview/check?url=${encodeURIComponent(tab.url)}`)
+      .then(setCheck)
+      .catch(() => {});
   }, [tab.url, tab.reloadKey]);
 
   const problem = check && (!check.reachable || check.blocked);
@@ -69,14 +83,18 @@ function FrameTab({ tab, visible }) {
     <div style={{ display: visible ? 'flex' : 'none' }} className="preview-frame-wrap">
       {problem && (
         <div className="row preview-notice">
-          {!check.reachable && <span className="chip red">not reachable — is the service running?</span>}
-          {check.blocked && <span className="chip red">blocks iframes ({check.reason}) — use ↗</span>}
+          {!check.reachable && (
+            <span className="chip red">not reachable — is the service running?</span>
+          )}
+          {check.blocked && (
+            <span className="chip red">blocks iframes ({check.reason}) — use ↗</span>
+          )}
         </div>
       )}
       {check?.blocked ? (
         <div className="card empty" style={{ flex: 1 }}>
-          This app refuses to render inside an iframe ({check.reason}).
-          Use ↗ to open it in a new tab, or remove the header in the app's dev config.
+          This app refuses to render inside an iframe ({check.reason}). Use ↗ to open it in a new
+          tab, or remove the header in the app's dev config.
         </div>
       ) : (
         <iframe
@@ -100,8 +118,12 @@ export default function Workspace() {
   const counter = useRef(0);
 
   useEffect(() => {
-    api('/projects').then(setProjects).catch(() => {});
-    api('/health').then((h) => setPtyAvailable(h.terminals)).catch(() => {});
+    api('/projects')
+      .then(setProjects)
+      .catch(() => {});
+    api('/health')
+      .then((h) => setPtyAvailable(h.terminals))
+      .catch(() => {});
   }, []);
 
   function openTerm(label, cwd) {
@@ -114,9 +136,21 @@ export default function Workspace() {
     const norm = normalize(url);
     if (!norm) return;
     const existing = tabs.find((t) => t.kind === 'preview' && t.url === norm);
-    if (existing) { setActiveTab(existing.id); return; }
+    if (existing) {
+      setActiveTab(existing.id);
+      return;
+    }
     const id = ++counter.current;
-    setTabs((t) => [...t, { id, kind: 'preview', label: label || norm.replace(/^https?:\/\//, ''), url: norm, reloadKey: 0 }]);
+    setTabs((t) => [
+      ...t,
+      {
+        id,
+        kind: 'preview',
+        label: label || norm.replace(/^https?:\/\//, ''),
+        url: norm,
+        reloadKey: 0,
+      },
+    ]);
     setActiveTab(id);
   }
 
@@ -137,11 +171,13 @@ export default function Workspace() {
   }
 
   function reloadActive() {
-    setTabs((t) => t.map((tab) => (tab.id === activeTab ? { ...tab, reloadKey: tab.reloadKey + 1 } : tab)));
+    setTabs((t) =>
+      t.map((tab) => (tab.id === activeTab ? { ...tab, reloadKey: tab.reloadKey + 1 } : tab)),
+    );
   }
 
   const quickLinks = projects.flatMap((p) =>
-    (p.previews || []).map((pr) => ({ label: `${p.name}/${pr.name}`, url: pr.url }))
+    (p.previews || []).map((pr) => ({ label: `${p.name}/${pr.name}`, url: pr.url })),
   );
   const active = tabs.find((t) => t.id === activeTab);
 
@@ -159,9 +195,15 @@ export default function Workspace() {
           }}
           disabled={!ptyAvailable}
         >
-          <option value="" disabled>+ Terminal…</option>
+          <option value="" disabled>
+            + Terminal…
+          </option>
           <option value="::home">home</option>
-          {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
         </select>
 
         {quickLinks.length > 0 && (
@@ -172,24 +214,54 @@ export default function Workspace() {
               if (q) openPreviewTab(q.label, q.url);
             }}
           >
-            <option value="" disabled>+ Preview…</option>
-            {quickLinks.map((q) => <option key={q.label} value={q.label}>{q.label}</option>)}
+            <option value="" disabled>
+              + Preview…
+            </option>
+            {quickLinks.map((q) => (
+              <option key={q.label} value={q.label}>
+                {q.label}
+              </option>
+            ))}
           </select>
         )}
         <input
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { openPreviewTab(null, urlInput); setUrlInput(''); } }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              openPreviewTab(null, urlInput);
+              setUrlInput('');
+            }
+          }}
           placeholder="localhost:4000"
           style={{ width: 160, marginTop: 0 }}
         />
-        <button className="btn small" onClick={() => { openPreviewTab(null, urlInput); setUrlInput(''); }} disabled={!urlInput.trim()}>Open</button>
+        <button
+          className="btn small"
+          onClick={() => {
+            openPreviewTab(null, urlInput);
+            setUrlInput('');
+          }}
+          disabled={!urlInput.trim()}
+        >
+          Open
+        </button>
 
         <span className="spacer" />
         {active?.kind === 'preview' && (
           <>
-            <button className="btn small" onClick={reloadActive} title="Reload">⟳</button>
-            <a className="btn small" href={active.url} target="_blank" rel="noreferrer" title="Open in new tab">↗</a>
+            <button className="btn small" onClick={reloadActive} title="Reload">
+              ⟳
+            </button>
+            <a
+              className="btn small"
+              href={active.url}
+              target="_blank"
+              rel="noreferrer"
+              title="Open in new tab"
+            >
+              ↗
+            </a>
           </>
         )}
       </div>
@@ -197,10 +269,25 @@ export default function Workspace() {
       {tabs.length > 0 && (
         <div className="tab-bar">
           {tabs.map((t) => (
-            <div key={t.id} className={'tab' + (activeTab === t.id ? ' active' : '')} onClick={() => setActiveTab(t.id)} title={t.kind === 'preview' ? t.url : t.cwd || 'home'}>
-              <span className={t.kind === 'term' ? 'tab-glyph mono' : 'tab-glyph'}>{t.kind === 'term' ? '❯' : '⌗'}</span>
+            <div
+              key={t.id}
+              className={'tab' + (activeTab === t.id ? ' active' : '')}
+              onClick={() => setActiveTab(t.id)}
+              title={t.kind === 'preview' ? t.url : t.cwd || 'home'}
+            >
+              <span className={t.kind === 'term' ? 'tab-glyph mono' : 'tab-glyph'}>
+                {t.kind === 'term' ? '❯' : '⌗'}
+              </span>
               {t.label}
-              <span className="tab-close" onClick={(e) => { e.stopPropagation(); closeTab(t.id); }}>✕</span>
+              <span
+                className="tab-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeTab(t.id);
+                }}
+              >
+                ✕
+              </span>
             </div>
           ))}
         </div>
@@ -208,26 +295,29 @@ export default function Workspace() {
 
       {!ptyAvailable && (
         <div className="card error">
-          node-pty is not installed, so terminals are disabled.
-          Run <span className="mono">npm install node-pty</span> in the dev-hub folder (needs Xcode Command Line Tools), then restart the server.
+          node-pty is not installed, so terminals are disabled. Run{' '}
+          <span className="mono">npm install node-pty</span> in the dev-hub folder (needs Xcode
+          Command Line Tools), then restart the server.
         </div>
       )}
 
       {tabs.length === 0 && (
         <div className="card empty">
-          One surface for shells and running apps. Open a terminal in your home folder or any project
-          (tip: run <span className="mono">claude</span> inside one), and open previews of your services next to it —
-          set preview URLs per project (Projects → Edit) to get one-click entries.
-          Tabs stay alive while you move around the hub.
+          One surface for shells and running apps. Open a terminal in your home folder or any
+          project (tip: run <span className="mono">claude</span> inside one), and open previews of
+          your services next to it — set preview URLs per project (Projects → Edit) to get one-click
+          entries. Tabs stay alive while you move around the hub.
         </div>
       )}
 
       <div className="work-area">
-        {tabs.map((t) => (
-          t.kind === 'term'
-            ? <TermView key={'t' + t.id} cwd={t.cwd} visible={activeTab === t.id} />
-            : <FrameTab key={'p' + t.id} tab={t} visible={activeTab === t.id} />
-        ))}
+        {tabs.map((t) =>
+          t.kind === 'term' ? (
+            <TermView key={'t' + t.id} cwd={t.cwd} visible={activeTab === t.id} />
+          ) : (
+            <FrameTab key={'p' + t.id} tab={t} visible={activeTab === t.id} />
+          ),
+        )}
       </div>
     </div>
   );

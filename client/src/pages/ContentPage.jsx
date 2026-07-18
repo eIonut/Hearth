@@ -30,14 +30,22 @@ function DraftViewer({ item, onClose, onSaved }) {
       <div className="row space-between">
         <h3>{item.title} — drafts</h3>
         <div>
-          <button className="btn small primary" onClick={copy}>{copied ? 'Copied!' : 'Copy ' + tab}</button>
-          <button className="btn small" onClick={save}>Save edits</button>
-          <button className="btn small" onClick={onClose}>Close</button>
+          <button className="btn small primary" onClick={copy}>
+            {copied ? 'Copied!' : 'Copy ' + tab}
+          </button>
+          <button className="btn small" onClick={save}>
+            Save edits
+          </button>
+          <button className="btn small" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
       <div className="tab-bar">
         {PLATFORMS.map((p) => (
-          <div key={p} className={'tab' + (tab === p ? ' active' : '')} onClick={() => setTab(p)}>{p}</div>
+          <div key={p} className={'tab' + (tab === p ? ' active' : '')} onClick={() => setTab(p)}>
+            {p}
+          </div>
         ))}
       </div>
       <textarea
@@ -64,7 +72,9 @@ export default function ContentPage() {
     setTils(await api('/tils'));
     setItems(await api('/content'));
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function createIdea() {
     setError('');
@@ -74,7 +84,9 @@ export default function ContentPage() {
       setNewTitle('');
       setSelectedTils({});
       load();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function generate(item) {
@@ -84,7 +96,9 @@ export default function ContentPage() {
       const updated = await api(`/content/${item.id}/generate`, { method: 'POST', body: {} });
       setViewing(updated);
       load();
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.message);
+    }
     setGenerating((g) => ({ ...g, [item.id]: false }));
   }
 
@@ -107,13 +121,20 @@ export default function ContentPage() {
 
   return (
     <div>
-      <p className="muted">Turn what you learn into TikTok scripts, X threads, and LinkedIn posts. Log TILs with the bar at the top of the app.</p>
+      <p className="muted">
+        Turn what you learn into TikTok scripts, X threads, and LinkedIn posts. Log TILs with the
+        bar at the top of the app.
+      </p>
       {error && <div className="error">{error}</div>}
 
       <div className="content-layout">
         <div className="til-column">
           <h3>TIL log ({tils.length})</h3>
-          {tils.length === 0 && <div className="muted small-text">Nothing yet. Log what you learn — it becomes content.</div>}
+          {tils.length === 0 && (
+            <div className="muted small-text">
+              Nothing yet. Log what you learn — it becomes content.
+            </div>
+          )}
           {tils.map((t) => (
             <div className="card compact" key={t.id}>
               <div className="row" style={{ alignItems: 'flex-start', flexWrap: 'nowrap' }}>
@@ -125,9 +146,13 @@ export default function ContentPage() {
                 />
                 <div style={{ flex: 1 }}>
                   <div className="small-text">{t.text}</div>
-                  <div className="muted small-text">{new Date(t.createdAt).toLocaleDateString()}</div>
+                  <div className="muted small-text">
+                    {new Date(t.createdAt).toLocaleDateString()}
+                  </div>
                 </div>
-                <button className="btn small danger" onClick={() => removeTil(t)}>✕</button>
+                <button className="btn small danger" onClick={() => removeTil(t)}>
+                  ✕
+                </button>
               </div>
             </div>
           ))}
@@ -153,23 +178,49 @@ export default function ContentPage() {
               const colItems = items.filter((i) => i.status === col.id);
               return (
                 <div className="column" key={col.id}>
-                  <h3>{col.label} <span className="muted">({colItems.length})</span></h3>
+                  <h3>
+                    {col.label} <span className="muted">({colItems.length})</span>
+                  </h3>
                   {colItems.map((item) => (
                     <div className="card compact" key={item.id}>
                       <div className="row space-between">
                         <strong className="small-text">{item.title}</strong>
-                        <button className="btn small danger" onClick={() => removeItem(item)}>✕</button>
+                        <button className="btn small danger" onClick={() => removeItem(item)}>
+                          ✕
+                        </button>
                       </div>
                       {item.sourceTilIds.length > 0 && (
-                        <div className="muted small-text">{item.sourceTilIds.length} TIL{item.sourceTilIds.length > 1 ? 's' : ''}</div>
+                        <div className="muted small-text">
+                          {item.sourceTilIds.length} TIL{item.sourceTilIds.length > 1 ? 's' : ''}
+                        </div>
                       )}
                       <div className="row">
-                        <button className="btn small primary" disabled={generating[item.id]} onClick={() => generate(item)}>
-                          {generating[item.id] ? 'Generating…' : item.drafts ? 'Regenerate' : 'Generate drafts'}
+                        <button
+                          className="btn small primary"
+                          disabled={generating[item.id]}
+                          onClick={() => generate(item)}
+                        >
+                          {generating[item.id]
+                            ? 'Generating…'
+                            : item.drafts
+                              ? 'Regenerate'
+                              : 'Generate drafts'}
                         </button>
-                        {item.drafts && <button className="btn small" onClick={() => setViewing(item)}>View drafts</button>}
-                        {col.id === 'drafted' && <button className="btn small" onClick={() => setStatus(item, 'posted')}>Mark posted</button>}
-                        {col.id === 'posted' && <button className="btn small" onClick={() => setStatus(item, 'drafted')}>← Drafted</button>}
+                        {item.drafts && (
+                          <button className="btn small" onClick={() => setViewing(item)}>
+                            View drafts
+                          </button>
+                        )}
+                        {col.id === 'drafted' && (
+                          <button className="btn small" onClick={() => setStatus(item, 'posted')}>
+                            Mark posted
+                          </button>
+                        )}
+                        {col.id === 'posted' && (
+                          <button className="btn small" onClick={() => setStatus(item, 'drafted')}>
+                            ← Drafted
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -182,7 +233,10 @@ export default function ContentPage() {
             <DraftViewer
               item={viewing}
               onClose={() => setViewing(null)}
-              onSaved={() => { setViewing(null); load(); }}
+              onSaved={() => {
+                setViewing(null);
+                load();
+              }}
             />
           )}
         </div>

@@ -36,7 +36,7 @@ The sidebar has four pages, grouped by what you're doing — managing projects, 
 
 **Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
 
-**Patches** — named file tweaks you apply/revert on demand. Two op types: *Env value* (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and *Text replace* (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
+**Patches** — named file tweaks you apply/revert on demand. Two op types: _Env value_ (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and _Text replace_ (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
 
 **Workflows** — your setup rituals as one click. A workflow is an ordered list of steps: start/stop services, apply env presets, apply/revert patches, open previews. Edit them under Projects → Workflows; run them from the quick-run buttons at the top of the Projects page. Failed steps are reported individually; the rest still run.
 
@@ -72,10 +72,10 @@ The learn → post pipeline as three sub-tabs: **Learning queue**, **Ideas & dra
 
 ## Where data lives
 
-| What | Where |
-|---|---|
-| Projects, snippets, learning items | `data/*.json` |
-| Env presets | `envs/<projectId>/<name>.env` |
+| What                               | Where                         |
+| ---------------------------------- | ----------------------------- |
+| Projects, snippets, learning items | `data/*.json`                 |
+| Env presets                        | `envs/<projectId>/<name>.env` |
 
 Both are gitignored (env presets contain secrets — keep them out of any remote).
 

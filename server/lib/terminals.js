@@ -17,7 +17,11 @@ function findSpawnHelpers(dir) {
   while (stack.length) {
     const d = stack.pop();
     let entries;
-    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { continue; }
+    try {
+      entries = fs.readdirSync(d, { withFileTypes: true });
+    } catch {
+      continue;
+    }
     for (const e of entries) {
       const p = path.join(d, e.name);
       if (e.isDirectory()) stack.push(p);
@@ -35,16 +39,24 @@ try {
     // "posix_spawnp failed" on macOS is almost always the spawn-helper binary
     // being non-executable, quarantined, or badly signed. Repair all of that.
     for (const helper of findSpawnHelpers(ptyDir)) {
-      try { fs.chmodSync(helper, 0o755); } catch {}
+      try {
+        fs.chmodSync(helper, 0o755);
+      } catch {}
       if (process.platform === 'darwin') {
-        try { execFileSync('xattr', ['-d', 'com.apple.quarantine', helper], { stdio: 'ignore' }); } catch {}
-        try { execFileSync('codesign', ['--force', '--sign', '-', helper], { stdio: 'ignore' }); } catch {}
+        try {
+          execFileSync('xattr', ['-d', 'com.apple.quarantine', helper], { stdio: 'ignore' });
+        } catch {}
+        try {
+          execFileSync('codesign', ['--force', '--sign', '-', helper], { stdio: 'ignore' });
+        } catch {}
       }
       const mode = fs.statSync(helper).mode;
       helperInfo.push({ path: helper, executable: !!(mode & 0o100) });
     }
     if (helperInfo.length === 0) {
-      console.warn('[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source');
+      console.warn(
+        '[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source',
+      );
     }
   } catch {}
 } catch {
@@ -92,10 +104,20 @@ function spawnTest(cmd, args, cwd) {
     try {
       const t = spawnPty(cmd, args, cwd);
       const timer = setTimeout(() => {
-        if (!done) { done = true; try { t.kill(); } catch {} resolve({ ok: true, note: 'spawned ok' }); }
+        if (!done) {
+          done = true;
+          try {
+            t.kill();
+          } catch {}
+          resolve({ ok: true, note: 'spawned ok' });
+        }
       }, 1500);
       t.onExit(({ exitCode }) => {
-        if (!done) { done = true; clearTimeout(timer); resolve({ ok: true, exitCode }); }
+        if (!done) {
+          done = true;
+          clearTimeout(timer);
+          resolve({ ok: true, exitCode });
+        }
       });
     } catch (e) {
       resolve({ ok: false, error: e.message });
@@ -130,8 +152,13 @@ async function diagnose(rawCwd) {
     out.cwd = cwd;
     out.cwd_exists = fs.existsSync(cwd);
     if (out.cwd_exists) {
-      try { fs.accessSync(cwd, fs.constants.R_OK | fs.constants.X_OK); out.cwd_accessible = true; }
-      catch (e) { out.cwd_accessible = false; out.cwd_access_error = e.message; }
+      try {
+        fs.accessSync(cwd, fs.constants.R_OK | fs.constants.X_OK);
+        out.cwd_accessible = true;
+      } catch (e) {
+        out.cwd_accessible = false;
+        out.cwd_access_error = e.message;
+      }
       out.spawn_shell_in_cwd = await spawnTest(shell, ['-c', 'exit 0'], cwd);
     }
   }
@@ -144,7 +171,9 @@ function attach(server) {
 
   wss.on('connection', (ws, req) => {
     if (!pty) {
-      ws.send('\r\n[dev-hub] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n');
+      ws.send(
+        '\r\n[dev-hub] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n',
+      );
       ws.close();
       return;
     }
@@ -185,7 +214,9 @@ function attach(server) {
       try {
         term = spawnPty(a.cmd, a.args, a.dir);
         if (a.fallback) {
-          ws.send(`\r\n[dev-hub] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`);
+          ws.send(
+            `\r\n[dev-hub] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`,
+          );
         }
         break;
       } catch (e) {
@@ -196,35 +227,46 @@ function attach(server) {
     if (!term) {
       ws.send(
         `\r\n[dev-hub] could not spawn any shell.\r\n` +
-        errors.map((e) => `  · ${e}`).join('\r\n') + '\r\n' +
-        `\r\nnode ${process.version} (${process.arch}) · node-pty ${ptyVersion || '?'} · helpers found: ${helperInfo.length}\r\n` +
-        `Try, in the dev-hub folder:  npm rebuild node-pty --build-from-source\r\n` +
-        `(needs Xcode Command Line Tools: xcode-select --install)\r\n` +
-        `Then restart. Diagnostics: http://localhost:5001/api/termdiag?cwd=${encodeURIComponent(cwd)}\r\n`
+          errors.map((e) => `  · ${e}`).join('\r\n') +
+          '\r\n' +
+          `\r\nnode ${process.version} (${process.arch}) · node-pty ${ptyVersion || '?'} · helpers found: ${helperInfo.length}\r\n` +
+          `Try, in the dev-hub folder:  npm rebuild node-pty --build-from-source\r\n` +
+          `(needs Xcode Command Line Tools: xcode-select --install)\r\n` +
+          `Then restart. Diagnostics: http://localhost:5001/api/termdiag?cwd=${encodeURIComponent(cwd)}\r\n`,
       );
       ws.close();
       return;
     }
 
     term.onData((d) => {
-      try { ws.send(d); } catch {}
+      try {
+        ws.send(d);
+      } catch {}
     });
     term.onExit(() => {
-      try { ws.close(); } catch {}
+      try {
+        ws.close();
+      } catch {}
     });
 
     ws.on('message', (msg) => {
       const s = msg.toString();
       if (s.startsWith('\x00resize:')) {
         const [cols, rows] = s.slice(8).split(',').map(Number);
-        if (cols > 0 && rows > 0) { try { term.resize(cols, rows); } catch {} }
+        if (cols > 0 && rows > 0) {
+          try {
+            term.resize(cols, rows);
+          } catch {}
+        }
         return;
       }
       term.write(s);
     });
 
     ws.on('close', () => {
-      try { term.kill(); } catch {}
+      try {
+        term.kill();
+      } catch {}
     });
   });
 }

@@ -44,7 +44,10 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  write(NAME, read(NAME).filter((s) => s.id !== req.params.id));
+  write(
+    NAME,
+    read(NAME).filter((s) => s.id !== req.params.id),
+  );
   res.json({ ok: true });
 });
 

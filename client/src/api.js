@@ -6,7 +6,9 @@ export async function api(path, opts = {}) {
   });
   if (!res.ok) {
     let msg = res.statusText;
-    try { msg = (await res.json()).error || msg; } catch {}
+    try {
+      msg = (await res.json()).error || msg;
+    } catch {}
     throw new Error(msg);
   }
   return res.json();

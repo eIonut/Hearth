@@ -4,7 +4,9 @@ let sdk = null;
 try {
   sdk = require('@anthropic-ai/claude-agent-sdk');
 } catch {
-  console.warn('[dev-hub] @anthropic-ai/claude-agent-sdk not installed — Claude features disabled.');
+  console.warn(
+    '[dev-hub] @anthropic-ai/claude-agent-sdk not installed — Claude features disabled.',
+  );
 }
 
 const HUB_DIR = path.join(__dirname, '..', '..');

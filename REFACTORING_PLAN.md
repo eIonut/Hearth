@@ -11,20 +11,20 @@ This document is an execution plan for an agent. Goal: bring the codebase to a s
 
 ### Dependency versions: current → target (latest on npm as of 2026-07-18)
 
-| Package | Current | Target | Jump |
-|---|---|---|---|
-| express | ^4.19.2 | ^5.2.1 | **major** |
-| ws | ^8.17.0 | ^8.21.1 | minor |
-| concurrently | ^9.0.0 | ^10.0.3 | major (Node 20+) |
-| node-pty | ^1.1.0 | ^1.1.0 | current |
-| @anthropic-ai/claude-agent-sdk | ^0.1.0 | ^0.3.214 | **major (0.x)** |
-| react / react-dom | ^18.3.1 | ^19.2.7 | **major** |
-| vite | ^5.4.0 | ^8.1.5 | **3 majors** |
-| @vitejs/plugin-react | ^4.3.1 | ^6.0.3 | major |
-| @xterm/xterm | ^5.5.0 | ^6.0.0 | **major** |
-| @xterm/addon-fit | ^0.10.0 | ^0.11.0 | minor (pairs with xterm 6) |
-| ansi_up | ^6.0.2 | ^6.0.6 | patch |
-| react-router | — (new) | ^8.2.0 | new dependency (Phase 5) |
+| Package                        | Current | Target   | Jump                       |
+| ------------------------------ | ------- | -------- | -------------------------- |
+| express                        | ^4.19.2 | ^5.2.1   | **major**                  |
+| ws                             | ^8.17.0 | ^8.21.1  | minor                      |
+| concurrently                   | ^9.0.0  | ^10.0.3  | major (Node 20+)           |
+| node-pty                       | ^1.1.0  | ^1.1.0   | current                    |
+| @anthropic-ai/claude-agent-sdk | ^0.1.0  | ^0.3.214 | **major (0.x)**            |
+| react / react-dom              | ^18.3.1 | ^19.2.7  | **major**                  |
+| vite                           | ^5.4.0  | ^8.1.5   | **3 majors**               |
+| @vitejs/plugin-react           | ^4.3.1  | ^6.0.3   | major                      |
+| @xterm/xterm                   | ^5.5.0  | ^6.0.0   | **major**                  |
+| @xterm/addon-fit               | ^0.10.0 | ^0.11.0  | minor (pairs with xterm 6) |
+| ansi_up                        | ^6.0.2  | ^6.0.6   | patch                      |
+| react-router                   | — (new) | ^8.2.0   | new dependency (Phase 5)   |
 
 Re-run `npm view <pkg> version` at execution time; use whatever is latest then.
 
@@ -61,9 +61,11 @@ The cheapest credibility wins for a public repo:
 Order rationale: server and client are independent; within the client, Vite before React keeps each step testable.
 
 ### 2a. Trivial bumps
+
 `ws`, `ansi_up`, `concurrently` (v10 needs Node 20+ — acceptable, see below). Verify: app starts, terminals work, logs render colors.
 
 ### 2b. Express 4 → 5
+
 - This codebase uses only simple literal routes (`/`, `/:id`), `express.json()`, and `express.Router()` — none of the removed APIs — so the migration is mostly mechanical. Consult the official migration guide anyway.
 - Things to actively check:
   - Route paths: path-to-regexp v8 syntax changes (no bare `*` wildcards, no `?` optional markers). Grep all `router.` calls to confirm only literal/`:param` paths exist.
@@ -72,21 +74,25 @@ Order rationale: server and client are independent; within the client, Vite befo
 - Verify: every route in the smoke checklist.
 
 ### 2c. claude-agent-sdk 0.1 → 0.3
+
 - `server/lib/claude.js` (~50 lines) is the only consumer. The 0.x SDK has had breaking API changes between minors — read the SDK changelog/migration notes and adapt the call sites.
 - This dependency is **optional** at runtime; preserve the graceful "SDK not installed" degradation. Verify: content draft generation and digest review either work (if authenticated) or fail with the existing friendly message.
 
 ### 2d. Vite 5 → 8 + @vitejs/plugin-react 6
+
 - Node floor becomes **20.19+ / 22.12+**. Set `engines` accordingly in both `package.json` files and update README ("Node 18+" → the new floor).
 - `client/vite.config.js` is tiny; expect it to work unchanged (check the dev proxy for `/api` and the `/term` WebSocket proxy still function — proxy `ws: true` behavior must be re-verified).
 - Read the Vite 6/7/8 migration pages for anything that applies; this project uses near-default config, so expect little.
 - Verify: `npm run dev` (HMR works), `npm --prefix client run build` succeeds.
 
 ### 2e. React 18 → 19
+
 - Check `client/src/main.jsx` uses `createRoot` from `react-dom/client` (it should; fix if not).
 - This codebase uses no legacy APIs (no propTypes, no defaultProps on functions, no string refs, no `forwardRef`-heavy patterns) — expect a near-drop-in upgrade. Run the official React 19 codemod set if anything surfaces.
 - Verify: full client smoke pass; watch the console for new warnings.
 
 ### 2f. @xterm/xterm 5 → 6 + addon-fit 0.11
+
 - Consumers: `client/src/pages/Workspace.jsx` (`TermView`) only — `new Terminal(opts)`, `loadAddon`, `open`, `onData`, `write`, `dispose`, and the CSS import `@xterm/xterm/css/xterm.css`. Check the 6.0 changelog for renames in these APIs and the CSS path.
 - Verify: open terminals (home + project cwd), type commands, resize the window (fit + server-side resize message `\x00resize:` must keep working), close tab.
 

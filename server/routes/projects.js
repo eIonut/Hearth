@@ -23,7 +23,8 @@ router.post('/', (req, res) => {
   const { name, envFile, envTargets, services, previews, links } = req.body;
   const projectPath = expandHome(req.body.path);
   if (!name || !projectPath) return res.status(400).json({ error: 'name and path are required' });
-  if (!fs.existsSync(projectPath)) return res.status(400).json({ error: `path does not exist: ${projectPath}` });
+  if (!fs.existsSync(projectPath))
+    return res.status(400).json({ error: `path does not exist: ${projectPath}` });
 
   const projects = read(NAME);
   const project = {

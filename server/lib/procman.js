@@ -61,7 +61,9 @@ function start(project, service, _restarts = 0) {
     entry.running = false;
     entry.exitCode = code;
     entry.crashed = !entry.stoppedByUser && code !== 0 && code !== null;
-    entry.lines.push(`[dev-hub] process exited with code ${code}${entry.crashed ? ' (crash)' : ''}`);
+    entry.lines.push(
+      `[dev-hub] process exited with code ${code}${entry.crashed ? ' (crash)' : ''}`,
+    );
 
     if (entry.crashed && service.autoRestart && entry.restarts < MAX_AUTO_RESTARTS) {
       const next = entry.restarts + 1;
@@ -91,7 +93,9 @@ function stop(projectId, serviceName) {
     // negative pid kills the whole process group (yarn + its children)
     process.kill(-entry.child.pid, 'SIGTERM');
   } catch {
-    try { entry.child.kill('SIGTERM'); } catch {}
+    try {
+      entry.child.kill('SIGTERM');
+    } catch {}
   }
   return { ok: true, wasRunning: true };
 }
@@ -113,7 +117,12 @@ function status() {
 function logs(projectId, serviceName) {
   const entry = procs.get(key(projectId, serviceName));
   if (!entry) return { lines: [], running: false, exitCode: null, crashed: false };
-  return { lines: entry.lines, running: entry.running, exitCode: entry.exitCode, crashed: entry.crashed };
+  return {
+    lines: entry.lines,
+    running: entry.running,
+    exitCode: entry.exitCode,
+    crashed: entry.crashed,
+  };
 }
 
 function stopAll() {
