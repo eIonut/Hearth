@@ -1,6 +1,8 @@
 import express from 'express';
 import { read, write, id } from '../lib/store.js';
 import * as patchops from '../lib/patchops.js';
+import { requireFields } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'patches';
@@ -33,14 +35,13 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { projectId, name, ops } = req.body;
-  if (!name || !projectId)
-    return res.status(400).json({ error: 'name and projectId are required' });
-  if (!getProject(projectId)) return res.status(404).json({ error: 'project not found' });
+  requireFields(req.body, ['name', 'projectId']);
+  if (!getProject(projectId)) throw new NotFoundError('project not found');
   if (!Array.isArray(ops) || ops.length === 0)
-    return res.status(400).json({ error: 'at least one op is required' });
+    throw new ValidationError('at least one op is required');
   for (const op of ops) {
     const err = patchops.validateOp(op);
-    if (err) return res.status(400).json({ error: err });
+    if (err) throw new ValidationError(err);
   }
   const patches = read(NAME);
   const patch = { id: id(), projectId, name, ops };
@@ -52,14 +53,14 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const patches = read(NAME);
   const idx = patches.findIndex((p) => p.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { name, ops } = req.body;
   if (ops !== undefined) {
     if (!Array.isArray(ops) || ops.length === 0)
-      return res.status(400).json({ error: 'at least one op is required' });
+      throw new ValidationError('at least one op is required');
     for (const op of ops) {
       const err = patchops.validateOp(op);
-      if (err) return res.status(400).json({ error: err });
+      if (err) throw new ValidationError(err);
     }
   }
   patches[idx] = {
@@ -82,13 +83,14 @@ router.delete('/:id', (req, res) => {
 
 function runAction(req, res, fn) {
   const patch = read(NAME).find((p) => p.id === req.params.id);
-  if (!patch) return res.status(404).json({ error: 'not found' });
+  if (!patch) throw new NotFoundError();
   const project = getProject(patch.projectId);
-  if (!project) return res.status(404).json({ error: 'project not found' });
+  if (!project) throw new NotFoundError('project not found');
   try {
     fn(project, patch);
   } catch (e) {
-    return res.status(400).json({ error: e.message });
+    // patchops throws plain Errors for bad ops (e.g. file missing) — surface as 400.
+    throw new ValidationError(e.message);
   }
   res.json({ ok: true, status: patchops.overallStatus(project, patch.ops) });
 }

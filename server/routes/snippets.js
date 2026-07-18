@@ -1,5 +1,7 @@
 import express from 'express';
 import { read, write, id } from '../lib/store.js';
+import { requireFields } from '../lib/validate.js';
+import { NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'snippets';
@@ -12,7 +14,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { title, language, tags, body } = req.body;
-  if (!title || !body) return res.status(400).json({ error: 'title and body are required' });
+  requireFields(req.body, ['title', 'body']);
   const items = read(NAME);
   const item = {
     id: id(),
@@ -30,7 +32,7 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const items = read(NAME);
   const idx = items.findIndex((s) => s.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { title, language, tags, body } = req.body;
   items[idx] = {
     ...items[idx],

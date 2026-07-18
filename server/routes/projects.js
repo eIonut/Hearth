@@ -1,14 +1,7 @@
 import express from 'express';
-import fs from 'fs';
-import os from 'os';
 import { read, write, id } from '../lib/store.js';
-
-function expandHome(p) {
-  if (typeof p === 'string' && (p === '~' || p.startsWith('~/'))) {
-    return os.homedir() + p.slice(1);
-  }
-  return p;
-}
+import { expandHome, requirePathExists } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'projects';
@@ -22,9 +15,8 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   const { name, envFile, envTargets, services, previews, links } = req.body;
   const projectPath = expandHome(req.body.path);
-  if (!name || !projectPath) return res.status(400).json({ error: 'name and path are required' });
-  if (!fs.existsSync(projectPath))
-    return res.status(400).json({ error: `path does not exist: ${projectPath}` });
+  if (!name || !projectPath) throw new ValidationError('name and path are required');
+  requirePathExists(projectPath);
 
   const projects = read(NAME);
   const project = {
@@ -45,12 +37,10 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const projects = read(NAME);
   const idx = projects.findIndex((p) => p.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { name, envFile, envTargets, services, previews, links } = req.body;
   const projectPath = req.body.path !== undefined ? expandHome(req.body.path) : undefined;
-  if (projectPath !== undefined && !fs.existsSync(projectPath)) {
-    return res.status(400).json({ error: `path does not exist: ${projectPath}` });
-  }
+  if (projectPath !== undefined) requirePathExists(projectPath);
   projects[idx] = {
     ...projects[idx],
     ...(name !== undefined && { name }),

@@ -61,12 +61,9 @@ ${d.contentDrafted.map((c) => `- ${c.title}`).join('\n') || '- none'}
 
 End with a section "Content ideas for next week" — 2-3 specific post ideas based on what he learned, and one honest observation about where his time went.`;
 
-  try {
-    const text = await claude.runText(prompt);
-    res.json({ summary: text });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  // On failure the async throw is auto-forwarded to the error middleware (500).
+  const text = await claude.runText(prompt);
+  res.json({ summary: text });
 });
 
 export default router;

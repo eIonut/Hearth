@@ -1,6 +1,8 @@
 import express from 'express';
 import { read, write, id } from '../lib/store.js';
 import * as claude from '../lib/claude.js';
+import { requireFields } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'content';
@@ -14,7 +16,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { title, notes, sourceTilIds } = req.body;
-  if (!title) return res.status(400).json({ error: 'title is required' });
+  requireFields(req.body, ['title']);
   const items = read(NAME);
   const item = {
     id: id(),
@@ -34,10 +36,10 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const items = read(NAME);
   const idx = items.findIndex((c) => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { title, notes, status, drafts } = req.body;
   if (status !== undefined && !STATUSES.includes(status)) {
-    return res.status(400).json({ error: `status must be one of ${STATUSES.join(', ')}` });
+    throw new ValidationError(`status must be one of ${STATUSES.join(', ')}`);
   }
   items[idx] = {
     ...items[idx],
@@ -68,7 +70,7 @@ router.post('/:id/generate', async (req, res) => {
   }
   const items = read(NAME);
   const idx = items.findIndex((c) => c.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const item = items[idx];
 
   const tils = read('tils').filter((t) => item.sourceTilIds.includes(t.id));
@@ -88,15 +90,12 @@ Create three drafts:
 Reply with ONLY a valid JSON object (no markdown fences, no commentary):
 {"tiktok": "...", "x": "...", "linkedin": "..."}`;
 
-  try {
-    const text = await claude.runText(prompt);
-    const drafts = claude.extractJSON(text);
-    items[idx] = { ...item, drafts, status: item.status === 'idea' ? 'drafted' : item.status };
-    write(NAME, items);
-    res.json(items[idx]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  // On failure the async throw is auto-forwarded to the error middleware (500).
+  const text = await claude.runText(prompt);
+  const drafts = claude.extractJSON(text);
+  items[idx] = { ...item, drafts, status: item.status === 'idea' ? 'drafted' : item.status };
+  write(NAME, items);
+  res.json(items[idx]);
 });
 
 export default router;

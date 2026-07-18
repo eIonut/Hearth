@@ -1,6 +1,7 @@
 import express from 'express';
 import { read } from '../lib/store.js';
 import * as procman from '../lib/procman.js';
+import { NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get('/status', (req, res) => {
 router.post('/start', (req, res) => {
   const { projectId, service: serviceName } = req.body;
   const { project, service } = findProjectService(projectId, serviceName);
-  if (!project || !service) return res.status(404).json({ error: 'project or service not found' });
+  if (!project || !service) throw new NotFoundError('project or service not found');
   res.json(procman.start(project, service));
 });
 

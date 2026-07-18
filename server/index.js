@@ -45,11 +45,14 @@ app.use((req, res) => {
 });
 
 // Terminal error handler. Express 5 auto-forwards rejected promises from async
-// handlers here, so an async throw returns a clean 500 instead of hanging.
+// handlers here, so an async throw returns a clean response instead of hanging.
+// Routes and lib throw typed errors (ValidationError → 400, NotFoundError → 404);
+// anything untyped is an unexpected fault → 500. Only faults are logged.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.error('[dev-hub]', err);
-  res.status(err.status || 500).json({ error: err.message || 'internal error' });
+  const status = err.status || 500;
+  if (status >= 500) console.error('[dev-hub]', err);
+  res.status(status).json({ error: err.message || 'internal error' });
 });
 
 const server = http.createServer(app);

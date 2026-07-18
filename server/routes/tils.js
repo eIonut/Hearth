@@ -1,5 +1,6 @@
 import express from 'express';
 import { read, write, id } from '../lib/store.js';
+import { ValidationError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'tils';
@@ -12,7 +13,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { text, tags } = req.body;
-  if (!text || !text.trim()) return res.status(400).json({ error: 'text is required' });
+  if (!text || !text.trim()) throw new ValidationError('text is required');
   const items = read(NAME);
   const item = {
     id: id(),

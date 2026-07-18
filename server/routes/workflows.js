@@ -3,6 +3,8 @@ import { read, write, id } from '../lib/store.js';
 import * as procman from '../lib/procman.js';
 import * as envops from '../lib/envops.js';
 import * as patchops from '../lib/patchops.js';
+import { requireFields } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'workflows';
@@ -67,12 +69,12 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { name, steps } = req.body;
-  if (!name) return res.status(400).json({ error: 'name is required' });
+  requireFields(req.body, ['name']);
   if (!Array.isArray(steps) || steps.length === 0)
-    return res.status(400).json({ error: 'at least one step is required' });
+    throw new ValidationError('at least one step is required');
   for (const s of steps) {
     const err = validateStep(s);
-    if (err) return res.status(400).json({ error: err });
+    if (err) throw new ValidationError(err);
   }
   const workflows = read(NAME);
   const wf = { id: id(), name, steps };
@@ -84,14 +86,14 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const workflows = read(NAME);
   const idx = workflows.findIndex((w) => w.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { name, steps } = req.body;
   if (steps !== undefined) {
     if (!Array.isArray(steps) || steps.length === 0)
-      return res.status(400).json({ error: 'at least one step is required' });
+      throw new ValidationError('at least one step is required');
     for (const s of steps) {
       const err = validateStep(s);
-      if (err) return res.status(400).json({ error: err });
+      if (err) throw new ValidationError(err);
     }
   }
   workflows[idx] = {
@@ -114,7 +116,7 @@ router.delete('/:id', (req, res) => {
 // Run all server-side steps in order; preview steps are returned for the client to open.
 router.post('/:id/run', (req, res) => {
   const wf = read(NAME).find((w) => w.id === req.params.id);
-  if (!wf) return res.status(404).json({ error: 'not found' });
+  if (!wf) throw new NotFoundError();
 
   const results = [];
   for (const step of wf.steps) {

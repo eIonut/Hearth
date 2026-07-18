@@ -1,5 +1,7 @@
 import express from 'express';
 import { read, write, id } from '../lib/store.js';
+import { requireFields } from '../lib/validate.js';
+import { ValidationError, NotFoundError } from '../lib/errors.js';
 
 const router = express.Router();
 const NAME = 'learning';
@@ -13,7 +15,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { title, url, tags, notes } = req.body;
-  if (!title) return res.status(400).json({ error: 'title is required' });
+  requireFields(req.body, ['title']);
   const items = read(NAME);
   const item = {
     id: id(),
@@ -33,10 +35,10 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const items = read(NAME);
   const idx = items.findIndex((s) => s.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'not found' });
+  if (idx === -1) throw new NotFoundError();
   const { title, url, tags, notes, status } = req.body;
   if (status !== undefined && !STATUSES.includes(status)) {
-    return res.status(400).json({ error: `status must be one of ${STATUSES.join(', ')}` });
+    throw new ValidationError(`status must be one of ${STATUSES.join(', ')}`);
   }
   items[idx] = {
     ...items[idx],
