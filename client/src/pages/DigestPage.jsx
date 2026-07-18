@@ -47,7 +47,7 @@ export default function DigestPage() {
   return (
     <div>
       <div className="row space-between">
-        <p className="muted">
+        <p className="text-muted">
           Your last stretch at a glance — and a Claude-written review when you want one.
         </p>
         <div className="row">
@@ -70,12 +70,12 @@ export default function DigestPage() {
         {stats.map((s) => (
           <div className="card stat" key={s.label}>
             <div className="stat-value">{s.value}</div>
-            <div className="muted small-text">{s.label}</div>
+            <div className="text-muted text-[12px]">{s.label}</div>
           </div>
         ))}
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
 
       {summary && (
         <div className="card">
@@ -94,9 +94,9 @@ export default function DigestPage() {
           <h3>Details</h3>
           {data.tils.length > 0 && (
             <>
-              <strong className="small-text">TILs</strong>
+              <strong className="text-[12px]">TILs</strong>
               {data.tils.map((t) => (
-                <div className="muted small-text" key={t.id}>
+                <div className="text-muted text-[12px]" key={t.id}>
                   · {t.text}
                 </div>
               ))}
@@ -104,9 +104,9 @@ export default function DigestPage() {
           )}
           {data.learningDone.length > 0 && (
             <>
-              <strong className="small-text">Learning completed</strong>
+              <strong className="text-[12px]">Learning completed</strong>
               {data.learningDone.map((l) => (
-                <div className="muted small-text" key={l.id}>
+                <div className="text-muted text-[12px]" key={l.id}>
                   · {l.title}
                 </div>
               ))}
@@ -114,9 +114,9 @@ export default function DigestPage() {
           )}
           {data.contentPosted.length > 0 && (
             <>
-              <strong className="small-text">Posted</strong>
+              <strong className="text-[12px]">Posted</strong>
               {data.contentPosted.map((c) => (
-                <div className="muted small-text" key={c.id}>
+                <div className="text-muted text-[12px]" key={c.id}>
                   · {c.title}
                 </div>
               ))}
@@ -125,7 +125,7 @@ export default function DigestPage() {
           {data.tils.length === 0 &&
             data.learningDone.length === 0 &&
             data.contentPosted.length === 0 && (
-              <div className="muted">Nothing logged in this period yet.</div>
+              <div className="text-muted">Nothing logged in this period yet.</div>
             )}
         </div>
       )}

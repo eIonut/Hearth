@@ -95,7 +95,7 @@ export default function Projects() {
               + Add project
             </button>
           </div>
-          {wfMsg && <div className={wfMsg.includes('failed') ? 'error' : 'success'}>{wfMsg}</div>}
+          {wfMsg && <div className={wfMsg.includes('failed') ? 'text-red my-1.5' : 'text-green my-1.5'}>{wfMsg}</div>}
 
           {editing && (
             <ProjectForm

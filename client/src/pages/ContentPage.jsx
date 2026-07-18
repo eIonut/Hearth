@@ -50,7 +50,7 @@ function DraftViewer({ item, onClose, onSaved }) {
       </div>
       <textarea
         rows={14}
-        className="mono"
+        className="font-mono"
         value={drafts[tab] || ''}
         onChange={(e) => setDrafts((d) => ({ ...d, [tab]: e.target.value }))}
       />
@@ -121,17 +121,17 @@ export default function ContentPage() {
 
   return (
     <div>
-      <p className="muted">
+      <p className="text-muted">
         Turn what you learn into TikTok scripts, X threads, and LinkedIn posts. Log TILs with the
         bar at the top of the app.
       </p>
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
 
       <div className="content-layout">
         <div className="til-column">
           <h3>TIL log ({tils.length})</h3>
           {tils.length === 0 && (
-            <div className="muted small-text">
+            <div className="text-muted text-[12px]">
               Nothing yet. Log what you learn — it becomes content.
             </div>
           )}
@@ -145,8 +145,8 @@ export default function ContentPage() {
                   onChange={(e) => setSelectedTils((s) => ({ ...s, [t.id]: e.target.checked }))}
                 />
                 <div style={{ flex: 1 }}>
-                  <div className="small-text">{t.text}</div>
-                  <div className="muted small-text">
+                  <div className="text-[12px]">{t.text}</div>
+                  <div className="text-muted text-[12px]">
                     {new Date(t.createdAt).toLocaleDateString()}
                   </div>
                 </div>
@@ -179,18 +179,18 @@ export default function ContentPage() {
               return (
                 <div className="column" key={col.id}>
                   <h3>
-                    {col.label} <span className="muted">({colItems.length})</span>
+                    {col.label} <span className="text-muted">({colItems.length})</span>
                   </h3>
                   {colItems.map((item) => (
                     <div className="card compact" key={item.id}>
                       <div className="row space-between">
-                        <strong className="small-text">{item.title}</strong>
+                        <strong className="text-[12px]">{item.title}</strong>
                         <button className="btn small danger" onClick={() => removeItem(item)}>
                           ✕
                         </button>
                       </div>
                       {item.sourceTilIds.length > 0 && (
-                        <div className="muted small-text">
+                        <div className="text-muted text-[12px]">
                           {item.sourceTilIds.length} TIL{item.sourceTilIds.length > 1 ? 's' : ''}
                         </div>
                       )}

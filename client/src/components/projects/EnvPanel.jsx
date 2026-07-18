@@ -49,20 +49,20 @@ function TargetCard({ projectId, target, onChanged }) {
     <div className="card compact op-editor">
       <div className="row space-between">
         <strong>{target.name}</strong>
-        <span className="muted mono small-text">
+        <span className="text-muted font-mono text-[12px]">
           {target.file}
           {!target.exists && ' (missing)'}
         </span>
       </div>
 
       {target.presets.length === 0 && (
-        <div className="muted small-text">No presets yet — save the current file below.</div>
+        <div className="text-muted text-[12px]">No presets yet — save the current file below.</div>
       )}
       {target.presets.map((name) => (
         <div className="service-row" key={name}>
           <span className={'dot ' + (target.current === name ? 'green' : 'gray')} />
           <span className="service-name">{name}</span>
-          {target.current === name && <span className="muted small-text">active</span>}
+          {target.current === name && <span className="text-muted text-[12px]">active</span>}
           <span className="spacer" />
           <button
             className="btn small primary"
@@ -88,8 +88,8 @@ function TargetCard({ projectId, target, onChanged }) {
         </button>
       </div>
 
-      {msg && <div className="success">{msg}</div>}
-      {error && <div className="error">{error}</div>}
+      {msg && <div className="text-green my-1.5">{msg}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
     </div>
   );
 }
@@ -113,7 +113,7 @@ export default function EnvPanel({ projectId }) {
 
   if (targets.length === 0) {
     return (
-      <div className="muted small-text" style={{ padding: '8px 0' }}>
+      <div className="text-muted text-[12px]" style={{ padding: '8px 0' }}>
         No env targets — add env files to this project via Edit. The current file is always backed
         up before a swap.
       </div>

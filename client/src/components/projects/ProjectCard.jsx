@@ -28,7 +28,7 @@ export default function ProjectCard({ project, statuses, onEdit, onRemove, onTog
           </button>
         </div>
       </div>
-      <div className="muted mono">{project.path}</div>
+      <div className="text-muted font-mono">{project.path}</div>
       {(project.links || []).length > 0 && (
         <div className="row" style={{ marginTop: 6 }}>
           {project.links.map((l) => (
@@ -54,7 +54,7 @@ export default function ProjectCard({ project, statuses, onEdit, onRemove, onTog
             />
           ))}
           {(project.services || []).length === 0 && (
-            <div className="muted">No services defined.</div>
+            <div className="text-muted">No services defined.</div>
           )}
         </div>
       )}

@@ -12,7 +12,7 @@ export default function ServiceRow({ project, service, status, onToggle, onLogs 
         {service.name}
         {service.autoRestart ? ' ↻' : ''}
       </span>
-      <span className="muted mono small-text">{service.cmd}</span>
+      <span className="text-muted font-mono text-[12px]">{service.cmd}</span>
       {crashed && <span className="chip red">crashed ({status.exitCode})</span>}
       <span className="spacer" />
       {preview && (

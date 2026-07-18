@@ -181,7 +181,7 @@ export default function Workspace() {
               onClick={() => setActiveTab(t.id)}
               title={t.kind === 'preview' ? t.url : t.cwd || 'home'}
             >
-              <span className={t.kind === 'term' ? 'tab-glyph mono' : 'tab-glyph'}>
+              <span className={t.kind === 'term' ? 'tab-glyph font-mono' : 'tab-glyph'}>
                 {t.kind === 'term' ? '❯' : '⌗'}
               </span>
               {t.label}
@@ -200,9 +200,9 @@ export default function Workspace() {
       )}
 
       {!ptyAvailable && (
-        <div className="card error">
+        <div className="card text-red my-1.5">
           node-pty is not installed, so terminals are disabled. Run{' '}
-          <span className="mono">npm install node-pty</span> in the dev-hub folder (needs Xcode
+          <span className="font-mono">npm install node-pty</span> in the dev-hub folder (needs Xcode
           Command Line Tools), then restart the server.
         </div>
       )}
@@ -210,7 +210,7 @@ export default function Workspace() {
       {tabs.length === 0 && (
         <div className="card empty">
           One surface for shells and running apps. Open a terminal in your home folder or any
-          project (tip: run <span className="mono">claude</span> inside one), and open previews of
+          project (tip: run <span className="font-mono">claude</span> inside one), and open previews of
           your services next to it — set preview URLs per project (Projects → Edit) to get one-click
           entries. Tabs stay alive while you move around the hub.
         </div>

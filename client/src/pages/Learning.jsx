@@ -64,7 +64,7 @@ function ItemForm({ onSaved, onCancel }) {
           placeholder="Why this matters / what to focus on"
         />
       </label>
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
       <div className="row">
         <button className="btn primary" onClick={save}>
           Add
@@ -110,7 +110,7 @@ export default function Learning() {
   return (
     <div>
       <div className="row space-between">
-        <p className="muted">
+        <p className="text-muted">
           Everything you want to learn next, so nothing gets lost. Finished items are raw material
           for your content.
         </p>
@@ -142,7 +142,7 @@ export default function Learning() {
           return (
             <div className="column" key={col.id}>
               <h3>
-                {col.label} <span className="muted">({colItems.length})</span>
+                {col.label} <span className="text-muted">({colItems.length})</span>
               </h3>
               {colItems.map((item) => (
                 <div className="card compact" key={item.id}>
@@ -153,12 +153,12 @@ export default function Learning() {
                     </button>
                   </div>
                   {item.url && (
-                    <a href={item.url} target="_blank" rel="noreferrer" className="small-text">
+                    <a href={item.url} target="_blank" rel="noreferrer" className="text-[12px]">
                       {item.url}
                     </a>
                   )}
                   {item.tags.length > 0 && (
-                    <div className="small-text">
+                    <div className="text-[12px]">
                       {item.tags.map((t) => (
                         <span className="tag" key={t}>
                           {t}
@@ -166,7 +166,7 @@ export default function Learning() {
                       ))}
                     </div>
                   )}
-                  {item.notes && <div className="muted small-text">{item.notes}</div>}
+                  {item.notes && <div className="text-muted text-[12px]">{item.notes}</div>}
                   <div className="row">
                     {col.id !== 'queued' && (
                       <button

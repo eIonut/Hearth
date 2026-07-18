@@ -200,7 +200,7 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
         + Add step
       </button>
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
       <div className="row">
         <button
           className="btn primary"
@@ -278,7 +278,7 @@ export default function Workflows() {
       </datalist>
 
       <div className="row space-between">
-        <p className="muted">
+        <p className="text-muted">
           Your setup rituals as one click: start services, swap env presets, apply patches, open
           previews — in order.
         </p>
@@ -311,8 +311,8 @@ export default function Workflows() {
                 className={'dot ' + (r.ok ? 'green' : 'gray')}
                 style={!r.ok ? { background: 'var(--red)' } : {}}
               />
-              <span className="small-text">{r.label}</span>
-              {r.error && <span className="error small-text">{r.error}</span>}
+              <span className="text-[12px]">{r.label}</span>
+              {r.error && <span className="text-red my-1.5 text-[12px]">{r.error}</span>}
             </div>
           ))}
         </div>
@@ -345,7 +345,7 @@ export default function Workflows() {
               </button>
             </div>
           </div>
-          <div className="muted small-text">{wf.stepLabels.join('  →  ')}</div>
+          <div className="text-muted text-[12px]">{wf.stepLabels.join('  →  ')}</div>
         </div>
       ))}
     </div>

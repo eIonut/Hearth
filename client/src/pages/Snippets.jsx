@@ -54,13 +54,13 @@ function SnippetForm({ initial, onSaved, onCancel }) {
         Snippet
         <textarea
           rows={6}
-          className="mono"
+          className="font-mono"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="lsof -ti:3000 | xargs kill -9"
         />
       </label>
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
       <div className="row">
         <button className="btn primary" onClick={save}>
           Save
@@ -159,7 +159,7 @@ export default function Snippets() {
               </button>
             </div>
           </div>
-          <div className="muted small-text">
+          <div className="text-muted text-[12px]">
             {s.language}
             {s.tags.length > 0 && ' · '}
             {s.tags.map((t) => (

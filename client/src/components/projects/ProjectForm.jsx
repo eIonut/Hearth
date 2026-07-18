@@ -98,7 +98,7 @@ export default function ProjectForm({ initial, onSaved, onCancel }) {
           }
         />
       </label>
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
       <div className="row">
         <button className="btn primary" onClick={save}>
           Save

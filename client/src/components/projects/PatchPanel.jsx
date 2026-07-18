@@ -75,7 +75,7 @@ function OpEditor({ op, onChange, onRemove }) {
             Find
             <textarea
               rows={2}
-              className="mono"
+              className="font-mono"
               value={op.find}
               onChange={(e) => set('find', e.target.value)}
               placeholder={'loader={checkAccessToken}'}
@@ -85,7 +85,7 @@ function OpEditor({ op, onChange, onRemove }) {
             Replace with (revert swaps them back)
             <textarea
               rows={2}
-              className="mono"
+              className="font-mono"
               value={op.replace}
               onChange={(e) => set('replace', e.target.value)}
               placeholder={'// loader={checkAccessToken}'}
@@ -146,7 +146,7 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
         </button>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
       <div className="row">
         <button className="btn primary" onClick={save} disabled={!name.trim() || ops.length === 0}>
           Save
@@ -235,7 +235,7 @@ export default function PatchPanel({ projectId }) {
         />
       ) : (
         <div className="row">
-          <span className="muted small-text">
+          <span className="text-muted text-[12px]">
             Named file tweaks you apply and revert on demand.
           </span>
           <span className="spacer" />
@@ -245,11 +245,11 @@ export default function PatchPanel({ projectId }) {
         </div>
       )}
 
-      {msg && <div className="success">{msg}</div>}
-      {error && <div className="error">{error}</div>}
+      {msg && <div className="text-green my-1.5">{msg}</div>}
+      {error && <div className="text-red my-1.5">{error}</div>}
 
       {patches.length === 0 && !editing && (
-        <div className="muted small-text" style={{ padding: '8px 0' }}>
+        <div className="text-muted text-[12px]" style={{ padding: '8px 0' }}>
           No patches for this project yet.
         </div>
       )}
@@ -292,7 +292,7 @@ export default function PatchPanel({ projectId }) {
                       : 'orange')
                 }
               />
-              <span className="mono small-text">{opSummary(op)}</span>
+              <span className="font-mono text-[12px]">{opSummary(op)}</span>
             </div>
           ))}
         </div>

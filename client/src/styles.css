@@ -121,24 +121,9 @@
   margin: 8px 0;
 }
 
-/* --- Text utilities + status text --- */
-.mono {
-  font-family: Menlo, Monaco, monospace;
-}
-.muted {
-  color: var(--muted);
-}
-.small-text {
-  font-size: 12px;
-}
-.error {
-  color: var(--red);
-  margin: 6px 0;
-}
-.success {
-  color: var(--green);
-  margin: 6px 0;
-}
+/* Text utilities (.mono/.muted/.small-text/.error/.success) → real Tailwind
+   utilities at call sites: font-mono / text-muted / text-[12px] /
+   text-red my-1.5 / text-green my-1.5 */
 
 /* --- Service rows (.dot family → index.css @layer components) --- */
 .service-row {

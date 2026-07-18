@@ -62,9 +62,9 @@ export default function SkillsPage() {
 
   return (
     <div>
-      <p className="muted">
+      <p className="text-muted">
         Your reusable skills repo, installable into any project's{' '}
-        <span className="mono">.claude/skills</span> with one click.
+        <span className="font-mono">.claude/skills</span> with one click.
       </p>
 
       <div className="card">
@@ -79,8 +79,8 @@ export default function SkillsPage() {
             Save
           </button>
         </div>
-        {saved && <div className="success">Saved.</div>}
-        <div className="muted small-text">
+        {saved && <div className="text-green my-1.5">Saved.</div>}
+        <div className="text-muted text-[12px]">
           A skill is a subfolder containing SKILL.md, or a loose .md file.
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function SkillsPage() {
             <h3>Skills ({skillsInfo.skills.length})</h3>
             {projects.length > 0 && (
               <div className="row">
-                <span className="muted">Install into:</span>
+                <span className="text-muted">Install into:</span>
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
@@ -114,9 +114,9 @@ export default function SkillsPage() {
             )}
           </div>
 
-          {skillsInfo.missing && <div className="error">Configured path no longer exists.</div>}
+          {skillsInfo.missing && <div className="text-red my-1.5">Configured path no longer exists.</div>}
           {skillsInfo.skills.length === 0 && !skillsInfo.missing && (
-            <div className="muted">No skills found in the repo yet.</div>
+            <div className="text-muted">No skills found in the repo yet.</div>
           )}
 
           {skillsInfo.skills.map((s) => (
@@ -129,12 +129,12 @@ export default function SkillsPage() {
               />
               <span className="service-name">{s.name}</span>
               {installed.includes(s.name) && <span className="tag">installed</span>}
-              <span className="muted small-text">{s.description}</span>
+              <span className="text-muted text-[12px]">{s.description}</span>
             </div>
           ))}
 
-          {msg && <div className="success">{msg}</div>}
-          {error && <div className="error">{error}</div>}
+          {msg && <div className="text-green my-1.5">{msg}</div>}
+          {error && <div className="text-red my-1.5">{error}</div>}
         </div>
       )}
     </div>
