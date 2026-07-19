@@ -10,6 +10,21 @@ export function expandHome(p) {
   return p;
 }
 
+// Clean up a filesystem path a user typed or pasted into a field. People often
+// paste a path copied from a terminal — wrapped in quotes, or with shell-escaped
+// spaces ("Mobile\ Documents") — which are escapes for the shell, not part of
+// the real path. Strip those, trim, and expand ~ so the value points at the
+// actual folder.
+export function normalizePath(p) {
+  if (typeof p !== 'string') return p;
+  let s = p.trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1);
+  }
+  s = s.replace(/\\ /g, ' '); // un-escape shell-escaped spaces
+  return expandHome(s);
+}
+
 // Throw a 400 unless every named field on `body` is truthy. The message lists
 // all required fields ("name and path are required"), matching the prior
 // per-route wording.

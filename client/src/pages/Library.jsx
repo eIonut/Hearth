@@ -3,13 +3,11 @@ import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import Snippets from './Snippets.jsx';
 import Notes from './Notes.jsx';
 import SkillsPage from './SkillsPage.jsx';
-import Backup from './Backup.jsx';
 
 const TABS = [
   { to: '/library/snippets', label: 'Snippets' },
   { to: '/library/notes', label: 'Notes' },
   { to: '/library/skills', label: 'AI skills' },
-  { to: '/library/backup', label: 'Backup' },
 ];
 
 export default function Library() {
@@ -23,7 +21,6 @@ export default function Library() {
       {tab === 'snippets' && <Snippets />}
       {tab === 'notes' && <Notes />}
       {tab === 'skills' && <SkillsPage />}
-      {tab === 'backup' && <Backup />}
     </div>
   );
 }

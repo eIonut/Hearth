@@ -1,7 +1,33 @@
 import { NavLink } from 'react-router';
 
-// Left navigation rail: logo, collapse toggle, page links, crash badge.
-export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
+function rel(iso) {
+  const s = (Date.now() - Date.parse(iso)) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+// The always-visible backup status shown at the bottom of the rail, so "when
+// did I last back up" is answerable from any page without opening the tab.
+function backupLine(backup) {
+  if (!backup) return null;
+  if (backup.autoBlocked) return { text: '⚠ Auto-sync blocked', cls: 'text-red' };
+  if (!backup.configured) return { text: 'Backup not set up', cls: 'text-muted' };
+  if (backup.stale) {
+    const last = backup.lastBackupAt ? ` (last ${rel(backup.lastBackupAt)})` : '';
+    return { text: `⚠ Backup needed${last}`, cls: 'text-orange' };
+  }
+  if (backup.lastBackupAt)
+    return { text: `✓ Backed up ${rel(backup.lastBackupAt)}`, cls: 'text-muted' };
+  return { text: 'Not backed up yet', cls: 'text-muted' };
+}
+
+// Left navigation rail: logo, collapse toggle, page links, crash badge, and the
+// backup status footer.
+export default function Sidebar({ pages, collapsed, crashedCount, backup, onToggle }) {
+  const backupDot = backup && (backup.autoBlocked ? 'bg-red' : backup.stale ? 'bg-orange' : null);
+  const status = backupLine(backup);
   return (
     <aside
       className={
@@ -45,10 +71,23 @@ export default function Sidebar({ pages, collapsed, crashedCount, onToggle }) {
                 {collapsed ? '' : crashedCount}
               </span>
             )}
+            {p.path === '/backup' && backupDot && (
+              <span
+                className={`ml-1.5 inline-block size-2 rounded-full align-middle ${backupDot}`}
+                title={status?.text}
+              />
+            )}
           </NavLink>
         ))}
       </nav>
-      {!collapsed && <div className="mt-auto p-2.5 text-[11px] text-muted">localhost only</div>}
+      <div className="mt-auto">
+        {!collapsed && status && (
+          <NavLink to="/backup" className={`block px-2.5 pt-2.5 text-[11px] ${status.cls}`}>
+            {status.text}
+          </NavLink>
+        )}
+        {!collapsed && <div className="p-2.5 text-[11px] text-muted">localhost only</div>}
+      </div>
     </aside>
   );
 }

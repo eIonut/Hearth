@@ -47,6 +47,14 @@ describe('sync API', () => {
     expect(res.body.enabled).toEqual(['notes']); // settings/bogus stripped
   });
 
+  it('normalizes a pasted, shell-escaped or quoted cloud path', async () => {
+    const res = await request(app)
+      .put('/api/sync/config')
+      .send({ cloudDir: '  "/tmp/My\\ Cloud Folder"  ' });
+    expect(res.status).toBe(200);
+    expect(res.body.cloud.dir).toBe('/tmp/My Cloud Folder');
+  });
+
   it('flags a planted secret in the scan', async () => {
     fs.writeFileSync(
       path.join(dataDir, 'snippets.json'),

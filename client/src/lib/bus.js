@@ -25,3 +25,9 @@ export function consumePendingTerm() {
   pendingTerm = null;
   return t;
 }
+
+// Fire a transient toast notification, shown by the <Toasts> container mounted
+// in App. `kind` is 'ok' | 'warn' | 'err' (styling only).
+export function notify(message, kind = 'ok') {
+  window.dispatchEvent(new CustomEvent('hub:toast', { detail: { message, kind } }));
+}

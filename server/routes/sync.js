@@ -1,5 +1,5 @@
 import express from 'express';
-import { expandHome } from '../lib/validate.js';
+import { normalizePath } from '../lib/validate.js';
 import {
   PORTABLE_ELIGIBLE,
   getConfig,
@@ -9,11 +9,31 @@ import {
   scanSecrets,
   restore as applyRestore,
 } from '../lib/sync.js';
-import { runCloud, runGit } from '../lib/syncrun.js';
+import { runCloud, runGit, dirtySince } from '../lib/syncrun.js';
 import * as cloud from '../lib/cloudsync.js';
 import * as gitsync from '../lib/gitsync.js';
 
 const router = express.Router();
+
+// A cheap poll target for the sidebar backup indicator: config + file mtimes
+// only, no git subprocesses or cloud stat. Reports the most recent backup, a
+// per-destination pair of timestamps (so the client can name what synced), and
+// whether a configured destination is stale (data changed since it last
+// backed up) or its last auto-sync was blocked on a secret.
+router.get('/summary', (req, res) => {
+  const { cloud: cd, git: g, lastCloudAt, lastGitAt, autoState } = getConfig();
+  const configured = !!(cd.dir || g.remote);
+  const stale = (!!cd.dir && dirtySince(lastCloudAt)) || (!!g.remote && dirtySince(lastGitAt));
+  const times = [lastCloudAt, lastGitAt].filter(Boolean).map((t) => Date.parse(t));
+  res.json({
+    configured,
+    lastBackupAt: times.length ? new Date(Math.max(...times)).toISOString() : null,
+    lastCloudAt,
+    lastGitAt,
+    stale: configured && stale,
+    autoBlocked: autoState?.cloud?.status === 'blocked' || autoState?.git?.status === 'blocked',
+  });
+});
 
 function safe(fn, fallback) {
   try {
@@ -51,12 +71,12 @@ router.put('/config', (req, res) => {
     patch.enabled = req.body.enabled.filter((n) => PORTABLE_ELIGIBLE.includes(n));
   }
   if (req.body.cloudDir !== undefined) {
-    patch.cloud = { dir: req.body.cloudDir ? expandHome(req.body.cloudDir) : '' };
+    patch.cloud = { dir: req.body.cloudDir ? normalizePath(req.body.cloudDir) : '' };
   }
   if (req.body.gitRemote !== undefined || req.body.gitRepoDir !== undefined) {
     const cur = getConfig().git;
     patch.git = {
-      repoDir: req.body.gitRepoDir ? expandHome(req.body.gitRepoDir) : cur.repoDir,
+      repoDir: req.body.gitRepoDir ? normalizePath(req.body.gitRepoDir) : cur.repoDir,
       remote: req.body.gitRemote !== undefined ? req.body.gitRemote.trim() : cur.remote,
     };
   }

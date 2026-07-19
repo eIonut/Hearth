@@ -164,7 +164,8 @@ export default function Backup() {
   const git = status.git || {};
 
   return (
-    <div>
+    <div className="max-w-[1100px] p-6">
+      <h2 className="mb-2">Backup</h2>
       <p className="text-muted">
         Your snippets, notes, learnings and workflows live in this folder and are gitignored — so
         they don't ship with the app repo. Point them at a backup destination you own so years of
