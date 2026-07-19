@@ -121,11 +121,6 @@ All are gitignored (env presets contain secrets — keep them out of any remote)
 Use the **Library → Backup** tab to sync the portable `data/` collections to a
 cloud folder or a private git remote you own.
 
-## Roadmap (build next)
-
-1. **Git dashboard** — branch/stash/dirty state across all repos at a glance.
-2. **Money tracker** — income streams and goals with a scoreboard.
-
 ## License
 
 [MIT](LICENSE) — do whatever you want with it. If it saves you time, that's the point.
