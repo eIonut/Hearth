@@ -8,6 +8,7 @@ import preview from './routes/preview.js';
 import workflows from './routes/workflows.js';
 import templates from './routes/templates.js';
 import snippets from './routes/snippets.js';
+import notes from './routes/notes.js';
 import learning from './routes/learning.js';
 import skills from './routes/skills.js';
 
@@ -25,6 +26,7 @@ app.use('/api/preview', preview);
 app.use('/api/workflows', workflows);
 app.use('/api/templates', templates);
 app.use('/api/snippets', snippets);
+app.use('/api/notes', notes);
 app.use('/api/learning', learning);
 app.use('/api/skills', skills);
 

@@ -1,10 +1,12 @@
 import { useParams } from 'react-router';
 import SubTabsNav from '../components/common/SubTabsNav.jsx';
 import Snippets from './Snippets.jsx';
+import Notes from './Notes.jsx';
 import SkillsPage from './SkillsPage.jsx';
 
 const TABS = [
   { to: '/library/snippets', label: 'Snippets' },
+  { to: '/library/notes', label: 'Notes' },
   { to: '/library/skills', label: 'AI skills' },
 ];
 
@@ -17,6 +19,7 @@ export default function Library() {
         <SubTabsNav tabs={TABS} />
       </div>
       {tab === 'snippets' && <Snippets />}
+      {tab === 'notes' && <Notes />}
       {tab === 'skills' && <SkillsPage />}
     </div>
   );
