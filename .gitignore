@@ -4,6 +4,7 @@ client/dist/
 data/
 envs/
 backups/
+sync/
 .DS_Store
 
 # Local Claude Code settings (per-user)

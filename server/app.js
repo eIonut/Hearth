@@ -11,6 +11,7 @@ import snippets from './routes/snippets.js';
 import notes from './routes/notes.js';
 import learning from './routes/learning.js';
 import skills from './routes/skills.js';
+import sync from './routes/sync.js';
 
 // The Express app is built here and exported without binding a port, so tests
 // can drive it with supertest. Port binding, the WebSocket terminal server, and
@@ -29,6 +30,7 @@ app.use('/api/snippets', snippets);
 app.use('/api/notes', notes);
 app.use('/api/learning', learning);
 app.use('/api/skills', skills);
+app.use('/api/sync', sync);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, terminals: terminals.available() });
@@ -51,7 +53,11 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   if (status >= 500) console.error('[dev-hub]', err);
-  res.status(status).json({ error: err.message || 'internal error' });
+  const body = { error: err.message || 'internal error' };
+  // The sync secret-scan gate attaches the offending lines so the client can
+  // show them and offer an explicit override.
+  if (err.findings) body.findings = err.findings;
+  res.status(status).json(body);
 });
 
 export default app;

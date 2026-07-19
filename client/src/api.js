@@ -6,12 +6,16 @@ export async function api(path, opts = {}) {
   });
   if (!res.ok) {
     let msg = res.statusText;
+    let data = null;
     try {
-      msg = (await res.json()).error || msg;
+      data = await res.json();
+      msg = data.error || msg;
     } catch {
       /* response body not JSON — keep statusText */
     }
-    throw new Error(msg);
+    const err = new Error(msg);
+    if (data) err.data = data; // e.g. sync secret-scan findings
+    throw err;
   }
   return res.json();
 }
