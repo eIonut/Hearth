@@ -48,7 +48,7 @@ function OpEditor({ op, onChange, onRemove }) {
               <input
                 value={op.key}
                 onChange={(e) => set('key', e.target.value)}
-                placeholder="IAM_API_URL"
+                placeholder="API_URL"
               />
             </label>
             <label>
@@ -56,7 +56,7 @@ function OpEditor({ op, onChange, onRemove }) {
               <input
                 value={op.value}
                 onChange={(e) => set('value', e.target.value)}
-                placeholder="iam-a-dev-1.infra.al:30374"
+                placeholder="localhost:3000"
               />
             </label>
           </div>
@@ -78,7 +78,7 @@ function OpEditor({ op, onChange, onRemove }) {
               className="font-mono"
               value={op.find}
               onChange={(e) => set('find', e.target.value)}
-              placeholder={'loader={checkAccessToken}'}
+              placeholder={'text to find'}
             />
           </label>
           <label>
@@ -88,7 +88,7 @@ function OpEditor({ op, onChange, onRemove }) {
               className="font-mono"
               value={op.replace}
               onChange={(e) => set('replace', e.target.value)}
-              placeholder={'// loader={checkAccessToken}'}
+              placeholder={'text to replace it with'}
             />
           </label>
         </>
@@ -121,7 +121,7 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="point IAM at dev-1 + disable auth loader"
+          placeholder="short name for this patch"
         />
       </label>
 
