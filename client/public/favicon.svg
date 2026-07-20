@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    
+    <linearGradient id="mflame" x1="256" y1="456" x2="256" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f81f7"/>
+      <stop offset="0.42" stop-color="#7a6fe0"/>
+      <stop offset="0.72" stop-color="#e0902b"/>
+      <stop offset="1" stop-color="#f5c451"/>
+    </linearGradient>
+    <linearGradient id="minner" x1="256" y1="430" x2="256" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f81f7"/>
+      <stop offset="0.55" stop-color="#e0902b"/>
+      <stop offset="1" stop-color="#ffe39a"/>
+    </linearGradient>
+    <radialGradient id="mglow" cx="256" cy="300" r="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e0902b" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#e0902b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mtile" x1="0" y1="0" x2="0" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1b222c"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="500" height="500" rx="112" fill="url(#mtile)" stroke="#30363d" stroke-width="3"/>
+  <circle cx="256" cy="300" r="200" fill="url(#mglow)"/>
+  <g transform="translate(0 0) scale(1)">
+    <path fill="url(#mflame)" d="M256 88 C 236 150 292 176 300 236 C 305 282 356 296 356 356 C 356 420 312 456 256 456 C 200 456 148 420 148 356 C 148 306 176 292 194 258 C 210 228 206 196 196 168 C 236 196 250 150 256 88 Z"/>
+    <path fill="url(#minner)" d="M262 210 C 250 246 288 258 292 300 C 295 332 322 344 322 378 C 322 414 294 436 258 436 C 224 436 198 414 198 380 C 198 350 220 340 232 316 C 242 296 240 260 262 210 Z"/>
+  </g>
+  <rect x="150" y="454" width="212" height="8" rx="4" fill="#30363d"/>
+</svg>

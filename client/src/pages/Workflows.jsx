@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowUp, ArrowDown, X, Play, Loader2, Pencil, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { handleWorkflowClientStep } from '../lib/workflowSteps.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
@@ -55,7 +56,7 @@ function StepEditor({
         </select>
         <div>
           <button className="btn small" onClick={onMoveUp} disabled={!canMoveUp} title="Move up">
-            ↑
+            <ArrowUp size={13} />
           </button>
           <button
             className="btn small"
@@ -63,10 +64,10 @@ function StepEditor({
             disabled={!canMoveDown}
             title="Move down"
           >
-            ↓
+            <ArrowDown size={13} />
           </button>
           <button className="btn small danger" onClick={onRemove} title="Remove step">
-            ✕
+            <X size={13} />
           </button>
         </div>
       </div>
@@ -194,7 +195,7 @@ function StepEditor({
                 onChange={(e) => set('target', e.target.value)}
               >
                 <option value="browser">New browser tab</option>
-                <option value="workspace">Dev Hub Workspace</option>
+                <option value="workspace">Hearth Workspace</option>
               </select>
             </label>
           )}
@@ -262,7 +263,8 @@ function WorkflowForm({ projects, patches, envCache, loadEnv, initial, onSaved, 
         className="btn small"
         onClick={() => setSteps((s) => [...s, { type: 'start', projectId: projects[0]?.id ?? '' }])}
       >
-        + Add step
+        <Plus size={14} />
+        Add step
       </button>
 
       {error && <div className="my-1.5 text-red">{error}</div>}
@@ -349,7 +351,8 @@ export default function Workflows() {
           sites you need — in order.
         </p>
         <button className="btn primary" onClick={() => setEditing({})}>
-          + New workflow
+          <Plus size={14} />
+          New workflow
         </button>
       </div>
 
@@ -404,13 +407,23 @@ export default function Workflows() {
                 disabled={running[wf.id]}
                 onClick={() => run(wf)}
               >
-                {running[wf.id] ? 'Running…' : '▶ Run'}
+                {running[wf.id] ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Play size={13} />
+                )}
+                {running[wf.id] ? 'Running…' : 'Run'}
               </button>
               <button className="btn small" onClick={() => setEditing(wf)}>
+                <Pencil size={13} />
                 Edit
               </button>
-              <button className="btn small danger" onClick={() => remove(wf)}>
-                ✕
+              <button
+                className="btn small danger"
+                onClick={() => remove(wf)}
+                title="Delete workflow"
+              >
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

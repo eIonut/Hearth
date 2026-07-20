@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { api } from '../../api.js';
 
 export default function PreviewFrame({ tab, visible }) {
@@ -21,14 +22,17 @@ export default function PreviewFrame({ tab, visible }) {
             <span className="chip red">not reachable — is the service running?</span>
           )}
           {check.blocked && (
-            <span className="chip red">blocks iframes ({check.reason}) — use ↗</span>
+            <span className="chip red">
+              blocks iframes ({check.reason}) — use <ExternalLink size={12} className="inline" />
+            </span>
           )}
         </div>
       )}
       {check?.blocked ? (
         <div className="card empty" style={{ flex: 1 }}>
-          This app refuses to render inside an iframe ({check.reason}). Use ↗ to open it in a new
-          tab, or remove the header in the app's dev config.
+          This app refuses to render inside an iframe ({check.reason}). Use{' '}
+          <ExternalLink size={12} className="inline" /> to open it in a new tab, or remove the
+          header in the app's dev config.
         </div>
       ) : (
         <iframe

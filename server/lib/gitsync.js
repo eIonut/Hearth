@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
-import { MANIFEST } from './sync.js';
+import { MANIFEST, LEGACY_MANIFEST, MANIFEST_NAMES } from './sync.js';
 import { ValidationError } from './errors.js';
 
 // Git-backed sync into a repository the user owns. Unlike the read-only status
@@ -50,8 +50,8 @@ function git(cwd, args, { net = false } = {}) {
 // config.
 function ensureIdentity(repoDir) {
   for (const [key, value] of [
-    ['user.name', 'dev-hub'],
-    ['user.email', 'dev-hub@localhost'],
+    ['user.name', 'hearth'],
+    ['user.email', 'hearth@localhost'],
   ]) {
     let has;
     try {
@@ -107,13 +107,16 @@ function push(repoDir, files, manifest, message) {
     fs.writeFileSync(path.join(repoDir, name + '.json'), content);
   }
   fs.writeFileSync(path.join(repoDir, MANIFEST), JSON.stringify(manifest, null, 2) + '\n');
+  // Sweep out a manifest committed under the old name so the repo keeps one.
+  const staleManifest = path.join(repoDir, LEGACY_MANIFEST);
+  if (fs.existsSync(staleManifest)) fs.rmSync(staleManifest);
 
   git(repoDir, ['add', '-A']);
   const staged = git(repoDir, ['status', '--porcelain']).trim();
   let committed = false;
   if (staged) {
     ensureIdentity(repoDir);
-    git(repoDir, ['commit', '-m', message || `dev-hub sync ${manifest.exportedAt}`]);
+    git(repoDir, ['commit', '-m', message || `hearth sync ${manifest.exportedAt}`]);
     committed = true;
   }
   // Push even when nothing new committed, in case a prior commit never made it
@@ -131,10 +134,10 @@ function restore(repoDir, remote) {
     fs.mkdirSync(parent, { recursive: true });
     // Clone into the target dir. It must be empty/absent for a clean clone.
     if (fs.existsSync(repoDir) && fs.readdirSync(repoDir).length > 0) {
-      throw new ValidationError(`${repoDir} exists and is not a dev-hub sync repo`);
+      throw new ValidationError(`${repoDir} exists and is not a hearth sync repo`);
     }
     git(parent, ['clone', remote, path.basename(repoDir)], { net: true });
-    // A remote whose HEAD points at a branch dev-hub never pushes — a repo
+    // A remote whose HEAD points at a branch hearth never pushes — a repo
     // still defaulting to `master` while push() always uses `main` — clones
     // successfully with an EMPTY working tree ("remote HEAD refers to
     // nonexistent ref"), and the restore would then report "no backup files"
@@ -150,7 +153,7 @@ function restore(repoDir, remote) {
 
   const files = {};
   for (const e of fs.readdirSync(repoDir)) {
-    if (!e.endsWith('.json') || e === MANIFEST) continue;
+    if (!e.endsWith('.json') || MANIFEST_NAMES.includes(e)) continue;
     files[e.replace(/\.json$/, '')] = fs.readFileSync(path.join(repoDir, e), 'utf8');
   }
   if (Object.keys(files).length === 0) throw new ValidationError('remote has no backup files yet');

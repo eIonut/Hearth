@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { api } from '../../api.js';
 import { openPreview } from '../../lib/bus.js';
 
@@ -33,7 +34,8 @@ export default function LinkButton({ project, link }) {
   }
   return (
     <a className="btn small" href={link.url} target="_blank" rel="noreferrer" title={link.url}>
-      {link.name} ↗
+      {link.name}
+      <ExternalLink size={12} />
     </a>
   );
 }

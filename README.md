@@ -1,4 +1,8 @@
-# ⚡ Dev Hub
+<p align="center">
+  <img src="brand/banner.png" alt="Hearth — your local dev, all in one place" width="100%" />
+</p>
+
+# Hearth
 
 Your personal local mission control: start/stop project services, swap env presets, run terminals in the browser, save snippets, and track what to learn next.
 
@@ -15,7 +19,7 @@ It's free and MIT-licensed. Clone it, gut it for parts, make it yours.
 Requires Node 20.19+ or 22.12+ (Vite 8 floor).
 
 ```bash
-cd dev-hub
+cd hearth
 npm install        # installs server + client deps (client via postinstall)
 npm run dev        # starts server (:5001) + client (:5173)
 ```
@@ -38,7 +42,7 @@ project, service definition, or folder has since disappeared is skipped with a
 reason on the console instead of failing the boot. To boot without starting
 anything, set `"autoRestartServices": false` in `data/settings.json`.
 
-**Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
+**Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `hearth/backups/`.
 
 **Patches** — named file tweaks you apply/revert on demand. Two op types: _Env value_ (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and _Text replace_ (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
 
@@ -75,7 +79,7 @@ One surface for shells and running apps, with a mixed tab strip — terminal tab
 **Backup** — your data (snippets, notes, learnings, workflows, templates) is gitignored, so it never ships with the app repo — which also means a lost laptop or fresh clone loses it. This tab points that data at a backup destination **you** own. Pick which collections to include (env presets, patches, backups and local settings are never included — patch ops embed literal env values); a **secret scan** flags anything that looks like a key or token before it leaves your machine. Two destinations, same data:
 
 - **Cloud folder** — write into a folder your OS already syncs (iCloud, Dropbox, OneDrive, Drive). Zero setup, off-machine within seconds. It's a mirror, not version history. Detected providers show up as one-click buttons.
-- **Git remote** — push to a **private** repo you own (not a fork of this one). Full history and diffs; needs your SSH key or credential helper already set up. The sync repo lives **outside** the app tree (`~/.dev-hub/sync` by default), a fully independent git repo — so `git pull`-ing app updates never conflicts with your data, and git operations can never touch the app repo.
+- **Git remote** — push to a **private** repo you own (not a fork of this one). Full history and diffs; needs your SSH key or credential helper already set up. The sync repo lives **outside** the app tree (`~/.hearth/sync` by default), a fully independent git repo — so `git pull`-ing app updates never conflicts with your data, and git operations can never touch the app repo.
 
 **Restore** on a new machine pulls it back; your current local data is snapshotted to `backups/` first, so a mistaken restore is always recoverable.
 
@@ -127,7 +131,7 @@ utilities in the JSX. There is no separate stylesheet.
 | Open tabs and split layout         | `data/workspace.json` (local)    |
 | Services running at last shutdown  | `data/servicestate.json` (local) |
 | Env presets                        | `envs/<projectId>/<name>.env`    |
-| Git sync repo (Backup tab)         | `~/.dev-hub/sync` → your remote  |
+| Git sync repo (Backup tab)         | `~/.hearth/sync` → your remote   |
 
 All are gitignored (env presets contain secrets — keep them out of any remote).
 Use the **Library → Backup** tab to sync the portable `data/` collections to a

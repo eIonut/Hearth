@@ -4,8 +4,8 @@ import path from 'path';
 import { read, write, dataDir } from './store.js';
 import { ValidationError } from './errors.js';
 
-// The hub root (…/dev-hub) — parent of the default data dir. Used to place the
-// git sync repo by default. Never derived from DEV_HUB_DATA_DIR so tests that
+// The app root (…/hearth) — parent of the default data dir. Used to place the
+// git sync repo by default. Never derived from HEARTH_DATA_DIR so tests that
 // relocate the data dir don't scatter repos into temp folders.
 const HUB_ROOT = path.join(import.meta.dirname, '..', '..');
 
@@ -31,14 +31,18 @@ const DEFAULT_ENABLED = PORTABLE_ELIGIBLE.filter((n) => n !== 'projects');
 // collections, so a data-file-based sync can't reach them at all.
 const NEVER = ['settings', 'patchstate', 'workspace', 'servicestate'];
 
-const MANIFEST = 'dev-hub.manifest.json';
+const MANIFEST = 'hearth.manifest.json';
+// Bundles written before the dev-hub → hearth rename used this name. Read paths
+// still recognize it so an existing backup restores without a re-push.
+const LEGACY_MANIFEST = 'dev-hub.manifest.json';
+const MANIFEST_NAMES = [MANIFEST, LEGACY_MANIFEST];
 
-// The git sync repo lives OUTSIDE the app tree by default (~/.dev-hub/sync).
+// The git sync repo lives OUTSIDE the app tree by default (~/.hearth/sync).
 // Placing it inside the cloned app folder means nesting git repos, and git
 // commands would leak into the app repo (rewriting its remote, committing its
 // files). Keeping it in the home dir makes the data repo fully independent, so
 // app updates and data backups never touch each other.
-const DEFAULT_REPO_DIR = path.join(os.homedir(), '.dev-hub', 'sync');
+const DEFAULT_REPO_DIR = path.join(os.homedir(), '.hearth', 'sync');
 
 // The sync slice of settings.json, normalized with defaults filled in. This is
 // the single reader both the routes and the auto-sync timer use.
@@ -85,7 +89,7 @@ function collect(names) {
 
 function buildManifest(names) {
   return {
-    app: 'dev-hub',
+    app: 'hearth',
     version: 1,
     exportedAt: new Date().toISOString(),
     host: os.hostname(),
@@ -226,7 +230,7 @@ function redact(line) {
 // is there now, so a mistaken restore is always recoverable.
 function snapshotLocal(names) {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  // Sibling of the active data dir: dev-hub/backups/sync in production, an
+  // Sibling of the active data dir: hearth/backups/sync in production, an
   // isolated temp path under tests (which relocate the data dir).
   const dir = path.join(dataDir(), '..', 'backups', 'sync', stamp);
   fs.mkdirSync(dir, { recursive: true });
@@ -265,6 +269,8 @@ export {
   DEFAULT_ENABLED,
   NEVER,
   MANIFEST,
+  LEGACY_MANIFEST,
+  MANIFEST_NAMES,
   HUB_ROOT,
   DEFAULT_REPO_DIR,
   getConfig,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
@@ -274,8 +275,9 @@ export default function Backup() {
         />
         {cloud.conflicts?.length > 0 && (
           <div className="my-1.5 text-red">
-            ⚠ {cloud.conflicts.length} conflicted-copy file(s) in the cloud folder — two machines
-            may have written at once. Review them: {cloud.conflicts.join(', ')}
+            <TriangleAlert size={13} className="mr-1 inline align-[-2px]" />
+            {cloud.conflicts.length} conflicted-copy file(s) in the cloud folder — two machines may
+            have written at once. Review them: {cloud.conflicts.join(', ')}
           </div>
         )}
         <Flash msg={cloudFlash} />
@@ -292,7 +294,7 @@ export default function Backup() {
           <input
             value={gitRemote}
             onChange={(e) => setGitRemote(e.target.value)}
-            placeholder="git@github.com:you/dev-hub-data.git"
+            placeholder="git@github.com:you/hearth-data.git"
             style={{ flex: 1, minWidth: 260 }}
           />
           <button

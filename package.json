@@ -1,10 +1,10 @@
 {
-  "name": "dev-hub",
+  "name": "hearth",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Personal local dev hub: services, env presets, terminals, snippets, learning queue",
+  "description": "Hearth — your local dev, all in one place: services, env presets, terminals, snippets, learning queue",
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },

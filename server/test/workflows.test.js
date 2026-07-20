@@ -12,14 +12,14 @@ const { default: app } = await import('../app.js');
 let dataDir;
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-workflows-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-workflows-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
   openInBrowser.mockClear();
 });
 
 afterEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('workflows API', () => {

@@ -11,7 +11,7 @@ function git(cwd, args) {
 
 describe('Git status', () => {
   it('returns a friendly non-repository state for an ordinary project folder', () => {
-    const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-no-git-'));
+    const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-no-git-'));
     try {
       expect(status(folder)).toEqual({ state: 'not-repository' });
     } finally {
@@ -20,10 +20,10 @@ describe('Git status', () => {
   });
 
   it('reports branch and changed files in a repository', () => {
-    const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-git-'));
+    const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-git-'));
     try {
       git(folder, ['init', '--initial-branch=main']);
-      git(folder, ['config', 'user.name', 'Dev Hub Test']);
+      git(folder, ['config', 'user.name', 'Hearth Test']);
       git(folder, ['config', 'user.email', 'test@example.com']);
       fs.writeFileSync(path.join(folder, 'tracked.txt'), 'first version\n');
       git(folder, ['add', 'tracked.txt']);

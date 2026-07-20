@@ -11,9 +11,9 @@ let dataDir;
 let scratch;
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-sync-'));
-  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-scratch-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-sync-'));
+  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-scratch-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
   // Seed a couple of portable collections.
   fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([{ id: 'n1', body: 'hi' }]));
   fs.writeFileSync(
@@ -25,7 +25,7 @@ beforeEach(() => {
 afterEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.rmSync(scratch, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('sync API', () => {
@@ -90,12 +90,12 @@ describe('sync API', () => {
     await request(app).put('/api/sync/config').send({ cloudDir });
 
     await request(app).post('/api/sync/cloud/push').send({}).expect(200);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'patches.json'))).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'patches.json'))).toBe(false);
 
     // A bundle written by an older version still carries patches.json. Restoring
     // it must not overwrite the local patches with another machine's env values.
     fs.writeFileSync(
-      path.join(cloudDir, 'dev-hub', 'patches.json'),
+      path.join(cloudDir, 'hearth', 'patches.json'),
       JSON.stringify([{ id: 'other', ops: [] }]),
     );
     const restore = await request(app).post('/api/sync/cloud/restore').send({});
@@ -107,7 +107,7 @@ describe('sync API', () => {
 
   it('refuses to restore machine-local state out of a backup bundle', async () => {
     const cloudDir = path.join(scratch, 'cloud');
-    const bundle = path.join(cloudDir, 'dev-hub'); // pull() reads the bundle subfolder
+    const bundle = path.join(cloudDir, 'hearth'); // pull() reads the bundle subfolder
     fs.mkdirSync(bundle, { recursive: true });
     fs.writeFileSync(path.join(bundle, 'notes.json'), JSON.stringify([{ id: 'n9', body: 'ok' }]));
     // A bundle that also carries state it should never be able to hand over.
@@ -120,8 +120,8 @@ describe('sync API', () => {
       JSON.stringify({ tabs: [{ id: 1, kind: 'term', cwd: '/somewhere/else' }] }),
     );
     fs.writeFileSync(
-      path.join(bundle, 'dev-hub.manifest.json'),
-      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
+      path.join(bundle, 'hearth.manifest.json'),
+      JSON.stringify({ app: 'hearth', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
     );
 
     await request(app).put('/api/sync/config').send({ cloudDir });
@@ -212,8 +212,8 @@ describe('sync API', () => {
 
     const push = await request(app).post('/api/sync/cloud/push').send({});
     expect(push.status).toBe(200);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'dev-hub.manifest.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'hearth.manifest.json'))).toBe(true);
 
     // Wipe local notes, then restore from the cloud folder.
     fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
@@ -222,6 +222,40 @@ describe('sync API', () => {
     expect(restore.body.restored).toContain('notes');
     const notes = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
     expect(notes).toEqual([{ id: 'n1', body: 'hi' }]);
+  });
+
+  it('restores from a legacy dev-hub cloud bundle and migrates it on push', async () => {
+    // Simulate a backup written before the dev-hub → hearth rename: the bundle
+    // sits in a "dev-hub" sibling with the old manifest name.
+    const cloudDir = path.join(scratch, 'iCloud');
+    const legacy = path.join(cloudDir, 'dev-hub');
+    fs.mkdirSync(legacy, { recursive: true });
+    fs.writeFileSync(
+      path.join(legacy, 'notes.json'),
+      JSON.stringify([{ id: 'old', body: 'kept' }]),
+    );
+    fs.writeFileSync(
+      path.join(legacy, 'dev-hub.manifest.json'),
+      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes'] }),
+    );
+    await request(app).put('/api/sync/config').send({ cloudDir });
+
+    // Read path: the legacy bundle restores without any re-push.
+    fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
+    const restore = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(restore.status).toBe(200);
+    expect(restore.body.restored).toContain('notes');
+    expect(JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'))).toEqual([
+      { id: 'old', body: 'kept' },
+    ]);
+
+    // Write path: the next push adopts the legacy folder in place — the bundle
+    // becomes "hearth", the old folder and old manifest are gone.
+    const push = await request(app).post('/api/sync/cloud/push').send({});
+    expect(push.status).toBe(200);
+    expect(fs.existsSync(legacy)).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'hearth.manifest.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'dev-hub.manifest.json'))).toBe(false);
   });
 
   it('blocks a cloud push on secrets, then allows it with force', async () => {
@@ -239,7 +273,7 @@ describe('sync API', () => {
 
     const forced = await request(app).post('/api/sync/cloud/push').send({ force: true });
     expect(forced.status).toBe(200);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
   });
 
   it('git init/push/restore round-trips through a local bare repo', async () => {
@@ -269,7 +303,7 @@ describe('sync API', () => {
   });
 
   // The remote's HEAD is set when the repo is created and often still points at
-  // `master`, while dev-hub always pushes `main`. A clone then succeeds with an
+  // `master`, while hearth always pushes `main`. A clone then succeeds with an
   // empty working tree, and a restore would claim the backup is empty while the
   // data sits safely on main — a recovery failure exactly when it matters.
   it('restores from a remote whose default branch is not main', async () => {
@@ -346,7 +380,7 @@ describe('auto-sync', () => {
 
     const s1 = await tick();
     expect(s1.cloud.status).toBe('ok');
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
 
     // Nothing changed since — a second tick must not re-run the push.
     const s2 = await tick();
@@ -364,7 +398,7 @@ describe('auto-sync', () => {
 
     const s = await tick();
     expect(s.cloud.status).toBe('blocked');
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(false);
   });
 
   it('does nothing when auto-sync is disabled', async () => {
@@ -374,6 +408,6 @@ describe('auto-sync', () => {
 
     const s = await tick();
     expect(s.cloud).toBeFalsy();
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub'))).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth'))).toBe(false);
   });
 });

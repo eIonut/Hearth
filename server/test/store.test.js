@@ -7,17 +7,17 @@ import { read, write, id, dataDir } from '../lib/store.js';
 let dir;
 
 beforeEach(() => {
-  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-store-'));
-  process.env.DEV_HUB_DATA_DIR = dir;
+  dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-store-'));
+  process.env.HEARTH_DATA_DIR = dir;
 });
 
 afterEach(() => {
   fs.rmSync(dir, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('store', () => {
-  it('resolves the data dir from DEV_HUB_DATA_DIR', () => {
+  it('resolves the data dir from HEARTH_DATA_DIR', () => {
     expect(dataDir()).toBe(dir);
   });
 

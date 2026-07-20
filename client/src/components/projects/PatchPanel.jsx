@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Pencil, Trash2, Undo2, X, Plus } from 'lucide-react';
 import { api } from '../../api.js';
 import { useConfirm } from '../common/ConfirmDialog.jsx';
 
@@ -26,8 +27,8 @@ function OpEditor({ op, onChange, onRemove }) {
           <option value="env-set">Env value</option>
           <option value="replace">Text replace</option>
         </select>
-        <button className="btn small danger" onClick={onRemove}>
-          ✕
+        <button className="btn small danger" onClick={onRemove} title="Remove operation">
+          <X size={13} />
         </button>
       </div>
 
@@ -136,13 +137,15 @@ function PatchForm({ projectId, initial, onSaved, onCancel }) {
 
       <div className="my-1.5 flex flex-wrap items-center gap-2">
         <button className="btn small" onClick={() => setOps((o) => [...o, { ...EMPTY_ENV_OP }])}>
-          + Env value
+          <Plus size={14} />
+          Env value
         </button>
         <button
           className="btn small"
           onClick={() => setOps((o) => [...o, { ...EMPTY_REPLACE_OP }])}
         >
-          + Text replace
+          <Plus size={14} />
+          Text replace
         </button>
       </div>
 
@@ -207,7 +210,7 @@ export default function PatchPanel({ projectId }) {
     try {
       await api(`/patches/${patch.id}/${action}`, { method: 'POST', body: {} });
       setMsg(
-        `${action === 'apply' ? 'Applied' : 'Reverted'} "${patch.name}" — files changed in place, previous versions saved in dev-hub/backups`,
+        `${action === 'apply' ? 'Applied' : 'Reverted'} "${patch.name}" — files changed in place, previous versions saved in hearth/backups`,
       );
       load();
     } catch (e) {
@@ -240,7 +243,8 @@ export default function PatchPanel({ projectId }) {
           </span>
           <span className="flex-1" />
           <button className="btn small primary" onClick={() => setEditing({})}>
-            + New patch
+            <Plus size={14} />
+            New patch
           </button>
         </div>
       )}
@@ -269,14 +273,16 @@ export default function PatchPanel({ projectId }) {
               )}
               {p.status !== 'not-applied' && (
                 <button className="btn small" onClick={() => run(p, 'revert')}>
+                  <Undo2 size={13} />
                   Revert
                 </button>
               )}
               <button className="btn small" onClick={() => setEditing(p)}>
+                <Pencil size={13} />
                 Edit
               </button>
-              <button className="btn small danger" onClick={() => remove(p)}>
-                ✕
+              <button className="btn small danger" onClick={() => remove(p)} title="Delete patch">
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Copy, Check, Pencil, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
@@ -120,7 +121,8 @@ export default function Snippets() {
           style={{ flex: 1 }}
         />
         <button className="btn primary" onClick={() => setEditing({})}>
-          + New snippet
+          <Plus size={14} />
+          New snippet
         </button>
       </div>
 
@@ -149,13 +151,15 @@ export default function Snippets() {
             <h3>{s.title}</h3>
             <div>
               <button className="btn small primary" onClick={() => copy(s)}>
+                {copiedId === s.id ? <Check size={13} /> : <Copy size={13} />}
                 {copiedId === s.id ? 'Copied!' : 'Copy'}
               </button>
               <button className="btn small" onClick={() => setEditing(s)}>
+                <Pencil size={13} />
                 Edit
               </button>
-              <button className="btn small danger" onClick={() => remove(s)}>
-                ✕
+              <button className="btn small danger" onClick={() => remove(s)} title="Delete snippet">
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

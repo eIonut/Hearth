@@ -97,10 +97,14 @@
 @layer components {
   /* Buttons */
   .btn {
-    @apply cursor-pointer rounded-md border border-border bg-bg-3 text-text;
+    @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-border bg-bg-3 align-middle text-text;
     padding: 6px 12px;
     font-size: 13px;
     margin-left: 4px;
+  }
+  /* Lucide icons inside buttons never squash or wrap. */
+  .btn > svg {
+    @apply shrink-0;
   }
   .btn:hover {
     @apply border-muted;
@@ -183,7 +187,7 @@
 
   /* Sidebar nav */
   .nav-item {
-    @apply block w-full cursor-pointer text-left text-muted no-underline;
+    @apply flex w-full cursor-pointer items-center gap-2.5 text-left text-muted no-underline;
     background: none;
     border: none;
     padding: 9px 10px;
@@ -226,7 +230,7 @@
 
   /* Workspace tabs */
   .tab {
-    @apply cursor-pointer border border-border bg-bg-2 text-muted;
+    @apply inline-flex cursor-pointer items-center border border-border bg-bg-2 text-muted;
     border-radius: 6px 6px 0 0;
     padding: 5px 12px;
     font-size: 12px;
@@ -236,14 +240,14 @@
     border-bottom-color: var(--color-bg);
   }
   .tab-close {
-    @apply opacity-60;
+    @apply inline-flex items-center opacity-60;
     margin-left: 8px;
   }
   .tab-close:hover {
     @apply text-red opacity-100;
   }
   .tab-glyph {
-    @apply opacity-70;
+    @apply inline-flex items-center opacity-70;
     margin-right: 6px;
   }
 }

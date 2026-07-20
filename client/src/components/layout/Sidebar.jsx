@@ -1,4 +1,8 @@
 import { NavLink } from 'react-router';
+import { TriangleAlert, CircleCheck, ChevronsLeft, ChevronsRight } from 'lucide-react';
+
+// Served from client/public — reference by URL, not a module import.
+const markUrl = '/hearth-mark.svg';
 
 function rel(iso) {
   const s = (Date.now() - Date.parse(iso)) / 1000;
@@ -12,14 +16,19 @@ function rel(iso) {
 // did I last back up" is answerable from any page without opening the tab.
 function backupLine(backup) {
   if (!backup) return null;
-  if (backup.autoBlocked) return { text: '⚠ Auto-sync blocked', cls: 'text-red' };
+  if (backup.autoBlocked)
+    return { text: 'Auto-sync blocked', cls: 'text-red', Icon: TriangleAlert };
   if (!backup.configured) return { text: 'Backup not set up', cls: 'text-muted' };
   if (backup.stale) {
     const last = backup.lastBackupAt ? ` (last ${rel(backup.lastBackupAt)})` : '';
-    return { text: `⚠ Backup needed${last}`, cls: 'text-orange' };
+    return { text: `Backup needed${last}`, cls: 'text-orange', Icon: TriangleAlert };
   }
   if (backup.lastBackupAt)
-    return { text: `✓ Backed up ${rel(backup.lastBackupAt)}`, cls: 'text-muted' };
+    return {
+      text: `Backed up ${rel(backup.lastBackupAt)}`,
+      cls: 'text-muted',
+      Icon: CircleCheck,
+    };
   return { text: 'Not backed up yet', cls: 'text-muted' };
 }
 
@@ -41,15 +50,16 @@ export default function Sidebar({ pages, collapsed, crashedCount, backup, onTogg
           (collapsed ? 'flex-col gap-2.5 px-0 pb-3' : 'px-1.5 pb-4')
         }
       >
-        <span className="px-1 text-base font-bold whitespace-nowrap">
-          {collapsed ? '⚡' : '⚡ Dev Hub'}
+        <span className="flex items-center gap-2 px-1 text-base font-bold whitespace-nowrap">
+          <img src={markUrl} alt="Hearth" className="size-5 shrink-0" />
+          {!collapsed && 'hearth'}
         </span>
         <button
-          className="size-6 shrink-0 cursor-pointer rounded-md border border-border bg-transparent text-[12px] leading-none text-muted hover:border-muted hover:text-text"
+          className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md border border-border bg-transparent leading-none text-muted hover:border-muted hover:text-text"
           onClick={onToggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {collapsed ? '»' : '«'}
+          {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
         </button>
       </div>
       <nav>
@@ -58,11 +68,12 @@ export default function Sidebar({ pages, collapsed, crashedCount, backup, onTogg
             key={p.path}
             to={p.path}
             className={({ isActive }) =>
-              'nav-item' + (isActive ? ' active' : '') + (collapsed ? ' px-0 text-center' : '')
+              'nav-item' + (isActive ? ' active' : '') + (collapsed ? ' justify-center px-0' : '')
             }
             title={p.label}
           >
-            {collapsed ? p.label[0] : p.label}
+            <p.Icon size={15} className="shrink-0" />
+            {!collapsed && p.label}
             {p.badge && crashedCount > 0 && (
               <span
                 className="ml-1.5 inline-block h-4 min-w-2 rounded-lg bg-red px-[5px] align-middle text-[10px] leading-4 font-bold text-white"
@@ -82,7 +93,11 @@ export default function Sidebar({ pages, collapsed, crashedCount, backup, onTogg
       </nav>
       <div className="mt-auto">
         {!collapsed && status && (
-          <NavLink to="/backup" className={`block px-2.5 pt-2.5 text-[11px] ${status.cls}`}>
+          <NavLink
+            to="/backup"
+            className={`flex items-center gap-1.5 px-2.5 pt-2.5 text-[11px] ${status.cls}`}
+          >
+            {status.Icon && <status.Icon size={12} className="shrink-0" />}
             {status.text}
           </NavLink>
         )}

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { MANIFEST } from './sync.js';
+import { MANIFEST, LEGACY_MANIFEST, MANIFEST_NAMES } from './sync.js';
 import { ValidationError } from './errors.js';
 
 // A "cloud folder" is just a normal directory that a sync daemon
@@ -35,9 +35,29 @@ function detect() {
   return found;
 }
 
-// Where the bundle lives inside the chosen cloud folder.
+// Where the bundle lives inside the chosen cloud folder. Pre-rename installs
+// wrote to a sibling named "dev-hub"; keep resolving to it for reads/migration
+// until the next push moves the bundle over.
+const BUNDLE_NAME = 'hearth';
+const LEGACY_BUNDLE_NAME = 'dev-hub';
+
 function bundleDir(dir) {
-  return path.join(dir, 'dev-hub');
+  return path.join(dir, BUNDLE_NAME);
+}
+
+function legacyBundleDir(dir) {
+  return path.join(dir, LEGACY_BUNDLE_NAME);
+}
+
+// Resolve the bundle folder to read from: the new "hearth" folder if present,
+// else a legacy "dev-hub" folder left by a pre-rename install. Returns the new
+// path when neither exists (callers then report "nothing there yet").
+function resolveBundleDir(dir) {
+  const out = bundleDir(dir);
+  if (fs.existsSync(out)) return out;
+  const legacy = legacyBundleDir(dir);
+  if (fs.existsSync(legacy)) return legacy;
+  return out;
 }
 
 // Atomic write: write to a temp file, then rename over the target. Same-
@@ -61,11 +81,22 @@ function push(dir, files, manifest) {
   if (!stat.isDirectory()) throw new ValidationError(`not a folder: ${dir}`);
 
   const out = bundleDir(dir);
+  // One-time migration: adopt a pre-rename "dev-hub" folder in place so the
+  // existing backup (and any provider version history) carries over instead of
+  // being stranded beside a fresh "hearth" folder.
+  const legacy = legacyBundleDir(dir);
+  if (!fs.existsSync(out) && fs.existsSync(legacy)) {
+    fs.renameSync(legacy, out);
+  }
   fs.mkdirSync(out, { recursive: true });
   for (const [name, content] of Object.entries(files)) {
     atomicWrite(path.join(out, name + '.json'), content);
   }
   atomicWrite(path.join(out, MANIFEST), JSON.stringify(manifest, null, 2) + '\n');
+  // Drop a stale manifest left by a migrated legacy bundle so the folder holds
+  // exactly one.
+  const staleManifest = path.join(out, LEGACY_MANIFEST);
+  if (fs.existsSync(staleManifest)) fs.rmSync(staleManifest);
   return { dir: out, files: Object.keys(files) };
 }
 
@@ -74,7 +105,7 @@ function push(dir, files, manifest) {
 // rather than silently ignore them.
 function status(dir) {
   if (!dir) return { configured: false };
-  const out = bundleDir(dir);
+  const out = resolveBundleDir(dir);
   const result = { configured: true, dir: out, exists: false, conflicts: [] };
   let entries;
   try {
@@ -82,11 +113,11 @@ function status(dir) {
   } catch {
     return result; // folder chosen but nothing written yet (or not synced down)
   }
-  const manifestPath = path.join(out, MANIFEST);
-  if (fs.existsSync(manifestPath)) {
+  const manifestName = MANIFEST_NAMES.find((m) => entries.includes(m));
+  if (manifestName) {
     result.exists = true;
     try {
-      result.manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      result.manifest = JSON.parse(fs.readFileSync(path.join(out, manifestName), 'utf8'));
     } catch {
       /* manifest unreadable — treat as bare files */
     }
@@ -99,7 +130,7 @@ function status(dir) {
 
 // Read the bundle back out for a restore. Returns name → JSON text.
 function pull(dir) {
-  const out = bundleDir(dir);
+  const out = resolveBundleDir(dir);
   let entries;
   try {
     entries = fs.readdirSync(out);
@@ -108,7 +139,7 @@ function pull(dir) {
   }
   const files = {};
   for (const e of entries) {
-    if (!e.endsWith('.json') || e === MANIFEST) continue;
+    if (!e.endsWith('.json') || MANIFEST_NAMES.includes(e)) continue;
     if (/conflicted copy/i.test(e)) continue;
     files[e.replace(/\.json$/, '')] = fs.readFileSync(path.join(out, e), 'utf8');
   }

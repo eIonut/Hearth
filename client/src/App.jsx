@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router';
+import { FolderGit2, LayoutPanelLeft, GraduationCap, BookMarked, CloudUpload } from 'lucide-react';
 import Projects from './pages/Projects.jsx';
 import Workspace from './pages/Workspace.jsx';
 import Learning from './pages/Learning.jsx';
@@ -12,11 +13,11 @@ import Sidebar from './components/layout/Sidebar.jsx';
 import Toasts from './components/common/Toasts.jsx';
 
 const PAGES = [
-  { path: '/projects', label: 'Projects', badge: true },
-  { path: '/workspace', label: 'Workspace' },
-  { path: '/learning', label: 'Learning' },
-  { path: '/library', label: 'Library' },
-  { path: '/backup', label: 'Backup' },
+  { path: '/projects', label: 'Projects', badge: true, Icon: FolderGit2 },
+  { path: '/workspace', label: 'Workspace', Icon: LayoutPanelLeft },
+  { path: '/learning', label: 'Learning', Icon: GraduationCap },
+  { path: '/library', label: 'Library', Icon: BookMarked },
+  { path: '/backup', label: 'Backup', Icon: CloudUpload },
 ];
 
 export default function App() {

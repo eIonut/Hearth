@@ -1,4 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ChevronRight,
+  Globe,
+  ArrowLeftRight,
+  X,
+  RotateCw,
+  ExternalLink,
+  Rows2,
+  Columns2,
+} from 'lucide-react';
 import { api } from '../api.js';
 import { usePoll } from '../hooks/usePoll.js';
 import { consumePendingPreview, consumePendingTerm } from '../lib/bus.js';
@@ -282,8 +292,8 @@ export default function Workspace() {
                 onClick={() => setActiveTab(t.id)}
                 title={t.kind === 'preview' ? t.url : t.cwd || 'home'}
               >
-                <span className={t.kind === 'term' ? 'tab-glyph font-mono' : 'tab-glyph'}>
-                  {t.kind === 'term' ? '❯' : '⌗'}
+                <span className="tab-glyph">
+                  {t.kind === 'term' ? <ChevronRight size={13} /> : <Globe size={13} />}
                 </span>
                 {t.label}
                 {tabs.length > 1 && (
@@ -295,7 +305,7 @@ export default function Workspace() {
                       setLayout((l) => moveAcrossPanes(l, t.id));
                     }}
                   >
-                    ⇄
+                    <ArrowLeftRight size={13} />
                   </span>
                 )}
                 <span
@@ -305,7 +315,7 @@ export default function Workspace() {
                     closeTab(t.id);
                   }}
                 >
-                  ✕
+                  <X size={13} />
                 </span>
               </div>
             ))}
@@ -314,8 +324,8 @@ export default function Workspace() {
 
         {split && paneTabs.length === 0 && (
           <div className="card empty my-2">
-            Empty pane — use ⇄ on a tab to move it here, or open a terminal while this pane has
-            focus.
+            Empty pane — use the move-across icon on a tab to send it here, or open a terminal while
+            this pane has focus.
           </div>
         )}
 
@@ -430,7 +440,7 @@ export default function Workspace() {
               }
               title={layout.mode === 'vsplit' ? 'Stack the panes' : 'Place the panes side by side'}
             >
-              {layout.mode === 'vsplit' ? '⫽' : '⫿'}
+              {layout.mode === 'vsplit' ? <Rows2 size={13} /> : <Columns2 size={13} />}
             </button>
             <button
               className="btn small"
@@ -454,7 +464,7 @@ export default function Workspace() {
         {active?.kind === 'preview' && (
           <>
             <button className="btn small" onClick={reloadActive} title="Reload">
-              ⟳
+              <RotateCw size={13} />
             </button>
             <a
               className="btn small"
@@ -463,7 +473,7 @@ export default function Workspace() {
               rel="noreferrer"
               title="Open in new tab"
             >
-              ↗
+              <ExternalLink size={13} />
             </a>
           </>
         )}
@@ -504,7 +514,7 @@ export default function Workspace() {
       {!ptyAvailable && (
         <div className="card my-1.5 text-red">
           node-pty is not installed, so terminals are disabled. Run{' '}
-          <span className="font-mono">npm install node-pty</span> in the dev-hub folder (needs Xcode
+          <span className="font-mono">npm install node-pty</span> in the hearth folder (needs Xcode
           Command Line Tools), then restart the server.
         </div>
       )}

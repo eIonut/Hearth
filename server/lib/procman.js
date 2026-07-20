@@ -77,20 +77,18 @@ function start(project, service, _restarts = 0) {
   child.on('error', (err) => {
     entry.running = false;
     entry.crashed = true;
-    entry.lines.push(`[dev-hub] failed to start: ${err.message}`);
+    entry.lines.push(`[hearth] failed to start: ${err.message}`);
   });
   child.on('exit', (code) => {
     entry.running = false;
     entry.exitCode = code;
     entry.crashed = !entry.stoppedByUser && code !== 0 && code !== null;
-    entry.lines.push(
-      `[dev-hub] process exited with code ${code}${entry.crashed ? ' (crash)' : ''}`,
-    );
+    entry.lines.push(`[hearth] process exited with code ${code}${entry.crashed ? ' (crash)' : ''}`);
     persist();
 
     if (entry.crashed && service.autoRestart && entry.restarts < MAX_AUTO_RESTARTS) {
       const next = entry.restarts + 1;
-      entry.lines.push(`[dev-hub] auto-restarting in 2s (${next}/${MAX_AUTO_RESTARTS})…`);
+      entry.lines.push(`[hearth] auto-restarting in 2s (${next}/${MAX_AUTO_RESTARTS})…`);
       setTimeout(() => {
         const cur = procs.get(k);
         // don't restart if the user started/stopped it manually in the meantime
@@ -200,7 +198,7 @@ function restore() {
 
     const result = start(project, service);
     if (result.ok) {
-      procs.get(key(projectId, serviceName))?.lines.push('[dev-hub] restored after hub restart');
+      procs.get(key(projectId, serviceName))?.lines.push('[hearth] restored after hub restart');
       restored.push(k);
     } else {
       skipped.push({ key: k, reason: result.error });

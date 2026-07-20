@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Rocket, Pencil, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { openTerm } from '../lib/bus.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
@@ -102,7 +103,8 @@ export default function Templates() {
           that tab.
         </p>
         <button className="btn primary" onClick={() => setEditing({})}>
-          + New template
+          <Plus size={14} />
+          New template
         </button>
       </div>
 
@@ -130,13 +132,19 @@ export default function Templates() {
             <h3 style={{ margin: 0 }}>{t.name}</h3>
             <div>
               <button className="btn small primary" onClick={() => scaffold(t)}>
-                ▶ Scaffold
+                <Rocket size={13} />
+                Scaffold
               </button>
               <button className="btn small" onClick={() => setEditing(t)}>
+                <Pencil size={13} />
                 Edit
               </button>
-              <button className="btn small danger" onClick={() => remove(t)}>
-                ✕
+              <button
+                className="btn small danger"
+                onClick={() => remove(t)}
+                title="Delete template"
+              >
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

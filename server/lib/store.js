@@ -4,9 +4,10 @@ import path from 'path';
 const DEFAULT_DIR = path.join(import.meta.dirname, '..', '..', 'data');
 
 // Data directory, resolved on each call so tests can point it at a temp dir via
-// DEV_HUB_DATA_DIR without having to set the env var before this module loads.
+// HEARTH_DATA_DIR without having to set the env var before this module loads.
+// The former DEV_HUB_DATA_DIR is still honored so existing shells keep working.
 function dataDir() {
-  return process.env.DEV_HUB_DATA_DIR || DEFAULT_DIR;
+  return process.env.HEARTH_DATA_DIR || process.env.DEV_HUB_DATA_DIR || DEFAULT_DIR;
 }
 
 function file(name) {
