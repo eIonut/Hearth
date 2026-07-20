@@ -151,6 +151,60 @@ describe('sync API', () => {
     expect(res.body.findings[0].file).toBe('snippets');
   });
 
+  // collect() pretty-prints, which puts a name and its value on separate lines.
+  // A line-at-a-time scan sees a keyword with nothing after the colon on one
+  // line and an opaque value with a boring name on the next, and clears both.
+  it('flags a secret split across lines by pretty-printing', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'snippets.json'),
+      JSON.stringify([
+        {
+          id: 's1',
+          name: 'stripe',
+          fields: [{ key: 'STRIPE_SECRET_KEY', value: 'sk_live_9xQ2eZvKYlo2C' }],
+        },
+      ]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings.length).toBeGreaterThan(0);
+    expect(res.body.findings[0].file).toBe('snippets');
+    // The secret itself must never be echoed back in the finding.
+    expect(JSON.stringify(res.body.findings)).not.toContain('sk_live_9xQ2eZvKYlo2C');
+  });
+
+  it('flags a credential under a secret-named property', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', apiKey: 'AIzaSyD1234567890abcdefg' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings.length).toBeGreaterThan(0);
+  });
+
+  it('flags a well-known token shape whatever the field is called', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', body: 'ghp_abcdefghij0123456789' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings[0].reason).toBe('GitHub token');
+  });
+
+  // The gate blocks a push, so a scan that cries wolf on ordinary content makes
+  // people reach for `force` by reflex and stop reading findings at all.
+  it('leaves ordinary content unflagged', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', body: 'remember to rotate the token next week' }]),
+    );
+    fs.writeFileSync(
+      path.join(dataDir, 'snippets.json'),
+      JSON.stringify([{ id: 's1', url: 'iam-a-dev-1.infra.al:30374', cwd: '~/Work/billing' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings).toEqual([]);
+  });
+
   it('cloud push round-trips through a folder and restores', async () => {
     const cloudDir = path.join(scratch, 'iCloud');
     fs.mkdirSync(cloudDir);

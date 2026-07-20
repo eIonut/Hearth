@@ -17,14 +17,7 @@ const HUB_ROOT = path.join(import.meta.dirname, '..', '..');
 // in `value`/`revert`, so the collection is a carrier for exactly the material
 // envs/ is kept out of sync to protect — and it is barely portable anyway, as
 // the ops reference file paths and source text inside one specific checkout.
-const PORTABLE_ELIGIBLE = [
-  'snippets',
-  'learning',
-  'notes',
-  'workflows',
-  'templates',
-  'projects',
-];
+const PORTABLE_ELIGIBLE = ['snippets', 'learning', 'notes', 'workflows', 'templates', 'projects'];
 const DEFAULT_ENABLED = PORTABLE_ELIGIBLE.filter((n) => n !== 'projects');
 
 // Collections that must NEVER leave the machine, no matter what a tampered
@@ -102,7 +95,11 @@ function buildManifest(names) {
 
 // --- secret-scan gate -------------------------------------------------------
 // Portable collections are user-authored text (a snippet could paste a real
-// key). Scan the serialized content line by line before it leaves the machine.
+// key), so scan the payload before it leaves the machine. Two passes are
+// needed, because the two ways a secret shows up look nothing alike.
+
+// Pass 1 — line scan. Catches secrets inside a *string*: a snippet holding a
+// chunk of .env or shell, where the name and the value sit on one line.
 const SECRET_PATTERNS = [
   { label: 'private key block', re: /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/ },
   { label: 'AWS access key id', re: /\bAKIA[0-9A-Z]{16}\b/ },
@@ -113,20 +110,109 @@ const SECRET_PATTERNS = [
   },
 ];
 
+// Pass 2 — structural scan. The line scan is blind to a secret carried by the
+// JSON *shape*, because collect() pretty-prints and that splits a name/value
+// pair across two lines:
+//
+//     "key": "STRIPE_SECRET_KEY",
+//     "value": "sk_live_…"
+//
+// Neither line trips pass 1: the first has the keyword but no value after the
+// colon, the second has the value but `value` is not a flagged name. Walking
+// the parsed object instead lets a name and its value be judged together.
+
+// Names that mean "whatever sits next to me is a credential".
+const SECRET_NAME_RE =
+  /(?:api[_-]?key|secret|token|password|passwd|access[_-]?key|client[_-]?secret|private[_-]?key|credential)/i;
+
+// Values that are self-evidently credentials whatever they are called.
+const SECRET_VALUE_PATTERNS = [
+  { label: 'private key block', re: /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/ },
+  { label: 'AWS access key id', re: /^AKIA[0-9A-Z]{16}$/ },
+  { label: 'JWT', re: /^eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{6,}$/ },
+  { label: 'Stripe key', re: /^[srp]k_(?:live|test)_[A-Za-z0-9]{8,}$/ },
+  { label: 'GitHub token', re: /^gh[pousr]_[A-Za-z0-9]{16,}$/ },
+  { label: 'Slack token', re: /^xox[abposr]-[A-Za-z0-9-]{10,}$/ },
+];
+
+// An opaque blob: long, unbroken, no spaces. Prose and file paths with spaces
+// fall out; so does anything short enough to be a flag or an identifier.
+function looksOpaque(s) {
+  return s.length >= 12 && /^[A-Za-z0-9._\-/+=]+$/.test(s);
+}
+
+// Walk the parsed collection, reporting [value, reason] for each string that
+// reads as a credential. Three ways to qualify: the value speaks for itself,
+// the property name says it is a secret, or a sibling *value* names it (the
+// {key, value} pair shape that pass 1 cannot see).
+function walkForSecrets(node, propName, out) {
+  if (typeof node === 'string') {
+    for (const { label, re } of SECRET_VALUE_PATTERNS) {
+      if (re.test(node)) return out.push([node, label]);
+    }
+    if (propName && SECRET_NAME_RE.test(propName) && looksOpaque(node)) {
+      out.push([node, 'secret-named field']);
+    }
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const item of node) walkForSecrets(item, propName, out);
+    return;
+  }
+  if (node && typeof node === 'object') {
+    const values = Object.values(node);
+    // Does some field in this object *name* a secret, e.g. {"key":"API_TOKEN"}?
+    const namedHere = values.some((v) => typeof v === 'string' && SECRET_NAME_RE.test(v));
+    for (const [k, v] of Object.entries(node)) {
+      if (namedHere && typeof v === 'string' && !SECRET_NAME_RE.test(v) && looksOpaque(v)) {
+        out.push([v, 'value beside a secret-named field']);
+      }
+      walkForSecrets(v, k, out);
+    }
+  }
+}
+
+// Locate a flagged value in the serialized text so the finding can point at a
+// line. collect() pretty-prints, so each leaf sits on its own line.
+function lineOf(lines, value) {
+  const escaped = JSON.stringify(value).slice(1, -1);
+  const i = lines.findIndex((l) => l.includes(escaped));
+  return i === -1 ? 1 : i + 1;
+}
+
 function scanSecrets(files) {
   const findings = [];
   for (const [name, content] of Object.entries(files)) {
     const lines = content.split('\n');
+    // One finding per line is enough to send someone looking, and it keeps the
+    // two passes from double-reporting the same spot.
+    const flagged = new Set();
+    const add = (line, reason, preview) => {
+      if (flagged.has(line)) return;
+      flagged.add(line);
+      findings.push({ file: name, line, reason, preview });
+    };
+
     lines.forEach((line, i) => {
       for (const { label, re } of SECRET_PATTERNS) {
-        if (re.test(line)) {
-          findings.push({ file: name, line: i + 1, reason: label, preview: redact(line) });
-          break; // one finding per line is enough to flag it
-        }
+        if (re.test(line)) return add(i + 1, label, redact(line));
       }
     });
+
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      continue; // not JSON — the line scan above is all we can do
+    }
+    const hits = [];
+    walkForSecrets(parsed, null, hits);
+    for (const [value, reason] of hits) {
+      const line = lineOf(lines, value);
+      add(line, reason, redact(lines[line - 1] ?? value));
+    }
   }
-  return findings;
+  return findings.sort((a, b) => a.file.localeCompare(b.file) || a.line - b.line);
 }
 
 // Show enough of a flagged line to locate it, without printing the secret.
