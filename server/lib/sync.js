@@ -12,13 +12,17 @@ const HUB_ROOT = path.join(import.meta.dirname, '..', '..');
 // Which collections are portable knowledge worth carrying between machines.
 // `projects` is eligible but off by default: it holds absolute local paths that
 // rarely match on a second machine.
+//
+// `patches` is deliberately absent. Its `env-set` ops embed literal env values
+// in `value`/`revert`, so the collection is a carrier for exactly the material
+// envs/ is kept out of sync to protect — and it is barely portable anyway, as
+// the ops reference file paths and source text inside one specific checkout.
 const PORTABLE_ELIGIBLE = [
   'snippets',
   'learning',
   'notes',
   'workflows',
   'templates',
-  'patches',
   'projects',
 ];
 const DEFAULT_ENABLED = PORTABLE_ELIGIBLE.filter((n) => n !== 'projects');

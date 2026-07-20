@@ -62,6 +62,49 @@ describe('sync API', () => {
     expect(saved.body.enabled).toEqual(['notes']);
   });
 
+  // Patch ops embed literal env values in `value`/`revert`, making `patches` a
+  // carrier for the same material envs/ is kept out of sync to protect.
+  it('never offers or accepts patches as a sync collection', async () => {
+    const res = await request(app).get('/api/sync/status');
+    expect(res.body.eligible).not.toContain('patches');
+    expect(res.body.config.enabled).not.toContain('patches');
+
+    const saved = await request(app)
+      .put('/api/sync/config')
+      .send({ enabled: ['notes', 'patches'] });
+    expect(saved.body.enabled).toEqual(['notes']);
+  });
+
+  it('does not push patches, and ignores them in a bundle that carries them', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'patches.json'),
+      JSON.stringify([
+        {
+          id: 'p1',
+          ops: [{ type: 'env-set', file: 'api/.env', key: 'STRIPE_KEY', value: 'sk_live_abc123' }],
+        },
+      ]),
+    );
+    const cloudDir = path.join(scratch, 'nopatch');
+    fs.mkdirSync(cloudDir);
+    await request(app).put('/api/sync/config').send({ cloudDir });
+
+    await request(app).post('/api/sync/cloud/push').send({}).expect(200);
+    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'patches.json'))).toBe(false);
+
+    // A bundle written by an older version still carries patches.json. Restoring
+    // it must not overwrite the local patches with another machine's env values.
+    fs.writeFileSync(
+      path.join(cloudDir, 'dev-hub', 'patches.json'),
+      JSON.stringify([{ id: 'other', ops: [] }]),
+    );
+    const restore = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(restore.status).toBe(200);
+    expect(restore.body.restored).not.toContain('patches');
+    const local = JSON.parse(fs.readFileSync(path.join(dataDir, 'patches.json'), 'utf8'));
+    expect(local[0].id).toBe('p1');
+  });
+
   it('refuses to restore machine-local state out of a backup bundle', async () => {
     const cloudDir = path.join(scratch, 'cloud');
     const bundle = path.join(cloudDir, 'dev-hub'); // pull() reads the bundle subfolder
