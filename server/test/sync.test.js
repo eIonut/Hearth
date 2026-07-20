@@ -47,6 +47,49 @@ describe('sync API', () => {
     expect(res.body.enabled).toEqual(['notes']); // settings/bogus stripped
   });
 
+  // Machine-local runtime state must not travel. `workspace` holds absolute
+  // paths and terminal session ids; restoring another machine's `servicestate`
+  // would auto-spawn its services on the next boot.
+  it('never offers or accepts machine-local state as a sync collection', async () => {
+    const res = await request(app).get('/api/sync/status');
+    for (const name of ['settings', 'patchstate', 'workspace', 'servicestate']) {
+      expect(res.body.eligible).not.toContain(name);
+    }
+
+    const saved = await request(app)
+      .put('/api/sync/config')
+      .send({ enabled: ['notes', 'workspace', 'servicestate'] });
+    expect(saved.body.enabled).toEqual(['notes']);
+  });
+
+  it('refuses to restore machine-local state out of a backup bundle', async () => {
+    const cloudDir = path.join(scratch, 'cloud');
+    const bundle = path.join(cloudDir, 'dev-hub'); // pull() reads the bundle subfolder
+    fs.mkdirSync(bundle, { recursive: true });
+    fs.writeFileSync(path.join(bundle, 'notes.json'), JSON.stringify([{ id: 'n9', body: 'ok' }]));
+    // A bundle that also carries state it should never be able to hand over.
+    fs.writeFileSync(
+      path.join(bundle, 'servicestate.json'),
+      JSON.stringify({ running: ['other-machine::web'] }),
+    );
+    fs.writeFileSync(
+      path.join(bundle, 'workspace.json'),
+      JSON.stringify({ tabs: [{ id: 1, kind: 'term', cwd: '/somewhere/else' }] }),
+    );
+    fs.writeFileSync(
+      path.join(bundle, 'dev-hub.manifest.json'),
+      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
+    );
+
+    await request(app).put('/api/sync/config').send({ cloudDir });
+    const res = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(res.status).toBe(200);
+    expect(res.body.restored).toEqual(['notes']);
+    // The dangerous files were ignored, not written into the local data dir.
+    expect(fs.existsSync(path.join(dataDir, 'servicestate.json'))).toBe(false);
+    expect(fs.existsSync(path.join(dataDir, 'workspace.json'))).toBe(false);
+  });
+
   it('normalizes a pasted, shell-escaped or quoted cloud path', async () => {
     const res = await request(app)
       .put('/api/sync/config')
@@ -104,8 +147,10 @@ describe('sync API', () => {
 
   it('git init/push/restore round-trips through a local bare repo', async () => {
     // A bare repo stands in for the user's private remote — no network/auth.
+    // The default branch is pinned so the test does not depend on whatever
+    // init.defaultBranch the machine running it happens to have configured.
     const bare = path.join(scratch, 'origin.git');
-    execFileSync('git', ['init', '--bare', bare]);
+    execFileSync('git', ['-c', 'init.defaultBranch=main', 'init', '--bare', bare]);
     const repoDir = path.join(scratch, 'sync');
     await request(app).put('/api/sync/config').send({ gitRepoDir: repoDir, gitRemote: bare });
 
@@ -122,6 +167,32 @@ describe('sync API', () => {
     fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
     const restore = await request(app).post('/api/sync/git/restore').send({});
     expect(restore.status).toBe(200);
+    const notes = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
+    expect(notes).toEqual([{ id: 'n1', body: 'hi' }]);
+  });
+
+  // The remote's HEAD is set when the repo is created and often still points at
+  // `master`, while dev-hub always pushes `main`. A clone then succeeds with an
+  // empty working tree, and a restore would claim the backup is empty while the
+  // data sits safely on main — a recovery failure exactly when it matters.
+  it('restores from a remote whose default branch is not main', async () => {
+    const bare = path.join(scratch, 'legacy.git');
+    execFileSync('git', ['-c', 'init.defaultBranch=master', 'init', '--bare', bare]);
+    expect(fs.readFileSync(path.join(bare, 'HEAD'), 'utf8')).toContain('master');
+
+    const repoDir = path.join(scratch, 'sync-legacy');
+    await request(app).put('/api/sync/config').send({ gitRepoDir: repoDir, gitRemote: bare });
+    await request(app).post('/api/sync/git/init').send({}).expect(200);
+    await request(app).post('/api/sync/git/push').send({}).expect(200);
+
+    // Force the clone path, then wipe local data so only a real restore can
+    // bring it back.
+    fs.rmSync(repoDir, { recursive: true, force: true });
+    fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
+
+    const restore = await request(app).post('/api/sync/git/restore').send({});
+    expect(restore.status).toBe(200);
+    expect(restore.body.restored).toContain('notes');
     const notes = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
     expect(notes).toEqual([{ id: 'n1', body: 'hi' }]);
   });

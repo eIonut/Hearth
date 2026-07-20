@@ -12,6 +12,8 @@ import notes from './routes/notes.js';
 import learning from './routes/learning.js';
 import skills from './routes/skills.js';
 import sync from './routes/sync.js';
+import terminalsRoutes from './routes/terminals.js';
+import workspace from './routes/workspace.js';
 
 // The Express app is built here and exported without binding a port, so tests
 // can drive it with supertest. Port binding, the WebSocket terminal server, and
@@ -31,6 +33,8 @@ app.use('/api/notes', notes);
 app.use('/api/learning', learning);
 app.use('/api/skills', skills);
 app.use('/api/sync', sync);
+app.use('/api/terminals', terminalsRoutes);
+app.use('/api/workspace', workspace);
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, terminals: terminals.available() });

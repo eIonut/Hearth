@@ -25,10 +25,14 @@ const DEFAULT_ENABLED = PORTABLE_ELIGIBLE.filter((n) => n !== 'projects');
 
 // Collections that must NEVER leave the machine, no matter what a tampered
 // config asks for. `settings` carries the sync config itself (remotes, paths);
-// `patchstate` is machine-local runtime state. Secrets live in envs/ and
-// backups/, which are separate top-level folders and never data collections, so
-// a data-file-based sync can't reach them at all.
-const NEVER = ['settings', 'patchstate'];
+// `patchstate`, `workspace` and `servicestate` are machine-local runtime state.
+// The last two are the important ones to keep out: `workspace` holds absolute
+// paths and terminal session ids that mean nothing on another machine, and
+// restoring another machine's `servicestate` would auto-spawn its services on
+// the next boot — a side effect nobody asked a restore to perform. Secrets live
+// in envs/ and backups/, which are separate top-level folders and never data
+// collections, so a data-file-based sync can't reach them at all.
+const NEVER = ['settings', 'patchstate', 'workspace', 'servicestate'];
 
 const MANIFEST = 'dev-hub.manifest.json';
 

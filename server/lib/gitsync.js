@@ -134,6 +134,16 @@ function restore(repoDir, remote) {
       throw new ValidationError(`${repoDir} exists and is not a dev-hub sync repo`);
     }
     git(parent, ['clone', remote, path.basename(repoDir)], { net: true });
+    // A remote whose HEAD points at a branch dev-hub never pushes — a repo
+    // still defaulting to `master` while push() always uses `main` — clones
+    // successfully with an EMPTY working tree ("remote HEAD refers to
+    // nonexistent ref"), and the restore would then report "no backup files"
+    // while the data sits safely on main. Check main out explicitly.
+    try {
+      git(repoDir, ['checkout', 'main']);
+    } catch {
+      /* no main branch on the remote — the emptiness check below reports it */
+    }
   } else {
     git(repoDir, ['pull', '--ff-only', 'origin', 'main'], { net: true });
   }
