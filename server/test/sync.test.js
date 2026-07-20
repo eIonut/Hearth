@@ -47,6 +47,49 @@ describe('sync API', () => {
     expect(res.body.enabled).toEqual(['notes']); // settings/bogus stripped
   });
 
+  // Machine-local runtime state must not travel. `workspace` holds absolute
+  // paths and terminal session ids; restoring another machine's `servicestate`
+  // would auto-spawn its services on the next boot.
+  it('never offers or accepts machine-local state as a sync collection', async () => {
+    const res = await request(app).get('/api/sync/status');
+    for (const name of ['settings', 'patchstate', 'workspace', 'servicestate']) {
+      expect(res.body.eligible).not.toContain(name);
+    }
+
+    const saved = await request(app)
+      .put('/api/sync/config')
+      .send({ enabled: ['notes', 'workspace', 'servicestate'] });
+    expect(saved.body.enabled).toEqual(['notes']);
+  });
+
+  it('refuses to restore machine-local state out of a backup bundle', async () => {
+    const cloudDir = path.join(scratch, 'cloud');
+    const bundle = path.join(cloudDir, 'dev-hub'); // pull() reads the bundle subfolder
+    fs.mkdirSync(bundle, { recursive: true });
+    fs.writeFileSync(path.join(bundle, 'notes.json'), JSON.stringify([{ id: 'n9', body: 'ok' }]));
+    // A bundle that also carries state it should never be able to hand over.
+    fs.writeFileSync(
+      path.join(bundle, 'servicestate.json'),
+      JSON.stringify({ running: ['other-machine::web'] }),
+    );
+    fs.writeFileSync(
+      path.join(bundle, 'workspace.json'),
+      JSON.stringify({ tabs: [{ id: 1, kind: 'term', cwd: '/somewhere/else' }] }),
+    );
+    fs.writeFileSync(
+      path.join(bundle, 'dev-hub.manifest.json'),
+      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
+    );
+
+    await request(app).put('/api/sync/config').send({ cloudDir });
+    const res = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(res.status).toBe(200);
+    expect(res.body.restored).toEqual(['notes']);
+    // The dangerous files were ignored, not written into the local data dir.
+    expect(fs.existsSync(path.join(dataDir, 'servicestate.json'))).toBe(false);
+    expect(fs.existsSync(path.join(dataDir, 'workspace.json'))).toBe(false);
+  });
+
   it('normalizes a pasted, shell-escaped or quoted cloud path', async () => {
     const res = await request(app)
       .put('/api/sync/config')

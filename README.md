@@ -32,6 +32,12 @@ The sidebar has four pages, grouped by what you're doing — managing projects, 
 
 **Projects** — add each project: name, absolute path, and services one per line (`web: yarn dev`). Then start/stop with one click and watch live logs. Green dot = running. Each project card also shows its Git branch, commits to push or pull, and changed files. Non-Git folders work normally too. The card has three tabs — **Services**, **Env presets**, **Patches** — so a whole setup ritual happens in one place.
 
+Services that were running when the hub went down are started again on the next
+boot, and their logs are marked `restored after hub restart`. Anything whose
+project, service definition, or folder has since disappeared is skipped with a
+reason on the console instead of failing the boot. To boot without starting
+anything, set `"autoRestartServices": false` in `data/settings.json`.
+
 **Env presets** — replaces your Fork stash workflow. Save a project's current `.env` as a preset (e.g. `dev`), change it, save again as `staging`. From then on: one click to swap, right on the project card. Files are changed in place — nothing extra appears in your project; the previous version is saved inside `dev-hub/backups/`.
 
 **Patches** — named file tweaks you apply/revert on demand. Two op types: _Env value_ (change one key, e.g. `IAM_API_URL`, leaving the rest of the file alone — revert restores the previous value) and _Text replace_ (e.g. comment a line out, revert swaps it back). Status detection shows whether each patch is currently applied. Idempotent — applying twice changes nothing.
@@ -48,7 +54,11 @@ The sidebar has four pages, grouped by what you're doing — managing projects, 
 
 One surface for shells and running apps, with a mixed tab strip — terminal tabs and preview tabs side by side. All tabs survive switching pages.
 
-**Terminals** — real shells opened in your home folder or any project.
+**Terminals** — real shells opened in your home folder or any project. Shells live on the server, not in the browser tab: refreshing the page, closing the hub, or navigating away **detaches** and reattaches you to the same shell, with its scrollback and whatever you left running. Closing a tab with ✕ is the one gesture that kills a shell. The **Sessions** button lists every shell the server is holding — including any no tab points at anymore, which you can reattach or kill. Shells sitting idle at a prompt are cleaned up after a day; anything still running a command is left alone.
+
+**Splitting** — **Split** puts two panes side by side (or stacked), each with its own tabs, so a terminal sits next to the preview it is serving. Drag the divider to resize, and use ⇄ on a tab to send it to the other pane.
+
+**What is remembered** — which tabs were open, their working directories, the split layout, and which tab was in front all come back on restart, saved in `data/workspace.json`. If a shell is gone (the hub restarted), its tab reopens in the same folder and says so rather than passing a fresh shell off as the old one.
 
 **Previews** — run your apps inside the hub. Set preview URLs per service (Projects → Edit, e.g. `web: localhost:4000`), then hit Preview on a running service or open any URL from the Workspace toolbar. HMR keeps working, and your browser DevTools inspect the embedded app normally — pick its frame in the Console's context dropdown. Apps that send `X-Frame-Options`/`frame-ancestors` are detected and flagged with an "open in new tab" fallback.
 
@@ -111,15 +121,23 @@ utilities in the JSX. There is no separate stylesheet.
 
 ## Where data lives
 
-| What                               | Where                         |
-| ---------------------------------- | ----------------------------- |
-| Projects, snippets, learning items | `data/*.json`                 |
-| Env presets                        | `envs/<projectId>/<name>.env` |
-| Git sync repo (Backup tab)         | `~/.dev-hub/sync` → your remote |
+| What                               | Where                            |
+| ---------------------------------- | -------------------------------- |
+| Projects, snippets, learning items | `data/*.json`                    |
+| Open tabs and split layout         | `data/workspace.json` (local)    |
+| Services running at last shutdown  | `data/servicestate.json` (local) |
+| Env presets                        | `envs/<projectId>/<name>.env`    |
+| Git sync repo (Backup tab)         | `~/.dev-hub/sync` → your remote  |
 
 All are gitignored (env presets contain secrets — keep them out of any remote).
 Use the **Library → Backup** tab to sync the portable `data/` collections to a
 cloud folder or a private git remote you own.
+
+Entries marked _(local)_ are machine-local runtime state and are never synced or
+restored, even if a backup bundle contains them: `workspace.json` holds absolute
+paths and terminal session ids that mean nothing elsewhere, and restoring another
+machine's `servicestate.json` would auto-start its services on your next boot.
+`settings.json` stays local too — it holds the sync configuration itself.
 
 ## License
 
