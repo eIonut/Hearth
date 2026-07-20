@@ -23,9 +23,9 @@ function writeProjects(projects) {
 const settle = (ms = 150) => new Promise((r) => setTimeout(r, ms));
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-procman-'));
-  projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-project-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-procman-'));
+  projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-project-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
   writeProjects([project()]);
 });
 
@@ -34,7 +34,7 @@ afterEach(async () => {
   await settle();
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.rmSync(projectDir, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('service state snapshot', () => {
@@ -89,7 +89,7 @@ describe('restore', () => {
 
     const status = procman.status();
     expect(status['p1::web'].running).toBe(true);
-    expect(procman.logs('p1', 'web').lines).toContain('[dev-hub] restored after hub restart');
+    expect(procman.logs('p1', 'web').lines).toContain('[hearth] restored after hub restart');
   });
 
   it('skips a service whose project is gone', () => {
@@ -106,7 +106,7 @@ describe('restore', () => {
   });
 
   it('skips a service whose project folder has disappeared', () => {
-    writeProjects([{ ...project(), path: path.join(os.tmpdir(), 'devhub-not-here') }]);
+    writeProjects([{ ...project(), path: path.join(os.tmpdir(), 'hearth-not-here') }]);
     fs.writeFileSync(stateFile(), JSON.stringify({ running: ['p1::web'] }));
     const { skipped } = procman.restore();
     expect(skipped[0].reason).toMatch(/folder is missing/);

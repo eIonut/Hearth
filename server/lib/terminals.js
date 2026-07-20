@@ -63,14 +63,14 @@ try {
     }
     if (helperInfo.length === 0) {
       console.warn(
-        '[dev-hub] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source',
+        '[hearth] node-pty is installed but no spawn-helper binary was found — terminals will fail. Run: npm rebuild node-pty --build-from-source',
       );
     }
   } catch {
     /* spawn-helper diagnostics best-effort */
   }
 } catch {
-  console.warn('[dev-hub] node-pty not installed — embedded terminals disabled.');
+  console.warn('[hearth] node-pty not installed — embedded terminals disabled.');
 }
 
 function expandHome(p) {
@@ -389,12 +389,12 @@ function createSession({ id, cwd: rawCwd, cmd, label }) {
   const notices = [];
 
   if (!fs.existsSync(cwd)) {
-    notices.push(`\r\n[dev-hub] folder not found: ${cwd} — opening in home folder instead.\r\n`);
+    notices.push(`\r\n[hearth] folder not found: ${cwd} — opening in home folder instead.\r\n`);
     cwd = home;
   }
 
   const shell = pickShell();
-  if (!shell) return { error: '\r\n[dev-hub] no usable shell found on this system.\r\n' };
+  if (!shell) return { error: '\r\n[hearth] no usable shell found on this system.\r\n' };
 
   // Attempt ladder: preferred shell in requested cwd, then fallbacks,
   // then the same ladder in the home folder so the user at least gets a shell.
@@ -417,7 +417,7 @@ function createSession({ id, cwd: rawCwd, cmd, label }) {
       term = spawnPty(a.cmd, a.args, a.dir);
       if (a.fallback) {
         notices.push(
-          `\r\n[dev-hub] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`,
+          `\r\n[hearth] could not start a shell inside ${cwd} — opened in your home folder instead. Run: cd ${cwd}\r\n\r\n`,
         );
       }
       break;
@@ -429,11 +429,11 @@ function createSession({ id, cwd: rawCwd, cmd, label }) {
   if (!term) {
     return {
       error:
-        `\r\n[dev-hub] could not spawn any shell.\r\n` +
+        `\r\n[hearth] could not spawn any shell.\r\n` +
         errors.map((e) => `  · ${e}`).join('\r\n') +
         '\r\n' +
         `\r\nnode ${process.version} (${process.arch}) · node-pty ${ptyVersion || '?'} · helpers found: ${helperInfo.length}\r\n` +
-        `Try, in the dev-hub folder:  npm rebuild node-pty --build-from-source\r\n` +
+        `Try, in the hearth folder:  npm rebuild node-pty --build-from-source\r\n` +
         `(needs Xcode Command Line Tools: xcode-select --install)\r\n` +
         `Then restart. Diagnostics: http://localhost:5001/api/termdiag?cwd=${encodeURIComponent(cwd)}\r\n`,
     };
@@ -466,7 +466,7 @@ function createSession({ id, cwd: rawCwd, cmd, label }) {
   term.onExit(({ exitCode }) => {
     session.alive = false;
     sessions.delete(id);
-    notify(session, `\r\n[dev-hub] shell exited (code ${exitCode}).\r\n`);
+    notify(session, `\r\n[hearth] shell exited (code ${exitCode}).\r\n`);
     if (session.ws) {
       try {
         session.ws.close();
@@ -549,7 +549,7 @@ function attach(server) {
   wss.on('connection', (ws, req) => {
     if (!pty) {
       ws.send(
-        '\r\n[dev-hub] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n',
+        '\r\n[hearth] node-pty is not installed.\r\nRun: npm install node-pty  (needs Xcode Command Line Tools on macOS)\r\n',
       );
       ws.close();
       return;
@@ -558,7 +558,7 @@ function attach(server) {
     const url = new URL(req.url, 'http://localhost');
     const id = url.searchParams.get('id');
     if (!id) {
-      ws.send('\r\n[dev-hub] terminal session id missing.\r\n');
+      ws.send('\r\n[hearth] terminal session id missing.\r\n');
       ws.close();
       return;
     }
@@ -571,7 +571,7 @@ function attach(server) {
 
     if (sessions.size >= MAX_SESSIONS) {
       ws.send(
-        `\r\n[dev-hub] too many open terminals (${MAX_SESSIONS}). Close one, or kill an orphaned session from the Sessions list.\r\n`,
+        `\r\n[hearth] too many open terminals (${MAX_SESSIONS}). Close one, or kill an orphaned session from the Sessions list.\r\n`,
       );
       ws.close();
       return;
@@ -597,7 +597,7 @@ function attach(server) {
     // restart, or the reaper). Say so, so a reborn shell is never mistaken for
     // the one you left running.
     if (url.searchParams.get('resume')) {
-      pushOutput(session, '\r\n[dev-hub] the previous session ended — this is a fresh shell.\r\n');
+      pushOutput(session, '\r\n[hearth] the previous session ended — this is a fresh shell.\r\n');
     }
 
     attachSocket(session, ws);

@@ -8,13 +8,13 @@ import app from '../app.js';
 let dataDir;
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-projects-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-projects-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
 });
 
 afterEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('projects API', () => {

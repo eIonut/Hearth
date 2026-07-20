@@ -8,16 +8,16 @@ import app from '../app.js';
 let dataDir;
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-workspace-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-workspace-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
 });
 
 afterEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
-const termTab = { id: 1, kind: 'term', label: 'dev-hub #1', cwd: '/tmp', sessionId: 'abc' };
+const termTab = { id: 1, kind: 'term', label: 'hearth #1', cwd: '/tmp', sessionId: 'abc' };
 const previewTab = { id: 2, kind: 'preview', label: 'app', url: 'http://localhost:3000' };
 
 const split = (a, b, extra = {}) => ({

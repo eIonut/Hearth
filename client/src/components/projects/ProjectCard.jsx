@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import SubTabs from '../common/SubTabs.jsx';
 import LinkButton from './LinkButton.jsx';
 import ServiceRow from './ServiceRow.jsx';
@@ -30,10 +31,11 @@ export default function ProjectCard({
         <h3>{project.name}</h3>
         <div>
           <button className="btn small" onClick={onEdit}>
+            <Pencil size={13} />
             Edit
           </button>
-          <button className="btn small danger" onClick={onRemove}>
-            ✕
+          <button className="btn small danger" onClick={onRemove} title="Remove project">
+            <Trash2 size={13} />
           </button>
         </div>
       </div>

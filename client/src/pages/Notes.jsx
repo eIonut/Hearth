@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Pencil, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
@@ -91,7 +92,8 @@ export default function Notes() {
           style={{ flex: 1 }}
         />
         <button className="btn primary" onClick={() => setEditing({})}>
-          + New note
+          <Plus size={14} />
+          New note
         </button>
       </div>
 
@@ -108,7 +110,9 @@ export default function Notes() {
 
       {filtered.length === 0 && !editing && (
         <div className="card empty">
-          {items.length === 0 ? 'No notes yet. Jot down anything worth remembering.' : 'No matches.'}
+          {items.length === 0
+            ? 'No notes yet. Jot down anything worth remembering.'
+            : 'No matches.'}
         </div>
       )}
 
@@ -118,10 +122,11 @@ export default function Notes() {
             <h3>{n.title || 'Untitled'}</h3>
             <div>
               <button className="btn small" onClick={() => setEditing(n)}>
+                <Pencil size={13} />
                 Edit
               </button>
-              <button className="btn small danger" onClick={() => remove(n)}>
-                ✕
+              <button className="btn small danger" onClick={() => remove(n)} title="Delete note">
+                <Trash2 size={13} />
               </button>
             </div>
           </div>

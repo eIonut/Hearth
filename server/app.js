@@ -56,7 +56,7 @@ app.use((req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-  if (status >= 500) console.error('[dev-hub]', err);
+  if (status >= 500) console.error('[hearth]', err);
   const body = { error: err.message || 'internal error' };
   // The sync secret-scan gate attaches the offending lines so the client can
   // show them and offer an explicit override.

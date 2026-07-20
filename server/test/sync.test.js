@@ -11,9 +11,9 @@ let dataDir;
 let scratch;
 
 beforeEach(() => {
-  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-sync-'));
-  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'devhub-scratch-'));
-  process.env.DEV_HUB_DATA_DIR = dataDir;
+  dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-sync-'));
+  scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'hearth-scratch-'));
+  process.env.HEARTH_DATA_DIR = dataDir;
   // Seed a couple of portable collections.
   fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([{ id: 'n1', body: 'hi' }]));
   fs.writeFileSync(
@@ -25,7 +25,7 @@ beforeEach(() => {
 afterEach(() => {
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.rmSync(scratch, { recursive: true, force: true });
-  delete process.env.DEV_HUB_DATA_DIR;
+  delete process.env.HEARTH_DATA_DIR;
 });
 
 describe('sync API', () => {
@@ -62,9 +62,52 @@ describe('sync API', () => {
     expect(saved.body.enabled).toEqual(['notes']);
   });
 
+  // Patch ops embed literal env values in `value`/`revert`, making `patches` a
+  // carrier for the same material envs/ is kept out of sync to protect.
+  it('never offers or accepts patches as a sync collection', async () => {
+    const res = await request(app).get('/api/sync/status');
+    expect(res.body.eligible).not.toContain('patches');
+    expect(res.body.config.enabled).not.toContain('patches');
+
+    const saved = await request(app)
+      .put('/api/sync/config')
+      .send({ enabled: ['notes', 'patches'] });
+    expect(saved.body.enabled).toEqual(['notes']);
+  });
+
+  it('does not push patches, and ignores them in a bundle that carries them', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'patches.json'),
+      JSON.stringify([
+        {
+          id: 'p1',
+          ops: [{ type: 'env-set', file: 'api/.env', key: 'STRIPE_KEY', value: 'sk_live_abc123' }],
+        },
+      ]),
+    );
+    const cloudDir = path.join(scratch, 'nopatch');
+    fs.mkdirSync(cloudDir);
+    await request(app).put('/api/sync/config').send({ cloudDir });
+
+    await request(app).post('/api/sync/cloud/push').send({}).expect(200);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'patches.json'))).toBe(false);
+
+    // A bundle written by an older version still carries patches.json. Restoring
+    // it must not overwrite the local patches with another machine's env values.
+    fs.writeFileSync(
+      path.join(cloudDir, 'hearth', 'patches.json'),
+      JSON.stringify([{ id: 'other', ops: [] }]),
+    );
+    const restore = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(restore.status).toBe(200);
+    expect(restore.body.restored).not.toContain('patches');
+    const local = JSON.parse(fs.readFileSync(path.join(dataDir, 'patches.json'), 'utf8'));
+    expect(local[0].id).toBe('p1');
+  });
+
   it('refuses to restore machine-local state out of a backup bundle', async () => {
     const cloudDir = path.join(scratch, 'cloud');
-    const bundle = path.join(cloudDir, 'dev-hub'); // pull() reads the bundle subfolder
+    const bundle = path.join(cloudDir, 'hearth'); // pull() reads the bundle subfolder
     fs.mkdirSync(bundle, { recursive: true });
     fs.writeFileSync(path.join(bundle, 'notes.json'), JSON.stringify([{ id: 'n9', body: 'ok' }]));
     // A bundle that also carries state it should never be able to hand over.
@@ -77,8 +120,8 @@ describe('sync API', () => {
       JSON.stringify({ tabs: [{ id: 1, kind: 'term', cwd: '/somewhere/else' }] }),
     );
     fs.writeFileSync(
-      path.join(bundle, 'dev-hub.manifest.json'),
-      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
+      path.join(bundle, 'hearth.manifest.json'),
+      JSON.stringify({ app: 'hearth', version: 1, files: ['notes', 'servicestate', 'workspace'] }),
     );
 
     await request(app).put('/api/sync/config').send({ cloudDir });
@@ -108,6 +151,60 @@ describe('sync API', () => {
     expect(res.body.findings[0].file).toBe('snippets');
   });
 
+  // collect() pretty-prints, which puts a name and its value on separate lines.
+  // A line-at-a-time scan sees a keyword with nothing after the colon on one
+  // line and an opaque value with a boring name on the next, and clears both.
+  it('flags a secret split across lines by pretty-printing', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'snippets.json'),
+      JSON.stringify([
+        {
+          id: 's1',
+          name: 'stripe',
+          fields: [{ key: 'STRIPE_SECRET_KEY', value: 'sk_live_9xQ2eZvKYlo2C' }],
+        },
+      ]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings.length).toBeGreaterThan(0);
+    expect(res.body.findings[0].file).toBe('snippets');
+    // The secret itself must never be echoed back in the finding.
+    expect(JSON.stringify(res.body.findings)).not.toContain('sk_live_9xQ2eZvKYlo2C');
+  });
+
+  it('flags a credential under a secret-named property', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', apiKey: 'AIzaSyD1234567890abcdefg' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings.length).toBeGreaterThan(0);
+  });
+
+  it('flags a well-known token shape whatever the field is called', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', body: 'ghp_abcdefghij0123456789' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings[0].reason).toBe('GitHub token');
+  });
+
+  // The gate blocks a push, so a scan that cries wolf on ordinary content makes
+  // people reach for `force` by reflex and stop reading findings at all.
+  it('leaves ordinary content unflagged', async () => {
+    fs.writeFileSync(
+      path.join(dataDir, 'notes.json'),
+      JSON.stringify([{ id: 'n1', body: 'remember to rotate the token next week' }]),
+    );
+    fs.writeFileSync(
+      path.join(dataDir, 'snippets.json'),
+      JSON.stringify([{ id: 's1', url: 'iam-a-dev-1.infra.al:30374', cwd: '~/Work/billing' }]),
+    );
+    const res = await request(app).get('/api/sync/scan');
+    expect(res.body.findings).toEqual([]);
+  });
+
   it('cloud push round-trips through a folder and restores', async () => {
     const cloudDir = path.join(scratch, 'iCloud');
     fs.mkdirSync(cloudDir);
@@ -115,8 +212,8 @@ describe('sync API', () => {
 
     const push = await request(app).post('/api/sync/cloud/push').send({});
     expect(push.status).toBe(200);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'dev-hub.manifest.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'hearth.manifest.json'))).toBe(true);
 
     // Wipe local notes, then restore from the cloud folder.
     fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
@@ -125,6 +222,40 @@ describe('sync API', () => {
     expect(restore.body.restored).toContain('notes');
     const notes = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
     expect(notes).toEqual([{ id: 'n1', body: 'hi' }]);
+  });
+
+  it('restores from a legacy dev-hub cloud bundle and migrates it on push', async () => {
+    // Simulate a backup written before the dev-hub → hearth rename: the bundle
+    // sits in a "dev-hub" sibling with the old manifest name.
+    const cloudDir = path.join(scratch, 'iCloud');
+    const legacy = path.join(cloudDir, 'dev-hub');
+    fs.mkdirSync(legacy, { recursive: true });
+    fs.writeFileSync(
+      path.join(legacy, 'notes.json'),
+      JSON.stringify([{ id: 'old', body: 'kept' }]),
+    );
+    fs.writeFileSync(
+      path.join(legacy, 'dev-hub.manifest.json'),
+      JSON.stringify({ app: 'dev-hub', version: 1, files: ['notes'] }),
+    );
+    await request(app).put('/api/sync/config').send({ cloudDir });
+
+    // Read path: the legacy bundle restores without any re-push.
+    fs.writeFileSync(path.join(dataDir, 'notes.json'), JSON.stringify([]));
+    const restore = await request(app).post('/api/sync/cloud/restore').send({});
+    expect(restore.status).toBe(200);
+    expect(restore.body.restored).toContain('notes');
+    expect(JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'))).toEqual([
+      { id: 'old', body: 'kept' },
+    ]);
+
+    // Write path: the next push adopts the legacy folder in place — the bundle
+    // becomes "hearth", the old folder and old manifest are gone.
+    const push = await request(app).post('/api/sync/cloud/push').send({});
+    expect(push.status).toBe(200);
+    expect(fs.existsSync(legacy)).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'hearth.manifest.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'dev-hub.manifest.json'))).toBe(false);
   });
 
   it('blocks a cloud push on secrets, then allows it with force', async () => {
@@ -142,7 +273,7 @@ describe('sync API', () => {
 
     const forced = await request(app).post('/api/sync/cloud/push').send({ force: true });
     expect(forced.status).toBe(200);
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
   });
 
   it('git init/push/restore round-trips through a local bare repo', async () => {
@@ -172,7 +303,7 @@ describe('sync API', () => {
   });
 
   // The remote's HEAD is set when the repo is created and often still points at
-  // `master`, while dev-hub always pushes `main`. A clone then succeeds with an
+  // `master`, while hearth always pushes `main`. A clone then succeeds with an
   // empty working tree, and a restore would claim the backup is empty while the
   // data sits safely on main — a recovery failure exactly when it matters.
   it('restores from a remote whose default branch is not main', async () => {
@@ -249,7 +380,7 @@ describe('auto-sync', () => {
 
     const s1 = await tick();
     expect(s1.cloud.status).toBe('ok');
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(true);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(true);
 
     // Nothing changed since — a second tick must not re-run the push.
     const s2 = await tick();
@@ -267,7 +398,7 @@ describe('auto-sync', () => {
 
     const s = await tick();
     expect(s.cloud.status).toBe('blocked');
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub', 'notes.json'))).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth', 'notes.json'))).toBe(false);
   });
 
   it('does nothing when auto-sync is disabled', async () => {
@@ -277,6 +408,6 @@ describe('auto-sync', () => {
 
     const s = await tick();
     expect(s.cloud).toBeFalsy();
-    expect(fs.existsSync(path.join(cloudDir, 'dev-hub'))).toBe(false);
+    expect(fs.existsSync(path.join(cloudDir, 'hearth'))).toBe(false);
   });
 });

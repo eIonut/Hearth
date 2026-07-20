@@ -8,7 +8,8 @@ import * as gitsync from './gitsync.js';
 // machine, so a gated push is recorded as "blocked" and skipped until the user
 // resolves it (or pushes manually with an explicit override).
 
-const DEFAULT_INTERVAL_MS = Number(process.env.DEV_HUB_AUTOSYNC_MS) || 30000;
+const DEFAULT_INTERVAL_MS =
+  Number(process.env.HEARTH_AUTOSYNC_MS || process.env.DEV_HUB_AUTOSYNC_MS) || 30000;
 
 let timer = null;
 let running = false; // guard against overlapping ticks (a slow git push)

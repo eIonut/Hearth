@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
@@ -116,7 +117,8 @@ export default function Learning() {
           of what you have learned.
         </p>
         <button className="btn primary" onClick={() => setAdding(true)}>
-          + Add
+          <Plus size={14} />
+          Add
         </button>
       </div>
 
@@ -149,8 +151,12 @@ export default function Learning() {
                 <div className="card compact" key={item.id}>
                   <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
                     <strong>{item.title}</strong>
-                    <button className="btn small danger" onClick={() => remove(item)}>
-                      ✕
+                    <button
+                      className="btn small danger"
+                      onClick={() => remove(item)}
+                      title="Delete item"
+                    >
+                      <Trash2 size={13} />
                     </button>
                   </div>
                   {item.url && (
@@ -177,7 +183,7 @@ export default function Learning() {
                         className="btn small"
                         onClick={() => setStatus(item, col.id === 'done' ? 'learning' : 'queued')}
                       >
-                        ←
+                        <ArrowLeft size={13} />
                       </button>
                     )}
                     {col.id !== 'done' && (
@@ -185,7 +191,7 @@ export default function Learning() {
                         className="btn small primary"
                         onClick={() => setStatus(item, col.id === 'queued' ? 'learning' : 'done')}
                       >
-                        →
+                        <ArrowRight size={13} />
                       </button>
                     )}
                   </div>

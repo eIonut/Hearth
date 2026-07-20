@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { api } from '../../api.js';
 import { useConfirm } from '../common/ConfirmDialog.jsx';
 
@@ -16,7 +17,7 @@ function TargetCard({ projectId, target, onChanged }) {
         method: 'POST',
         body: { target: target.name, preset },
       });
-      setMsg(`Applied "${preset}" (previous version saved in dev-hub/backups)`);
+      setMsg(`Applied "${preset}" (previous version saved in hearth/backups)`);
       onChanged();
     } catch (e) {
       setError(e.message);
@@ -74,8 +75,12 @@ function TargetCard({ projectId, target, onChanged }) {
           >
             Apply
           </button>
-          <button className="btn small danger" onClick={() => removePreset(name)}>
-            ✕
+          <button
+            className="btn small danger"
+            onClick={() => removePreset(name)}
+            title="Delete preset"
+          >
+            <Trash2 size={13} />
           </button>
         </div>
       ))}

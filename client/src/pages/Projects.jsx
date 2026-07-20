@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
+import { Wrench, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { openTerm } from '../lib/bus.js';
 import { handleWorkflowClientStep } from '../lib/workflowSteps.js';
@@ -117,12 +118,14 @@ export default function Projects() {
                 onClick={() => openTerm(t.name, t.cwd, t.commands.join(' && '))}
                 title={t.commands.join(' → ')}
               >
-                ⛭ {t.name}
+                <Wrench size={13} />
+                {t.name}
               </button>
             ))}
             <span className="flex-1" />
             <button className="btn primary" onClick={() => setEditing({})}>
-              + Add project
+              <Plus size={14} />
+              Add project
             </button>
           </div>
           {wfMsg && (

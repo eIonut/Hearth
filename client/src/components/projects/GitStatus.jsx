@@ -28,7 +28,7 @@ export default function GitStatus({ status }) {
   if (status.state !== 'repository') {
     const message =
       status.state === 'not-repository'
-        ? 'This folder is not a Git project yet — Dev Hub will still work normally.'
+        ? 'This folder is not a Git project yet — Hearth will still work normally.'
         : status.state === 'git-unavailable'
           ? 'Git is not available on this computer, so branch and file changes cannot be shown.'
           : 'Git status is unavailable for this folder right now.';

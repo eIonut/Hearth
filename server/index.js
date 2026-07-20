@@ -15,7 +15,7 @@ autosync.start();
 const PORT = process.env.PORT || 5001;
 // Bind to localhost only — this app must never be reachable from the network.
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[dev-hub] server running at http://localhost:${PORT}`);
+  console.log(`[hearth] server running at http://localhost:${PORT}`);
   restoreServices();
 });
 
@@ -27,10 +27,10 @@ function restoreServices() {
   if (read('settings', {}).autoRestartServices === false) return;
   const { restored, skipped } = procman.restore();
   for (const { key, reason } of skipped) {
-    console.warn(`[dev-hub] not restoring ${key}: ${reason}`);
+    console.warn(`[hearth] not restoring ${key}: ${reason}`);
   }
   if (restored.length) {
-    console.log(`[dev-hub] restored ${restored.length} service(s) from the last session`);
+    console.log(`[hearth] restored ${restored.length} service(s) from the last session`);
   }
 }
 
