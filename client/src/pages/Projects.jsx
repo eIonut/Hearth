@@ -151,7 +151,7 @@ export default function Projects() {
             </div>
           )}
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(420px,1fr))] gap-2.5">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(420px,1fr))] items-start gap-2.5">
             {projects.map((p) => (
               <ProjectCard
                 key={p.id}

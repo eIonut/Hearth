@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Trash2, Plus, ExternalLink } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
 
 const COLUMNS = [
-  { id: 'queued', label: 'Queued' },
-  { id: 'learning', label: 'Learning' },
-  { id: 'done', label: 'Done' },
+  { id: 'queued', label: 'Queued', dot: 'bg-muted', line: 'var(--color-muted)' },
+  { id: 'learning', label: 'Learning', dot: 'bg-accent', line: 'var(--color-accent)' },
+  { id: 'done', label: 'Done', dot: 'bg-green', line: 'var(--color-green)' },
 ];
+
+// Show a clean hostname for a link instead of the full, often-long URL.
+function hostname(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
 
 function ItemForm({ onSaved, onCancel }) {
   const [title, setTitle] = useState('');
@@ -139,64 +148,94 @@ export default function Learning() {
         />
       )}
 
-      <div className="mt-2 grid grid-cols-3 gap-3">
+      <div className="mt-3 grid grid-cols-3 gap-3">
         {COLUMNS.map((col) => {
           const colItems = visible.filter((i) => i.status === col.id);
           return (
             <div key={col.id}>
-              <h3 className="border-b border-border pb-1.5">
-                {col.label} <span className="text-muted">({colItems.length})</span>
+              <h3 className="mb-2 flex items-center gap-2 border-b border-border pb-2">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${col.dot}`} />
+                {col.label}
+                <span className="ml-auto rounded-full bg-bg-3 px-2 py-0.5 text-[11px] font-normal text-muted">
+                  {colItems.length}
+                </span>
               </h3>
-              {colItems.map((item) => (
-                <div className="card compact" key={item.id}>
-                  <div className="my-1.5 flex flex-wrap items-center justify-between gap-2">
-                    <strong>{item.title}</strong>
-                    <button
-                      className="btn small danger"
-                      onClick={() => remove(item)}
-                      title="Delete item"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+              <div className="flex flex-col gap-2">
+                {colItems.length === 0 && (
+                  <div className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-[12px] text-muted">
+                    Nothing here
                   </div>
-                  {item.url && (
-                    <a href={item.url} target="_blank" rel="noreferrer" className="text-[12px]">
-                      {item.url}
-                    </a>
-                  )}
-                  {item.tags.length > 0 && (
-                    <div className="text-[12px]">
-                      {item.tags.map((t) => (
-                        <span
-                          className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted"
-                          key={t}
-                        >
-                          {t}
-                        </span>
-                      ))}
+                )}
+                {colItems.map((item) => (
+                  <div
+                    className="group rounded-lg border border-border bg-bg-2 p-3 transition-colors hover:border-muted"
+                    style={{ borderLeftWidth: '3px', borderLeftColor: col.line }}
+                    key={item.id}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <strong className="leading-snug">{item.title}</strong>
+                      <button
+                        className="shrink-0 cursor-pointer rounded p-1 text-muted opacity-0 transition hover:bg-bg-3 hover:text-red focus:opacity-100 group-hover:opacity-100"
+                        onClick={() => remove(item)}
+                        title="Delete item"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
-                  )}
-                  {item.notes && <div className="text-[12px] text-muted">{item.notes}</div>}
-                  <div className="my-1.5 flex flex-wrap items-center gap-2">
-                    {col.id !== 'queued' && (
-                      <button
-                        className="btn small"
-                        onClick={() => setStatus(item, col.id === 'done' ? 'learning' : 'queued')}
+                    {item.url && (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1.5 flex items-center gap-1 text-[12px] no-underline hover:underline"
+                        title={item.url}
                       >
-                        <ArrowLeft size={13} />
-                      </button>
+                        <ExternalLink size={12} className="shrink-0" />
+                        <span className="truncate">{hostname(item.url)}</span>
+                      </a>
                     )}
-                    {col.id !== 'done' && (
-                      <button
-                        className="btn small primary"
-                        onClick={() => setStatus(item, col.id === 'queued' ? 'learning' : 'done')}
-                      >
-                        <ArrowRight size={13} />
-                      </button>
+                    {item.tags.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {item.tags.map((t) => (
+                          <span
+                            className="rounded-[10px] border border-accent/40 bg-accent/10 px-2 py-px text-[11px] font-medium text-accent"
+                            key={t}
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
                     )}
+                    {item.notes && (
+                      <div className="mt-2 border-t border-border pt-2 text-[12px] leading-relaxed text-muted">
+                        {item.notes}
+                      </div>
+                    )}
+                    <div className="mt-3 flex items-center gap-1.5">
+                      {col.id !== 'queued' && (
+                        <button
+                          className="btn small"
+                          onClick={() => setStatus(item, col.id === 'done' ? 'learning' : 'queued')}
+                          title={col.id === 'done' ? 'Move back to Learning' : 'Move back to Queued'}
+                        >
+                          <ArrowLeft size={13} />
+                        </button>
+                      )}
+                      {col.id !== 'done' && (
+                        <button
+                          className="btn small primary"
+                          onClick={() =>
+                            setStatus(item, col.id === 'queued' ? 'learning' : 'done')
+                          }
+                        >
+                          {col.id === 'queued' ? 'Start' : 'Done'}
+                          <ArrowRight size={13} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           );
         })}
