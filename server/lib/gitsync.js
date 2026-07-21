@@ -120,9 +120,48 @@ function push(repoDir, files, manifest, message) {
     committed = true;
   }
   // Push even when nothing new committed, in case a prior commit never made it
-  // up (e.g. earlier auth failure). --set-upstream on first push.
-  git(repoDir, ['push', '-u', 'origin', 'main'], { net: true });
+  // up (e.g. earlier auth failure).
+  pushBranch(repoDir);
   return { committed, files: Object.keys(files) };
+}
+
+// A push is rejected as "non-fast-forward" when the remote holds commits the
+// local repo has never seen — most often because the remote was created with an
+// initial commit (a README), but also when another machine pushed since our
+// last sync. Git prints "[rejected] … (fetch first)" and refuses.
+function isNonFastForward(err) {
+  const msg = (err && err.message) || '';
+  return /\[rejected\]|fetch first|non-fast-forward|failed to push/i.test(msg);
+}
+
+// Push main, recovering from a non-fast-forward rejection by replaying our
+// commits on top of the remote and pushing again. Each push writes the full
+// current state, so on any overlap local content is authoritative — hence
+// `-X theirs`, which in a rebase favors the commits being replayed (ours). A
+// genuinely unmergeable divergence is surfaced with an actionable message
+// rather than force-pushed, so a backup can never silently clobber the remote.
+function pushBranch(repoDir) {
+  try {
+    git(repoDir, ['push', '-u', 'origin', 'main'], { net: true });
+    return;
+  } catch (err) {
+    if (!isNonFastForward(err)) throw err;
+  }
+  git(repoDir, ['fetch', 'origin', 'main'], { net: true });
+  try {
+    git(repoDir, ['rebase', '-X', 'theirs', 'origin/main']);
+  } catch {
+    try {
+      git(repoDir, ['rebase', '--abort']);
+    } catch {
+      /* nothing to abort */
+    }
+    throw new ValidationError(
+      'the backup remote has diverged from this machine and could not be merged ' +
+        'automatically — restore from the remote first, then back up again',
+    );
+  }
+  git(repoDir, ['push', '-u', 'origin', 'main'], { net: true });
 }
 
 // Ensure the repo exists locally and is current with the remote, then read the

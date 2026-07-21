@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Copy, Check, Pencil, Trash2, Plus } from 'lucide-react';
 import { api } from '../api.js';
 import { useConfirm } from '../components/common/ConfirmDialog.jsx';
+import { LANGUAGES, highlight, languageLabel } from '../lib/highlight.js';
 
 function SnippetForm({ initial, onSaved, onCancel }) {
   const [title, setTitle] = useState(initial?.title || '');
@@ -44,7 +45,13 @@ function SnippetForm({ initial, onSaved, onCancel }) {
       <div className="my-1.5 flex flex-wrap items-center gap-2">
         <label>
           Language
-          <input value={language} onChange={(e) => setLanguage(e.target.value)} />
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            {LANGUAGES.map((l) => (
+              <option key={l.value} value={l.value}>
+                {l.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Tags (comma-separated)
@@ -163,20 +170,18 @@ export default function Snippets() {
               </button>
             </div>
           </div>
-          <div className="text-[12px] text-muted">
-            {s.language}
-            {s.tags.length > 0 && ' · '}
+          <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-muted">
+            <span className="rounded-[10px] border border-accent/40 bg-accent/10 px-2 py-px text-[11px] font-medium text-accent">
+              {languageLabel(s.language)}
+            </span>
             {s.tags.map((t) => (
-              <span
-                className="mr-1 rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted"
-                key={t}
-              >
+              <span className="rounded-[10px] bg-bg-3 px-2 py-px text-[11px] text-muted" key={t}>
                 {t}
               </span>
             ))}
           </div>
           {/* prettier-ignore */}
-          <pre className="mt-2 whitespace-pre-wrap break-all rounded-md border border-border bg-bg p-2.5 font-mono text-[12px]">{s.body}</pre>
+          <pre className="mt-2 whitespace-pre-wrap break-all rounded-md border border-border bg-bg p-2.5 font-mono text-[12px]"><code className={`hljs language-${s.language}`} dangerouslySetInnerHTML={{ __html: highlight(s.body, s.language) }} /></pre>
         </div>
       ))}
     </div>

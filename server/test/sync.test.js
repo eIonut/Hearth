@@ -327,6 +327,40 @@ describe('sync API', () => {
     const notes = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
     expect(notes).toEqual([{ id: 'n1', body: 'hi' }]);
   });
+
+  // The remote can hold commits the local backup repo has never seen — most
+  // often because the GitHub repo was created with an initial README, but also
+  // when another machine pushed. A plain push is rejected ("fetch first"); the
+  // backup must recover by integrating the remote and pushing our state anyway.
+  it('recovers when the remote has commits the local repo lacks', async () => {
+    const bare = path.join(scratch, 'seeded.git');
+    execFileSync('git', ['-c', 'init.defaultBranch=main', 'init', '--bare', bare]);
+
+    // Seed the remote with an unrelated commit — as "create repo with README"
+    // does — from a throwaway working clone.
+    const seed = path.join(scratch, 'seed');
+    execFileSync('git', ['-c', 'init.defaultBranch=main', 'clone', bare, seed]);
+    execFileSync('git', ['-C', seed, 'config', 'user.email', 'a@b.c']);
+    execFileSync('git', ['-C', seed, 'config', 'user.name', 'seed']);
+    fs.writeFileSync(path.join(seed, 'README.md'), '# backup\n');
+    execFileSync('git', ['-C', seed, 'add', '-A']);
+    execFileSync('git', ['-C', seed, 'commit', '-m', 'initial readme']);
+    execFileSync('git', ['-C', seed, 'push', 'origin', 'main']);
+
+    const repoDir = path.join(scratch, 'sync-seeded');
+    await request(app).put('/api/sync/config').send({ gitRepoDir: repoDir, gitRemote: bare });
+    await request(app).post('/api/sync/git/init').send({}).expect(200);
+
+    // A plain push here is a non-fast-forward; recovery makes it succeed while
+    // preserving the remote's README alongside our data.
+    const push = await request(app).post('/api/sync/git/push').send({});
+    expect(push.status).toBe(200);
+
+    const check = path.join(scratch, 'check');
+    execFileSync('git', ['clone', bare, check]);
+    expect(fs.existsSync(path.join(check, 'README.md'))).toBe(true);
+    expect(fs.existsSync(path.join(check, 'notes.json'))).toBe(true);
+  });
 });
 
 describe('git sync isolation', () => {
