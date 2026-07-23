@@ -6,6 +6,8 @@
 
 Your personal local mission control: start/stop project services, swap env presets, run terminals in the browser, save snippets, and track what to learn next.
 
+Built by **Gabriel Enache** ([@eIonut](https://github.com/eIonut)).
+
 Everything runs on **localhost only** and stores data as JSON files inside this folder. Nothing leaves your machine.
 
 ## Why this exists
@@ -142,6 +144,12 @@ restored, even if a backup bundle contains them: `workspace.json` holds absolute
 paths and terminal session ids that mean nothing elsewhere, and restoring another
 machine's `servicestate.json` would auto-start its services on your next boot.
 `settings.json` stays local too — it holds the sync configuration itself.
+
+## Author
+
+**Gabriel Enache** — [github.com/eIonut](https://github.com/eIonut)
+
+Hearth is a personal project by Gabriel Enache. Feedback, forks, and pull requests are welcome.
 
 ## License
 
